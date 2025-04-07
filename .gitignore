@@ -1,8 +1,10 @@
 # Ignore IDEA project files
 .idea/
 
-# Ignore compiled class files
+# Ignore compiled Java files
 *.class
+bin/*
+out/*
 
 # Ignore package manager directories
 node_modules/
@@ -23,6 +25,7 @@ Thumbs.db
 *.swp
 *.swo
 
-# Ignore any other unnecessary files (OS-specific)
+# Ignore any other unnecessary or temporary files (OS-specific)
 *.bak
 *.tmp
+*~
