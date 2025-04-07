@@ -1,4 +1,8 @@
 package enums;
 
-public class WithdrawalStatus {
+public enum WithdrawalStatus {
+    NULL,
+    PENDING,
+    APPROVED,
+    REJECTED,
 }

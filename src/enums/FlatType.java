@@ -1,4 +1,6 @@
 package enums;
 
-public class FlatType {
+public enum FlatType {
+    TWO_ROOMS,
+    THREE_ROOMS,
 }

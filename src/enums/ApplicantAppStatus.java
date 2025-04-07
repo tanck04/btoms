@@ -1,4 +1,8 @@
 package enums;
 
-public class ApplicantAppStatus {
+public enum ApplicantAppStatus {
+    PENDING,
+    UNSUCCESSFUL,
+    SUCCESSFUL,
+    BOOKED,
 }

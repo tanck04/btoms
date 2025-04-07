@@ -1,4 +1,6 @@
 package enums;
 
-public class MaritalStatus {
+public enum MaritalStatus {
+    SINGLE,
+    MARRIED
 }

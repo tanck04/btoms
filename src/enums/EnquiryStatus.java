@@ -1,4 +1,6 @@
 package enums;
 
-public class EnquiryStatus {
+public enum EnquiryStatus {
+    PENDING,
+    RESOLVED,
 }
