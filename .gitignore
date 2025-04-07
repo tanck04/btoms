@@ -1,0 +1,28 @@
+# Ignore IDEA project files
+.idea/
+
+# Ignore compiled class files
+*.class
+
+# Ignore package manager directories
+node_modules/
+
+# Ignore log files
+*.log
+
+# Ignore IntelliJ specific files
+*.iml
+*.iws
+*.ipr
+
+# Ignore temporary files created by IntelliJ IDEA
+.DS_Store
+Thumbs.db
+
+# Ignore system files
+*.swp
+*.swo
+
+# Ignore any other unnecessary files (OS-specific)
+*.bak
+*.tmp
