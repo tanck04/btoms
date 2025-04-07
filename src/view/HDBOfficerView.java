@@ -1,4 +1,4 @@
 package view;
 
-public class HDBOfficerView {
+public class HDBOfficerView implements MenuInterface{
 }

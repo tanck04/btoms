@@ -1,4 +1,4 @@
 package model;
 
-public class HDBManager {
+public class HDBManager extends User{
 }

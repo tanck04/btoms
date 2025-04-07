@@ -1,4 +1,4 @@
 package model;
 
-public class HDBOfficer {
+public class HDBOfficer extends User{
 }
