@@ -1,2 +1,4 @@
 Application ID,Applicant ID,Project ID,Flat Type,Application Status,Withdrawal Status
 A0001,S1234567A,P0001,2-Room,Pending,NULL
+60613717-94dc-45a5-a5f1-e10dbe421674,S1234567A,P001,TWO_ROOMS,SUCCESSFUL,NULL
+fbaf9df8-e008-4ff1-ba2a-7cb059c7b5ab,S1234567A,P001,TWO_ROOMS,SUCCESSFUL,NULL

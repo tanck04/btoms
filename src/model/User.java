@@ -2,7 +2,7 @@ package model;
 
 
 import enums.MaritalStatus;
-
+import enums.Role;
 import java.io.Serial;
 import java.io.Serializable;
 
@@ -10,15 +10,15 @@ import java.io.Serializable;
 public abstract class User implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;  // Optional but recommended for Serializable classes
-    protected String userID;
+    protected String NRIC;
     protected String name;
-    protected String role;
+    protected Role role;
     protected String password;
     protected int age;
     protected MaritalStatus maritalStatus;
 
-    public User(String userID, String name, String role, String password, int age, MaritalStatus maritalStatus) {
-        this.userID = userID;
+    public User(String NRIC, String name, Role role, String password, int age, MaritalStatus maritalStatus) {
+        this.NRIC = NRIC;
         this.name = name;
         this.role = role;
         this.password = password;
@@ -27,15 +27,15 @@ public abstract class User implements Serializable {
     }
 
     // Getters
-    public String getUserID() {
-        return userID;
+    public String getNRIC() {
+        return NRIC;
     }
 
     public String getName() {
         return name;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
@@ -52,15 +52,15 @@ public abstract class User implements Serializable {
     }
 
     // Setters
-    public void setUserID(String userID) {
-        this.userID = userID;
+    public void setNRIC(String NRIC) {
+        this.NRIC = NRIC;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 

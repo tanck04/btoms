@@ -1,4 +1,4 @@
 package view;
 
-public class HDBManagerView implements MenuInterface{
+public class HDBManagerView {
 }

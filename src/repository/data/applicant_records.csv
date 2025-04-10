@@ -1,6 +1,6 @@
-Name,NRIC,Age,Marital Status,Password,Application ID,Enquiry ID
-John,S1234567A,35,Single,password,A0001,E0001
-Sarah,T7654321B,40,Married,password,,
-Grace,S9876543C,37,Married,password,,
-James,T2345678D,30,Married,password,,
-Rachel,S3456789E,25,Single,password,,
+NRIC,Name,Age,Marital Status,Password,Application ID,Enquiry ID,ApplicantAppStatus,WithdrawalStatus
+S1234567A,John,35,Single,password123,A0001,E0001,PENDING,NOT_WITHDRAWN
+T7654321B,Sarah,40,Married,password456,A0002,E0002,APPROVED,WITHDRAWN
+S9876543C,Grace,37,Married,password789,A0003,E0003,REJECTED,NOT_WITHDRAWN
+T2345678D,James,30,Single,password321,A0004,E0004,PENDING,NOT_WITHDRAWN
+S3456789E,Rachel,25,Single,password654,A0005,E0005,APPROVED,WITHDRAWN

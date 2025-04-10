@@ -1,2 +1,2 @@
-Project ID,Project Name,Neighborhood,Type 1,Number of units for Type 1,Selling price for Type 1,Type 2,Number of units for Type 2,Selling price for Type 2,Application opening date,Application closing date,ID of Manager,Officer Slot,ID of Officer,Visbility
+Project ID,Project Name,Neighborhood,TWO_ROOMS,Number of units for Type 1,Selling price for TWO_ROOMS,THREE_ROOMS,Number of units for THREE_ROOMS,Selling price for Type 2,Application opening date,Application closing date,ID of Manager,Officer Slot,ID of Officer,Visbility
 P0001,Acacia Breeze,Yishun,2-Room,2,350000,3-Room,3,450000,2/15/2025,3/20/2025,S5678901G,3,"T2109876H,S6543210I",ON

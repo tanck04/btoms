@@ -1,4 +1,4 @@
 package repository;
 
-public class HDBOfficerRegRepository extends Repository{
+public class HDBOfficerRegRepository{
 }
