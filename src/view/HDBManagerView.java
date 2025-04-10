@@ -10,13 +10,13 @@ import model.Project;
 
 import java.util.Scanner;
 
-public class HDBManagerView implements MenuInterface{
+public class HDBManagerView {
     private Scanner sc;
     private ProjectController projectController;
     private ApplicationController applicationController;
     private EnquiryController enquiryController;
     private HDBOfficerRegController hdbOfficerRegController;
-  
+
     // Create a new BTO Project by prompting the manager for all required details.
     public void createProjectFlow(HDBManager manager) {
         Scanner sc = new Scanner(System.in);
@@ -57,10 +57,7 @@ public class HDBManagerView implements MenuInterface{
         }
 
         // Use ProjectController to construct and save the new project
-        Project newProject = projectController.createNewProject(
-                projectName, neighborhood, twoRoomUnits, threeRoomUnits,
-                openingDate, closingDate, manager, officerSlots, visibility
-        );
+        Project newProject = projectController.createProject(manager);
 
         // Confirm the result to the manager
         if (newProject != null) {

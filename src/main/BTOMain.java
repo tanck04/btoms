@@ -2,7 +2,11 @@ package main;
 
 import controller.ApplicantController;
 import controller.ProjectController;
+import enums.MaritalStatus;
+import enums.Role;
+
 import model.Applicant;
+import model.HDBManager;
 import model.Project;
 import repository.ApplicantRepository;
 import repository.ProjectRepository;
@@ -12,6 +16,14 @@ import java.util.Scanner;
 public class BTOMain {
     public static void main(String[] args) {
         // Load repositories
+        HDBManager manager = new HDBManager(
+                "MGR001",           // userID
+                "Alice Tan",        // name
+                Role.HDBMANAGER,        // role
+                "password123",      // password
+                35,                 // age
+                MaritalStatus.SINGLE // marital status
+        );
         ApplicantRepository applicantRepository = new ApplicantRepository();
         applicantRepository.loadFromCSV();
 
@@ -26,6 +38,8 @@ public class BTOMain {
 
         int choice = Integer.parseInt(scanner.nextLine().trim());
 
+        HDBManager HDBManager;
+        ProjectController projectController = null;
         if (choice == 1) {
             // Initialize ApplicantController and create a new applicant
             ApplicantController applicantController = new ApplicantController();
@@ -42,18 +56,27 @@ public class BTOMain {
             }
         } else if (choice == 2) {
             // Initialize ProjectController and create a new project
-            ProjectController projectController = new ProjectController();
+            projectController = new ProjectController();
             System.out.println("=== Creating a new project ===");
-            Project newProject = projectController.createProject();
+            HDBManager = new HDBManager(
+                    "MGR001",           // userID
+                    "Alice Tan",        // name
+                    Role.HDBMANAGER,    // role
+                    "password123",      // password
+                    35,                 // age
+                    MaritalStatus.SINGLE // marital status
+            );
 
-            if (newProject != null) {
-                System.out.println("Project created with ID: " + newProject.getProjectID());
-                System.out.println("Project name: " + newProject.getProjectName());
-                System.out.println("Neighborhood: " + newProject.getNeighborhood());
-            } else {
-                System.out.println("Project creation was unsuccessful.");
-            }
+            Project newProject = projectController.createProject(HDBManager);
+
+        if (newProject != null) {
+            System.out.println("Project created with ID: " + newProject.getProjectID());
+            System.out.println("Project name: " + newProject.getProjectName());
+            System.out.println("Neighborhood: " + newProject.getNeighborhood());
         } else {
+            System.out.println("Project creation was unsuccessful.");
+        }
+    } else {
             System.out.println("Invalid choice. Please restart the program.");
         }
     }
