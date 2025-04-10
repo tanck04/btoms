@@ -18,7 +18,7 @@ public class HDBManagerView {
     private HDBOfficerRegController hdbOfficerRegController;
 
     // Create a new BTO Project by prompting the manager for all required details.
-    public void createProjectFlow(HDBManager manager) {
+    public void createProjectFlow(HDBManager HDBManager) {
         Scanner sc = new Scanner(System.in);
 
         System.out.print("Enter project name: ");
@@ -57,7 +57,7 @@ public class HDBManagerView {
         }
 
         // Use ProjectController to construct and save the new project
-        Project newProject = projectController.createProject(manager);
+        Project newProject = projectController.createProject(HDBManager);
 
         // Confirm the result to the manager
         if (newProject != null) {

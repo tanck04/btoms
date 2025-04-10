@@ -15,6 +15,7 @@ public class HDBManager extends User{
     public void addProject(String projectID) {
         if (!createdProjectIDs.contains(projectID)) {
             createdProjectIDs.add(projectID);
+
         }
     }
 

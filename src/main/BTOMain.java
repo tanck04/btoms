@@ -16,14 +16,7 @@ import java.util.Scanner;
 public class BTOMain {
     public static void main(String[] args) {
         // Load repositories
-        HDBManager manager = new HDBManager(
-                "MGR001",           // userID
-                "Alice Tan",        // name
-                Role.HDBMANAGER,        // role
-                "password123",      // password
-                35,                 // age
-                MaritalStatus.SINGLE // marital status
-        );
+
         ApplicantRepository applicantRepository = new ApplicantRepository();
         applicantRepository.loadFromCSV();
 
