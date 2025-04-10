@@ -6,10 +6,10 @@ import enums.Role;
 
 public class Applicant extends User {
     private final Role role = Role.APPLICANT;
-    private ApplicantAppStatus applicantAppStatus;
+    private ApplicantAppStatus applicantAppStatus = ApplicantAppStatus.PENDING;
     private String applicationID;
-    private String enquiryID;
-    private WithdrawalStatus withdrawalStatus;
+    private String enquiryID = null;
+    private WithdrawalStatus withdrawalStatus = WithdrawalStatus.NULL;
 
     public Applicant(String nric,
                      String name,
@@ -33,7 +33,7 @@ public class Applicant extends User {
                      String password,
                      int age,
                      MaritalStatus maritalStatus) {
-        this(nric, name, password, age, maritalStatus, null, null, null, null);
+        this(nric, name, password, age, maritalStatus, null, null, ApplicantAppStatus.PENDING, WithdrawalStatus.NULL);
     }
 
     public ApplicantAppStatus getApplicantAppStatus() {

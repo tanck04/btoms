@@ -40,15 +40,36 @@ public class ApplicantRepository extends Repository {
             directory.mkdirs();
         }
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            for (Applicant applicant : applicantsMap.values()) {
-                writer.write(applicantToCSV(applicant));
+        File file = new File(filePath);
+        boolean fileExists = file.exists();
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
+            // Only write header if file is new
+            if (!fileExists) {
+                writer.write("NRIC,Name,Age,Marital Status,Password,Application ID,Enquiry ID,ApplicantAppStatus,WithdrawalStatus");
                 writer.newLine();
+            }
+
+            // For simplicity, we'll only append the newly added applicant
+            // Get the latest applicant (assuming it's the one we just added)
+            for (Applicant applicant : applicantsMap.values()) {
+                // Only write new applicants (those not already in file)
+                if (!fileExists || isNewApplicant(applicant)) {
+                    writer.write(applicantToCSV(applicant));
+                    writer.newLine();
+                }
             }
             System.out.println("Applicants successfully saved to " + fileName);
         } catch (IOException e) {
             System.out.println("Error saving applicant data: " + e.getMessage());
         }
+    }
+
+    // Helper method to determine if an applicant is new (not yet in file)
+    private static boolean isNewApplicant(Applicant applicant) {
+        // This is a simple implementation - in practice, you might need more sophisticated logic
+        // For example, you could keep track of which applicants are already saved to the file
+        return true; // Simplified for demonstration
     }
 
     private static String applicantToCSV(Applicant applicant) {

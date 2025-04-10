@@ -33,14 +33,14 @@ public class Project {
         this.projectID = projectID;
         this.projectName = projectName;
         this.neighborhood = neighborhood;
-        this.flatTypeUnits = new HashMap<>();
-        this.flatTypePrices = new HashMap<>();
+        this.flatTypeUnits = flatTypeUnits;     // Fixed
+        this.flatTypePrices = flatTypePrices;   // Fixed
         this.applicationOpeningDate = applicationOpeningDate;
         this.applicationClosingDate = applicationClosingDate;
         this.managerID = managerID;
         this.officerSlot = officerSlot;
         this.officerIDs = officerIDs;
-        this.visibility= Visibility.ON;
+        this.visibility = visibility;           // Use parameter instead of hardcoding
     }
 
     // Getter and Setter methods

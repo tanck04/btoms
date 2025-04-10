@@ -3,6 +3,7 @@ package controller;
 import model.Application;
 import model.Applicant;
 import model.Project;
+import repository.ApplicantRepository;
 import repository.ApplicationRepository;
 import enums.ApplicantAppStatus;
 import enums.WithdrawalStatus;
@@ -13,7 +14,6 @@ import java.util.UUID;
 public class ApplicationController {
 
     public boolean submitApplication(Applicant applicant, Project project, FlatType flatType) {
-
         // Test submitApplication
         System.out.println("Testing submitApplication...");
 
@@ -24,7 +24,7 @@ public class ApplicationController {
         }
 
         // Check if the applicant already has an application
-        if (ApplicationRepository.APPLICATIONS.containsKey(applicant.getApplicationID())) {
+        if (applicant.getApplicationID() != null && ApplicationRepository.APPLICATIONS.containsKey(applicant.getApplicationID())) {
             System.out.println("Applicant already has an application.");
             return false;
         }
@@ -47,9 +47,11 @@ public class ApplicationController {
         // Link the application to the applicant
         applicant.setApplicationID(applicationID);
 
+        // Update the applicant in the CSV file with the new application ID
+        ApplicantRepository.saveAllApplicantsToCSV();
+
         System.out.println("Application submitted successfully.");
         return true;
-
     }
 
     public boolean withdrawApplication(Applicant applicant) {
@@ -77,7 +79,7 @@ public class ApplicationController {
         return true;
     }
 
-    public void viewApplicationStatistics(Applicant applicant) {
+    public void viewApplicationStatus(Applicant applicant) {
         // Validate input
         if (applicant == null || applicant.getApplicationID() == null) {
             System.out.println("Invalid input: Applicant or Application ID is null.");
