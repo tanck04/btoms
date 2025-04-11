@@ -40,24 +40,15 @@ public class ApplicantRepository extends Repository {
             directory.mkdirs();
         }
 
-        File file = new File(filePath);
-        boolean fileExists = file.exists();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) { // false = overwrite mode
+            // Write header
+            writer.write("NRIC,Name,Age,Marital Status,Password,Application ID,Enquiry ID,ApplicantAppStatus,WithdrawalStatus");
+            writer.newLine();
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
-            // Only write header if file is new
-            if (!fileExists) {
-                writer.write("NRIC,Name,Age,Marital Status,Password,Application ID,Enquiry ID,ApplicantAppStatus,WithdrawalStatus");
-                writer.newLine();
-            }
-
-            // For simplicity, we'll only append the newly added applicant
-            // Get the latest applicant (assuming it's the one we just added)
+            // Write all applicants from the HashMap
             for (Applicant applicant : applicantsMap.values()) {
-                // Only write new applicants (those not already in file)
-                if (!fileExists || isNewApplicant(applicant)) {
-                    writer.write(applicantToCSV(applicant));
-                    writer.newLine();
-                }
+                writer.write(applicantToCSV(applicant));
+                writer.newLine();
             }
             System.out.println("Applicants successfully saved to " + fileName);
         } catch (IOException e) {
@@ -89,26 +80,23 @@ public class ApplicantRepository extends Repository {
     private static void loadApplicantsFromCSV(String fileName, HashMap<String, Applicant> applicantsMap) {
         String filePath = "./src/repository/" + folder + "/" + fileName;
 
-        File directory = new File("./src/repository/" + folder);
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-
         File file = new File(filePath);
-
         if (!file.exists()) {
-            try {
-                file.createNewFile();
-                System.out.println("Created empty file: " + filePath);
-            } catch (IOException e) {
-                System.out.println("Error creating file: " + e.getMessage());
-            }
+            System.out.println("File not found: " + filePath);
             return;
         }
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
+            boolean isFirstLine = true;
+
             while ((line = reader.readLine()) != null) {
+                // Skip the header row
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
+
                 Applicant applicant = csvToApplicant(line);
                 if (applicant != null) {
                     applicantsMap.put(applicant.getNRIC(), applicant);
@@ -121,25 +109,103 @@ public class ApplicantRepository extends Repository {
     }
 
     private static Applicant csvToApplicant(String csv) {
+        // Skip empty lines
+        if (csv == null || csv.trim().isEmpty()) {
+            return null;
+        }
+
         String[] fields = csv.split(",");
         try {
+            // Skip if fields array is too small or this looks like a header row
+            if (fields.length < 5 || fields[0].equalsIgnoreCase("NRIC")) {
+                return null;
+            }
+
             String nric = fields[0];
             String name = fields[1];
             int age = Integer.parseInt(fields[2]);
             MaritalStatus maritalStatus = MaritalStatus.valueOf(fields[3].toUpperCase());
             String password = fields[4];
-            String applicationID = fields[5];
-            String enquiryID = fields[6];
-            ApplicantAppStatus applicantAppStatus = ApplicantAppStatus.valueOf(fields[7].toUpperCase());
-            WithdrawalStatus withdrawalStatus = WithdrawalStatus.valueOf(fields[8].toUpperCase());
 
+            // Safely handle optional fields
+            String applicationID = (fields.length > 5 && !fields[5].isEmpty()) ? fields[5] : null;
+            String enquiryID = (fields.length > 6 && !fields[6].isEmpty()) ? fields[6] : null;
+
+            // Handle enums with default values if missing
+            ApplicantAppStatus applicantAppStatus = null;
+            if (fields.length > 7 && !fields[7].isEmpty()) {
+                try {
+                    applicantAppStatus = ApplicantAppStatus.valueOf(fields[7].toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Invalid ApplicantAppStatus value: " + fields[7]);
+                }
+            }
+
+            WithdrawalStatus withdrawalStatus = WithdrawalStatus.NULL;
+            if (fields.length > 8 && !fields[8].isEmpty()) {
+                try {
+                    withdrawalStatus = WithdrawalStatus.valueOf(fields[8].toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Invalid WithdrawalStatus value: " + fields[8]);
+                }
+            }
+
+            // Create applicant with all the correct values
             return new Applicant(nric, name, password, age, maritalStatus, applicationID, enquiryID, applicantAppStatus, withdrawalStatus);
         } catch (Exception e) {
-            System.out.println("Error parsing applicant data: " + e.getMessage());
+            System.out.println("Error parsing applicant data: " + csv + " - " + e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }
+    public static void saveNewApplicantToCSV(Applicant applicant) {
+        String filePath = "./src/repository/" + folder + "/" + fileName;
 
+        File directory = new File("./src/repository/" + folder);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+
+        try {
+            // Read existing content
+            List<String> lines = new ArrayList<>();
+            File file = new File(filePath);
+            boolean fileExists = file.exists() && file.length() > 0;
+
+            if (fileExists) {
+                try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        lines.add(line);
+                    }
+                }
+            }
+
+            // Write all content including new applicant
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) {
+                // Write header if file is new or empty
+                if (!fileExists) {
+                    writer.write("NRIC,Name,Age,Marital Status,Password,Application ID,Enquiry ID,ApplicantAppStatus,WithdrawalStatus");
+                } else {
+                    writer.write(lines.get(0)); // Write existing header
+                }
+
+                // Write existing applicants
+                for (int i = 1; i < lines.size(); i++) {
+                    writer.newLine();
+                    writer.write(lines.get(i));
+                }
+
+                // Write the new applicant
+                writer.newLine();
+                writer.write(applicantToCSV(applicant));
+
+                System.out.println("Applicant successfully saved to " + fileName);
+            }
+        } catch (IOException e) {
+            System.out.println("Error saving applicant data: " + e.getMessage());
+        }
+    }
     public static boolean clearApplicantDatabase() {
         APPLICANTS.clear();
         saveAllApplicantsToCSV();

@@ -6,7 +6,7 @@ import enums.Role;
 
 public class Applicant extends User {
     private final Role role = Role.APPLICANT;
-    private ApplicantAppStatus applicantAppStatus = ApplicantAppStatus.PENDING;
+    private ApplicantAppStatus applicantAppStatus = null;
     private String applicationID;
     private String enquiryID = null;
     private WithdrawalStatus withdrawalStatus = WithdrawalStatus.NULL;
@@ -20,8 +20,8 @@ public class Applicant extends User {
                      String enquiryID,
                      ApplicantAppStatus applicantAppStatus,
                      WithdrawalStatus withdrawalStatus) {
-        super(nric, name, Role.APPLICANT, password, age, maritalStatus);
-        this.applicantAppStatus = (applicantAppStatus != null) ? applicantAppStatus : ApplicantAppStatus.PENDING;
+        super(nric, name, Role.APPLICANT, password, maritalStatus, age);
+        this.applicantAppStatus = applicantAppStatus;
         this.applicationID = applicationID;
         this.enquiryID = enquiryID;
         this.withdrawalStatus = (withdrawalStatus != null) ? withdrawalStatus : WithdrawalStatus.NULL;
@@ -33,7 +33,7 @@ public class Applicant extends User {
                      String password,
                      int age,
                      MaritalStatus maritalStatus) {
-        this(nric, name, password, age, maritalStatus, null, null, ApplicantAppStatus.PENDING, WithdrawalStatus.NULL);
+        this(nric, name, password, age, maritalStatus, null, null, null, WithdrawalStatus.NULL);
     }
 
     public ApplicantAppStatus getApplicantAppStatus() {

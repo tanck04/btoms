@@ -41,10 +41,9 @@ public class ProjectRepository extends Repository {
             directory.mkdirs();
         }
 
-        // Use "false" parameter to overwrite the file instead of appending
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) {
-            // Always write header
-            writer.write("ProjectID,ProjectName,Neighborhood,FlatTypeData,ApplicationOpeningDate,ApplicationClosingDate,ManagerID,OfficerSlot,OfficerIDs,Visibility");
+            // Updated header
+            writer.write("ProjectID,ProjectName,Neighborhood,No of TWO_ROOMS,Price of TWO_ROOMS,No of THREE_ROOMS,Price of THREE_ROOMS,ApplicationOpeningDate,ApplicationClosingDate,ManagerID,OfficerSlot,OfficerIDs,Visibility");
             writer.newLine();
 
             // Write all projects
@@ -65,34 +64,16 @@ public class ProjectRepository extends Repository {
         return true;
     }
 
+    // Update this method to use the new CSV format
     private static String projectToCSV(Project project) {
-        // Build the flat type data string
-        StringBuilder flatTypeData = new StringBuilder();
-        if (project.getFlatTypeUnits() != null && !project.getFlatTypeUnits().isEmpty()) {
-            boolean isFirst = true;
-            for (Map.Entry<FlatType, Integer> entry : project.getFlatTypeUnits().entrySet()) {
-                FlatType flatType = entry.getKey();
-                int units = entry.getValue();
-                double price = project.getFlatTypePrices().getOrDefault(flatType, 0.0);
-
-                if (!isFirst) {
-                    flatTypeData.append("|");
-                }
-
-                flatTypeData.append(flatType.name()).append(";")
-                          .append(units).append(";")
-                          .append(price);
-
-                isFirst = false;
-            }
-        }
-
-        // Join all project fields into a CSV line
-        return String.format("%s,%s,%s,%s,%s,%s,%s,%d,%s,%s",
+        return String.format("%s,%s,%s,%d,%f,%d,%f,%s,%s,%s,%d,%s,%s",
                 project.getProjectID(),
                 project.getProjectName(),
                 project.getNeighborhood(),
-                flatTypeData.toString(), // This must contain the flat type data
+                project.getUnitsForFlatType(FlatType.TWO_ROOMS),
+                project.getPriceForFlatType(FlatType.TWO_ROOMS),
+                project.getUnitsForFlatType(FlatType.THREE_ROOMS),
+                project.getPriceForFlatType(FlatType.THREE_ROOMS),
                 project.getApplicationOpeningDate(),
                 project.getApplicationClosingDate(),
                 project.getManagerID(),
@@ -100,6 +81,69 @@ public class ProjectRepository extends Repository {
                 String.join(";", project.getOfficerIDs()),
                 project.getVisibility()
         );
+    }
+
+    // Update this method to parse the new CSV format
+    private static Project csvToProject(String csv) {
+        String[] fields = csv.split(",");
+        try {
+            if (fields.length < 13) {
+                System.out.println("Invalid CSV format: insufficient fields");
+                return null;
+            }
+
+            String projectID = fields[0];
+            String projectName = fields[1];
+            String neighborhood = fields[2];
+
+            // Parse flat type data from individual fields
+            Map<FlatType, Integer> flatTypeUnits = new HashMap<>();
+            Map<FlatType, Double> flatTypePrices = new HashMap<>();
+
+            // TWO_ROOMS data
+            int twoRoomUnits = Integer.parseInt(fields[3]);
+            double twoRoomPrice = Double.parseDouble(fields[4]);
+            flatTypeUnits.put(FlatType.TWO_ROOMS, twoRoomUnits);
+            flatTypePrices.put(FlatType.TWO_ROOMS, twoRoomPrice);
+
+            // THREE_ROOMS data
+            int threeRoomUnits = Integer.parseInt(fields[5]);
+            double threeRoomPrice = Double.parseDouble(fields[6]);
+            flatTypeUnits.put(FlatType.THREE_ROOMS, threeRoomUnits);
+            flatTypePrices.put(FlatType.THREE_ROOMS, threeRoomPrice);
+
+            String applicationOpeningDate = fields[7];
+            String applicationClosingDate = fields[8];
+            String managerID = fields[9];
+            int officerSlot = Integer.parseInt(fields[10]);
+
+            List<String> officerIDs = new ArrayList<>();
+            if (fields[11].contains(";")) {
+                officerIDs = Arrays.asList(fields[11].split(";"));
+            } else if (!fields[11].isEmpty()) {
+                officerIDs = Collections.singletonList(fields[11]);
+            }
+
+            Visibility visibility = Visibility.valueOf(fields[12]);
+
+            return new Project(
+                projectID,
+                projectName,
+                neighborhood,
+                flatTypeUnits,
+                flatTypePrices,
+                applicationOpeningDate,
+                applicationClosingDate,
+                managerID,
+                officerSlot,
+                officerIDs,
+                visibility
+            );
+        } catch (Exception e) {
+            System.out.println("Error parsing project data: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private static void loadProjectsFromCSV(String fileName) {
@@ -131,71 +175,6 @@ public class ProjectRepository extends Repository {
         } catch (IOException e) {
             System.out.println("Error loading project data: " + e.getMessage());
         }
-    }
-
-    private static Project csvToProject(String csv) {
-        String[] fields = csv.split(",");
-        try {
-            if (fields.length < 10) {
-                System.out.println("Invalid CSV format: insufficient fields");
-                return null;
-            }
-
-            String projectID = fields[0];
-            String projectName = fields[1];
-            String neighborhood = fields[2];
-            String flatTypeDataStr = fields[3];
-
-            // Parse flat type data
-            Map<FlatType, Integer> flatTypeUnits = new HashMap<>();
-            Map<FlatType, Double> flatTypePrices = new HashMap<>();
-
-            if (!flatTypeDataStr.isEmpty()) {
-                String[] flatTypeEntries = flatTypeDataStr.split("\\|");
-                for (String entry : flatTypeEntries) {
-                    String[] parts = entry.split(";");
-                    if (parts.length == 3) {
-                        FlatType flatType = FlatType.valueOf(parts[0]);
-                        int units = Integer.parseInt(parts[1]);
-                        double price = Double.parseDouble(parts[2]);
-                        flatTypeUnits.put(flatType, units);
-                        flatTypePrices.put(flatType, price);
-                    }
-                }
-            }
-
-            String applicationOpeningDate = fields[4];
-            String applicationClosingDate = fields[5];
-            String managerID = fields[6];
-            int officerSlot = Integer.parseInt(fields[7]);
-
-            List<String> officerIDs = new ArrayList<>();
-            if (fields[8].contains(";")) {
-                officerIDs = Arrays.asList(fields[8].split(";"));
-            } else if (!fields[8].isEmpty()) {
-                officerIDs = Collections.singletonList(fields[8]);
-            }
-
-            Visibility visibility = Visibility.valueOf(fields[9]);
-
-            return new Project(
-                projectID,
-                projectName,
-                neighborhood,
-                flatTypeUnits,
-                flatTypePrices,
-                applicationOpeningDate,
-                applicationClosingDate,
-                managerID,
-                officerSlot,
-                officerIDs,
-                visibility
-            );
-        } catch (Exception e) {
-            System.out.println("Error parsing project data: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return null;
     }
 
     public static boolean isRepoLoaded() {

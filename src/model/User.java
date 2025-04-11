@@ -13,17 +13,17 @@ public abstract class User implements Serializable {
     protected String NRIC;
     protected String name;
     protected Role role;
+    protected MaritalStatus maritalStatus;
     protected String password;
     protected int age;
-    protected MaritalStatus maritalStatus;
 
-    public User(String NRIC, String name, Role role, String password, int age, MaritalStatus maritalStatus) {
+    public User(String NRIC, String name, Role role, String password, MaritalStatus maritalStatus, int age) {
         this.NRIC = NRIC;
         this.name = name;
         this.role = role;
         this.password = password;
-        this.age = age;
         this.maritalStatus = maritalStatus;
+        this.age = age;
     }
 
     // Getters

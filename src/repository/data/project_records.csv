@@ -1,3 +1,2 @@
-ProjectID,ProjectName,Neighborhood,FlatTypeData,ApplicationOpeningDate,ApplicationClosingDate,ManagerID,OfficerSlot,OfficerIDs,Visibility
-P0001,Acacia Breeze,Yishun,TWO_ROOMS;2;2.0|THREE_ROOMS;2;2.0,2/15/2025,3/20/2025,S5678901G,3,T2109876H;S6543210I,ON
-P0002,THE CARLROSE,ANG MO KIO,TWO_ROOMS;2;2.0|THREE_ROOMS;2;2.0,05/25/2025,06/26/2026,M0001,1,O0001,ON
+ProjectID,ProjectName,Neighborhood,No of TWO_ROOMS,Price of TWO_ROOMS,No of THREE_ROOMS,Price of THREE_ROOMS,ApplicationOpeningDate,ApplicationClosingDate,ManagerID,OfficerSlot,OfficerIDs,Visibility
+P0001,THE CARLROSE,ANG MO KIO,200,200000.000000,3,300000.000000,05/26/2025,07/29/2025,M0001,1,O0001,ON

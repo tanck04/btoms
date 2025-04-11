@@ -1,4 +1,5 @@
 package controller;
 
-public class HDBOfficerController {
+public class HDBOfficerController extends ViewController {
+
 }

@@ -32,26 +32,26 @@ public class ApplicationRepository extends Repository {
         saveApplicationsToCSV(fileName, APPLICATIONS);
     }
 
+    // In ApplicationRepository.java
     private static void saveApplicationsToCSV(String fileName, HashMap<String, Application> applicationsMap) {
-        String filePath = "./src/repository/" + folder + "/" + ApplicationRepository.fileName;
+        String filePath = "./src/repository/" + folder + "/" + fileName;
 
         File directory = new File("./src/repository/" + folder);
-        if (!directory.exists() && !directory.mkdirs()) {
-            System.out.println("Failed to create directory: " + directory.getAbsolutePath());
-            return;
+        if (!directory.exists()) {
+            directory.mkdirs();
         }
 
-        File file = new File(filePath);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) { // false = overwrite mode
+            // Write header
+            writer.write("Application ID,Applicant ID,Project ID,Flat Type,Application Status,Withdrawal Status");
+            writer.newLine();
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) { // Open in append mode
+            // Write all applications from the HashMap
             for (Application application : applicationsMap.values()) {
-                // Check if the application already exists in the file
-                if (!isApplicationInFile(file, application.getApplicationID())) {
-                    writer.write(application.toCSV());
-                    writer.newLine();
-                }
+                writer.write(application.toCSV());
+                writer.newLine();
             }
-            System.out.println("Applications successfully saved to " + ApplicationRepository.fileName);
+            System.out.println("Applications successfully saved to " + fileName);
         } catch (IOException e) {
             System.out.println("Error saving application data: " + e.getMessage());
         }
@@ -71,24 +71,19 @@ public class ApplicationRepository extends Repository {
         return false;
     }
 
+    // In ApplicationRepository.java - fix the loadApplicationsFromCSV method
     private static void loadApplicationsFromCSV(String fileName, HashMap<String, Application> applicationsMap) {
-        String filePath = "./src/repository/" + folder + "/" + ApplicationRepository.fileName;
-
-        File directory = new File("./src/repository/" + folder);
-        if (!directory.exists() && !directory.mkdirs()) {
-            System.out.println("Failed to create directory: " + directory.getAbsolutePath());
-            return;
-        }
+        String filePath = "./src/repository/" + folder + "/" + fileName;
 
         File file = new File(filePath);
-
         if (!file.exists()) {
             try {
-                boolean isFileCreated = file.createNewFile();
-                if (isFileCreated) {
-                    System.out.println("Created empty file: " + filePath);
-                } else {
-                    System.out.println("File already exists: " + filePath);
+                new File("./src/repository/" + folder).mkdirs();
+                file.createNewFile();
+                // Write header to new file
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                    writer.write("Application ID,Applicant ID,Project ID,Flat Type,Application Status,Withdrawal Status");
+                    writer.newLine();
                 }
             } catch (IOException e) {
                 System.out.println("Error creating file: " + e.getMessage());
@@ -96,15 +91,39 @@ public class ApplicationRepository extends Repository {
             return;
         }
 
+        // Make sure repositories are loaded first
+        if (ApplicantRepository.APPLICANTS.isEmpty()) {
+            new ApplicantRepository().loadFromCSV();
+        }
+        if (ProjectRepository.PROJECTS.isEmpty()) {
+            new ProjectRepository().loadFromCSV();
+        }
+
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
+            boolean isFirstLine = true;
+            int linesRead = 0;
+            int applicationsLoaded = 0;
+
             while ((line = reader.readLine()) != null) {
-                Application application = csvToApplication(line);
-                if (application != null) {
-                    applicationsMap.put(application.getApplicationID(), application);
+                linesRead++;
+                // Skip the header row
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
+
+                if (!line.trim().isEmpty()) {
+                    Application application = csvToApplication(line);
+                    if (application != null) {
+                        applicationsMap.put(application.getApplicationID(), application);
+                        applicationsLoaded++;
+                    } else {
+                        System.out.println("Failed to load application from line: " + line);
+                    }
                 }
             }
-            System.out.println("Successfully loaded " + applicationsMap.size() + " applications from " + ApplicationRepository.fileName);
+            System.out.println("Read " + linesRead + " lines, loaded " + applicationsLoaded + " applications from " + fileName);
         } catch (IOException e) {
             System.out.println("Error reading application data: " + e.getMessage());
         }
@@ -113,6 +132,11 @@ public class ApplicationRepository extends Repository {
     private static Application csvToApplication(String csv) {
         String[] fields = csv.split(",");
         try {
+            // Skip header row
+            if (fields[0].equals("Application ID") || fields[0].trim().isEmpty()) {
+                return null;
+            }
+
             String applicationID = fields[0];
             String applicantNRIC = fields[1];
             String projectID = fields[2];
@@ -125,12 +149,14 @@ public class ApplicationRepository extends Repository {
             Project project = ProjectRepository.PROJECTS.get(projectID);
 
             if (applicant == null || project == null) {
-                throw new IllegalArgumentException("Invalid Applicant or Project reference in CSV data.");
+                System.out.println("Missing reference - Applicant: " + (applicant == null ? "null" : "found") +
+                                 ", Project: " + (project == null ? "null" : "found"));
+                return null;
             }
 
             return new Application(applicationID, applicant, project, flatType, applicationStatus, withdrawalStatus);
         } catch (Exception e) {
-            System.out.println("Error parsing application data: " + e.getMessage());
+            System.out.println("Error parsing application data: " + csv + " - " + e.getMessage());
         }
         return null;
     }

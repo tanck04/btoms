@@ -18,7 +18,7 @@ public class Project {
     private int officerSlot;
     private List<String> officerIDs;
     private Visibility visibility;
-
+    private static int projectCount = 0; // Static variable to keep track of project count
     public Project(String projectID,
                    String projectName,
                    String neighborhood,
@@ -40,7 +40,8 @@ public class Project {
         this.managerID = managerID;
         this.officerSlot = officerSlot;
         this.officerIDs = officerIDs;
-        this.visibility = visibility;           // Use parameter instead of hardcoding
+        this.visibility = visibility;
+        projectCount++;// Use parameter instead of hardcoding
     }
 
     // Getter and Setter methods
@@ -147,5 +148,9 @@ public class Project {
 
     public double getPriceForFlatType(FlatType flatType) {
         return flatTypePrices.getOrDefault(flatType, 0.0);
+    }
+
+    public static int getProjectCount() {
+        return projectCount;
     }
 }

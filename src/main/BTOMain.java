@@ -1,60 +1,90 @@
 package main;
 
-import controller.ApplicantController;
-import controller.ProjectController;
-import model.Applicant;
-import model.Project;
+import view.ApplicantView;
+import view.HDBManagerView;
 import repository.ApplicantRepository;
 import repository.ProjectRepository;
-
+import repository.ApplicationRepository;
+import repository.HDBManagerRepository;
 import java.util.Scanner;
 
 public class BTOMain {
     public static void main(String[] args) {
-        // Load repositories
-        ApplicantRepository applicantRepository = new ApplicantRepository();
-        applicantRepository.loadFromCSV();
+        // Initialize repositories
+        ProjectRepository projectRepo = new ProjectRepository();
+        ApplicantRepository applicantRepo = new ApplicantRepository();
+        ApplicationRepository applicationRepo = new ApplicationRepository();
+        HDBManagerRepository managerRepo = new HDBManagerRepository();
 
-        ProjectRepository projectRepository = new ProjectRepository();
-        projectRepository.loadFromCSV();
+        // Load data in the correct order
+        projectRepo.loadFromCSV();
+        applicantRepo.loadFromCSV();
+        managerRepo.loadFromCSV();
+        applicationRepo.loadFromCSV(); // This must come last
 
+        System.out.println("===== BTO Application System =====");
         Scanner scanner = new Scanner(System.in);
-        System.out.println("=== BTO Management System ===");
-        System.out.println("1. Create a new applicant");
-        System.out.println("2. Create a new project");
-        System.out.print("Enter your choice (1 or 2): ");
 
-        int choice = Integer.parseInt(scanner.nextLine().trim());
+        System.out.println("Select user type:");
+        System.out.println("1. Applicant");
+        System.out.println("2. HDB Manager");
+        System.out.print("Enter your choice: ");
 
-        if (choice == 1) {
-            // Initialize ApplicantController and create a new applicant
-            ApplicantController applicantController = new ApplicantController();
-            System.out.println("=== Creating a new applicant ===");
-            Applicant newApplicant = applicantController.createApplicantFromInput();
+        String userTypeChoice = scanner.nextLine();
 
-            if (newApplicant != null) {
-                System.out.println("Applicant created with NRIC: " + newApplicant.getNRIC());
-                System.out.println("Applicant name: " + newApplicant.getName());
-                System.out.println("Applicant age: " + newApplicant.getAge());
-                System.out.println("Marital status: " + newApplicant.getMaritalStatus());
-            } else {
-                System.out.println("Applicant creation was unsuccessful.");
-            }
-        } else if (choice == 2) {
-            // Initialize ProjectController and create a new project
-            ProjectController projectController = new ProjectController();
-            System.out.println("=== Creating a new project ===");
-            Project newProject = projectController.createProject();
-
-            if (newProject != null) {
-                System.out.println("Project created with ID: " + newProject.getProjectID());
-                System.out.println("Project name: " + newProject.getProjectName());
-                System.out.println("Neighborhood: " + newProject.getNeighborhood());
-            } else {
-                System.out.println("Project creation was unsuccessful.");
-            }
+        if (userTypeChoice.equals("1")) {
+            // Start the applicant flow
+            runApplicantFlow();
+        } else if (userTypeChoice.equals("2")) {
+            // Start the HDB manager flow
+            runHDBManagerFlow();
         } else {
-            System.out.println("Invalid choice. Please restart the program.");
+            System.out.println("Invalid choice. Exiting system.");
+        }
+
+        System.out.println("\nThank you for using the BTO Application System!");
+    }
+
+    private static void runApplicantFlow() {
+        // Create ApplicantView
+        ApplicantView applicantView = new ApplicantView();
+
+        // Start the main view loop
+        boolean exit = false;
+        while (!exit) {
+            // Display the applicant menu
+            applicantView.displayMenu();
+
+            // Handle the user input
+            String choice = applicantView.getUserInput();
+
+            if (choice.equals("6")) {
+                exit = true;
+            } else {
+                applicantView.handleUserInput(choice);
+            }
+        }
+    }
+
+    private static void runHDBManagerFlow() {
+        // Create HDBManagerView
+        HDBManagerView managerView = new HDBManagerView();
+        Scanner scanner = new Scanner(System.in);
+
+        // Start the main view loop
+        boolean exit = false;
+        while (!exit) {
+            // Display the manager menu
+            managerView.displayMenu();
+
+            // Handle the user input
+            String choice = scanner.nextLine();
+
+            if (choice.equals("7")) {
+                exit = true;
+            } else {
+                managerView.handleUserInput(choice);
+            }
         }
     }
 }

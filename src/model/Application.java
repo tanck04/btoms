@@ -33,15 +33,15 @@ public class Application {
     }
 
     // Converts the Application object to a CSV-formatted string
+    // In Application.java
     public String toCSV() {
-        return String.join(",",
-                applicationID,
-                applicant.getNRIC(),
-                project.getProjectID(),
-                flatType.toString(),
-                applicationStatus.toString(),
-                withdrawalStatus.toString()
-        );
+        return String.format("%s,%s,%s,%s,%s,%s",
+            applicationID,
+            applicant.getNRIC(),
+            project.getProjectID(),
+            flatType.toString(),
+            applicationStatus.toString(),
+            withdrawalStatus.toString());
     }
 
     // Getter and Setter methods
@@ -63,6 +63,10 @@ public class Application {
 
     public Project getProject() {
         return project;
+    }
+
+    public String getProjectID() {
+        return project.getProjectID();
     }
 
     public FlatType getFlatType() {
@@ -88,4 +92,5 @@ public class Application {
     public void setApplicationStatus(ApplicantAppStatus applicationStatus) {
         this.applicationStatus = applicationStatus;
     }
+
 }
