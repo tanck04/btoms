@@ -1,22 +1,29 @@
 package view;
 
+import controller.HDBOfficerRegController;
 import controller.ProjectController;
 import controller.HDBManagerController;
 import enums.FlatType;
 import enums.MaritalStatus;
 import enums.Role;
 import enums.Visibility;
+import model.HDBOfficerRegistration;
 import model.Project;
 import model.HDBManager;
 import repository.HDBManagerRepository;
+import repository.HDBOfficerRegRepository;
+
 import java.util.*;
 
 public class HDBManagerView implements MenuInterface {
-    private ProjectController projectController;
+    private ProjectController projectController;;
     private Scanner scanner;
+    //instance of HDBManagerController for officer Registration
+    private HDBOfficerRegController officerRegController;
 
     public HDBManagerView() {
         this.projectController = new ProjectController();
+        this.officerRegController = new HDBOfficerRegController();
         this.scanner = new Scanner(System.in);
     }
 
@@ -29,7 +36,8 @@ public class HDBManagerView implements MenuInterface {
         System.out.println("4. Manage Project Visibility");
         System.out.println("5. Assign Officers");
         System.out.println("6. Approve application");
-        System.out.println("7. Exit");
+        System.out.println("7. Review Officer Registrations");
+        System.out.println("8. Exit");
         System.out.print("Enter your choice: ");
     }
 
@@ -59,6 +67,9 @@ public class HDBManagerView implements MenuInterface {
                 approveApplication();
                 break;
             case "7":
+                reviewOfficerRegistrations();
+                break;
+            case "8":
                 System.out.println("Exiting...");
                 break;
             default:
@@ -188,6 +199,30 @@ public class HDBManagerView implements MenuInterface {
         } catch (Exception e) {
             System.out.println("Error during approval process: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    public void reviewOfficerRegistrations() {
+        System.out.print("Enter project ID to review officer registrations: ");
+        String projectID = scanner.nextLine().trim();
+
+        List<HDBOfficerRegistration> pending = HDBOfficerRegRepository.getPendingByProject(projectID);
+
+        if (pending.isEmpty()) {
+            System.out.println("No pending officer registrations for this project.");
+            return;
+        }
+
+        for (HDBOfficerRegistration reg : pending) {
+            System.out.println("Officer ID: " + reg.getOfficerID());
+            System.out.print("Approve this officer? (yes/no): ");
+            String input = scanner.nextLine().trim();
+
+            if (input.equalsIgnoreCase("yes")) {
+                officerRegController.approveRegistration(reg);
+            } else {
+                officerRegController.rejectRegistration(reg);
+            }
         }
     }
 }

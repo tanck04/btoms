@@ -1,5 +1,7 @@
 package main;
 
+import controller.HDBOfficerRegController;
+import controller.ProjectController;
 import view.ApplicantView;
 import view.HDBManagerView;
 import repository.ApplicantRepository;
@@ -80,7 +82,7 @@ public class BTOMain {
             // Handle the user input
             String choice = scanner.nextLine();
 
-            if (choice.equals("7")) {
+            if (choice.equals("8")) {
                 exit = true;
             } else {
                 managerView.handleUserInput(choice);

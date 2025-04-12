@@ -13,7 +13,7 @@ import java.util.Collections;
 
 public class ProjectRepository extends Repository {
     private static final String folder = "data";
-    private static final String fileName = "project_records" +".csv";
+    private static final String fileName = "project_records" + ".csv";
     private static Boolean isRepoLoaded = true;
     public static HashMap<String, Project> PROJECTS = new HashMap<>();
 
@@ -127,17 +127,17 @@ public class ProjectRepository extends Repository {
             Visibility visibility = Visibility.valueOf(fields[12]);
 
             return new Project(
-                projectID,
-                projectName,
-                neighborhood,
-                flatTypeUnits,
-                flatTypePrices,
-                applicationOpeningDate,
-                applicationClosingDate,
-                managerID,
-                officerSlot,
-                officerIDs,
-                visibility
+                    projectID,
+                    projectName,
+                    neighborhood,
+                    flatTypeUnits,
+                    flatTypePrices,
+                    applicationOpeningDate,
+                    applicationClosingDate,
+                    managerID,
+                    officerSlot,
+                    officerIDs,
+                    visibility
             );
         } catch (Exception e) {
             System.out.println("Error parsing project data: " + e.getMessage());
@@ -184,4 +184,15 @@ public class ProjectRepository extends Repository {
     public static void setRepoLoaded(boolean isRepoLoaded) {
         ProjectRepository.isRepoLoaded = isRepoLoaded;
     }
+
+    public static void addOfficerToProject(String projectID, String officerID) {
+        Project p = PROJECTS.get(projectID);
+        if (p != null && !p.getOfficerIDs().contains(officerID)) {
+            p.getOfficerIDs().add(officerID);
+            saveAllProjectsToCSV(); // if implemented
+            System.out.println("✅ Officer " + officerID + " added to project " + projectID);
+        }
+    }
 }
+
+
