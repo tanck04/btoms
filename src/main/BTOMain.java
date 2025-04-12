@@ -1,9 +1,7 @@
 package main;
 
-import controller.HDBOfficerRegController;
-import controller.ProjectController;
-import view.ApplicantView;
-import view.HDBManagerView;
+import boundary.ApplicantView;
+import boundary.HDBManagerView;
 import repository.ApplicantRepository;
 import repository.ProjectRepository;
 import repository.ApplicationRepository;

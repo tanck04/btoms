@@ -1,8 +1,8 @@
 package repository;
 
-import model.Application;
-import model.Applicant;
-import model.Project;
+import entity.Application;
+import entity.Applicant;
+import entity.Project;
 import enums.ApplicantAppStatus;
 import enums.FlatType;
 import enums.WithdrawalStatus;

@@ -1,13 +1,11 @@
 package controller;
 
-import model.Project;
-import model.Applicant;
+import entity.Project;
+import entity.Applicant;
 import repository.ApplicantRepository;
 import repository.ProjectRepository;
 
-import java.util.ArrayList;
 import java.util.Map;
-import java.util.Scanner;
 
 public class ViewController {
 

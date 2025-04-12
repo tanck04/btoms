@@ -1,8 +1,8 @@
-package model;
+package entity;
 
 import enums.FlatType;
 import enums.Visibility;
-import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
 

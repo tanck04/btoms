@@ -1,7 +1,7 @@
 package repository;
 
 import enums.OfficerRegStatus;
-import model.HDBOfficerRegistration;
+import entity.HDBOfficerRegistration;
 
 import java.util.ArrayList;
 import java.util.List;

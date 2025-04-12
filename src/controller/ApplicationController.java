@@ -1,8 +1,8 @@
 package controller;
 
-import model.Application;
-import model.Applicant;
-import model.Project;
+import entity.Application;
+import entity.Applicant;
+import entity.Project;
 import repository.ApplicantRepository;
 import repository.ApplicationRepository;
 import enums.ApplicantAppStatus;

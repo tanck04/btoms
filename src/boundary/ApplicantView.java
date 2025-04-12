@@ -1,12 +1,12 @@
-package view;
+package boundary;
 
 import controller.ApplicantController;
 import controller.ApplicationController;
 import enums.MaritalStatus;
 import enums.Role;
 import enums.FlatType;
-import model.Applicant;
-import model.Project;
+import entity.Applicant;
+import entity.Project;
 import java.util.Scanner;
 import java.util.Map;
 

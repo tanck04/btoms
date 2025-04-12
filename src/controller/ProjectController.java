@@ -1,6 +1,6 @@
 package controller;
 
-import model.Project;
+import entity.Project;
 import enums.FlatType;
 import enums.Visibility;
 import repository.ProjectRepository;

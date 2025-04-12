@@ -1,8 +1,8 @@
 package repository;
 
-import model.HDBManager;
+import entity.HDBManager;
 import enums.MaritalStatus;
-import model.Project;
+import entity.Project;
 
 import java.io.*;
 import java.util.HashMap;

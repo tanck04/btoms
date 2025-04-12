@@ -1,7 +1,7 @@
 package repository;
 
 import enums.Visibility;
-import model.Project;
+import entity.Project;
 import enums.FlatType;
 import java.util.Map;
 import java.io.*;

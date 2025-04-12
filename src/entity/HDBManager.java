@@ -1,9 +1,7 @@
-package model;
+package entity;
 
 import enums.MaritalStatus;
 import enums.Role;
-
-import model.Project;
 
 public class HDBManager extends User {
     private final Role role = Role.HDBMANAGER;

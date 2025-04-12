@@ -1,4 +1,4 @@
-package view;
+package boundary;
 public class HDBOfficerView {
 
     //prompt for login

@@ -1,7 +1,7 @@
 package controller;
 
 import enums.OfficerRegStatus;
-import model.HDBOfficerRegistration;
+import entity.HDBOfficerRegistration;
 import repository.HDBOfficerRegRepository;
 import repository.ProjectRepository;
 

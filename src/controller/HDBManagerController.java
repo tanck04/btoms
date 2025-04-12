@@ -2,10 +2,10 @@ package controller;
 
 
 import enums.WithdrawalStatus;
-import model.Applicant;
-import model.Application;
-import model.HDBManager;
-import model.Project;
+import entity.Applicant;
+import entity.Application;
+import entity.HDBManager;
+import entity.Project;
 import enums.ApplicantAppStatus;
 import repository.ApplicantRepository;
 import repository.ApplicationRepository;

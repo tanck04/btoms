@@ -1,15 +1,13 @@
-package view;
+package boundary;
 
 import controller.HDBOfficerRegController;
 import controller.ProjectController;
 import controller.HDBManagerController;
 import enums.FlatType;
-import enums.MaritalStatus;
 import enums.Role;
-import enums.Visibility;
-import model.HDBOfficerRegistration;
-import model.Project;
-import model.HDBManager;
+import entity.HDBOfficerRegistration;
+import entity.Project;
+import entity.HDBManager;
 import repository.HDBManagerRepository;
 import repository.HDBOfficerRegRepository;
 

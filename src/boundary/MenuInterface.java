@@ -1,4 +1,4 @@
-package view;
+package boundary;
 import enums.Role;
 public interface MenuInterface {
     void displayMenu();

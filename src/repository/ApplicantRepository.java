@@ -3,7 +3,7 @@ package repository;
 import enums.ApplicantAppStatus;
 import enums.WithdrawalStatus;
 import enums.MaritalStatus;
-import model.Applicant;
+import entity.Applicant;
 
 import java.io.*;
 import java.util.ArrayList;
