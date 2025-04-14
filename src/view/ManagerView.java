@@ -6,19 +6,18 @@ import controller.HDBManagerController;
 import enums.FlatType;
 import enums.Role;
 import model.*;
-import repository.HDBManagerRepository;
 import repository.HDBOfficerRegRepository;
 import repository.ProjectRepository;
 
 import java.util.*;
 
-public class HDBManagerView implements MenuInterface {
+public class ManagerView implements MenuInterface {
     private ProjectController projectController;
     private Scanner scanner;
     private HDBOfficerRegController officerRegController;
     private HDBManagerController hdbManagerController;
 
-    public HDBManagerView() {
+    public ManagerView() {
         this.projectController = new ProjectController();
         this.officerRegController = new HDBOfficerRegController();
         this.hdbManagerController = new HDBManagerController();
