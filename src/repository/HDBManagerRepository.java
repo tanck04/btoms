@@ -1,6 +1,8 @@
 package repository;
 
+import controller.PasswordChangerInterface;
 import controller.PasswordController;
+import controller.VerificationInterface;
 import model.HDBManager;
 import enums.MaritalStatus;
 import model.Project;
@@ -10,16 +12,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class HDBManagerRepository extends Repository {
+public class HDBManagerRepository extends Repository implements PasswordChangerInterface,VerificationInterface {
     private static final String folder = "data";
     private static final String fileName = "manager_records.csv";
     private static boolean isRepoLoaded = false;
     public static HashMap<String, HDBManager> MANAGERS = new HashMap<>();
+    private static final String filePath = "./src/repository/" + folder + "/" + fileName;
 
     @Override
     public boolean loadFromCSV() {
         try {
-            loadManagersFromCSV(fileName, MANAGERS);
+            loadManagersFromCSV(filePath, MANAGERS);
             isRepoLoaded = true;
             return true;
         } catch (Exception e) {
@@ -29,8 +32,6 @@ public class HDBManagerRepository extends Repository {
     }
 
     private static void loadManagersFromCSV(String fileName, HashMap<String, HDBManager> managersMap) {
-        String filePath = "./src/repository/" + folder + "/" + fileName;
-
         File file = new File(filePath);
         if (!file.exists()) {
             System.out.println("File not found: " + filePath);
@@ -92,7 +93,7 @@ public class HDBManagerRepository extends Repository {
         PasswordController pc = new PasswordController();
         String hashedInputPassword = pc.hashPassword(password);
 
-        try (BufferedReader reader = new BufferedReader(new FileReader("data/manager_records.csv"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             reader.readLine(); // Skip header
 
@@ -100,7 +101,7 @@ public class HDBManagerRepository extends Repository {
                 HDBManager hdbmanager = csvToManager(line);
                 if (hdbmanager != null && hdbmanager.getNRIC().equals(id)) {
                     // Check for default password OR hashed password match
-                    if (hdbmanager.getPassword().equals("Password") && password.equals("Password")) {
+                    if (hdbmanager.getPassword().equals("password") && password.equals("password")) {
                         return hdbmanager;
                     } else if (hdbmanager.getPassword().equals(hashedInputPassword)) {
                         return hdbmanager;
@@ -134,7 +135,7 @@ public class HDBManagerRepository extends Repository {
         }
 
         // Rewrite the file
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             for (String[] record : allRecords) {
                 writer.write(String.join(",", record));
                 writer.newLine();

@@ -37,43 +37,45 @@ public class HDBManagerView implements MenuInterface {
         System.out.println("7. Review Officer Registrations");
         System.out.println("8. Exit");
         System.out.print("Enter your choice: ");
-    }
-
-    public void handleUserInput(String input) {
-        switch (input) {
-            case "1":
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+        switch (choice) {
+            case 1:
                 createProject();
                 break;
-            case "2":
+            case 2:
                 // View all projects
                 System.out.println("View All Projects - Implementation pending");
                 break;
-            case "3":
+            case 3:
                 // Update project details
                 System.out.println("Update Project Details - Implementation pending");
                 break;
-            case "4":
+            case 4:
                 // Manage visibility
                 System.out.println("Manage Project Visibility - Implementation pending");
                 break;
-            case "5":
+            case 5:
                 // Assign officers
                 System.out.println("Assign Officers - Implementation pending");
                 break;
-            case "6":
+            case 6:
                 approveApplication();
                 break;
-            case "7":
+            case 7:
                 reviewOfficerRegistrations();
                 break;
-            case "8":
+            case 8:
                 System.out.println("Exiting...");
                 break;
             default:
                 System.out.println("Invalid option. Please try again.");
                 break;
         }
+
     }
+
+
 
     public Role getUserType() {
         return Role.HDBMANAGER;
