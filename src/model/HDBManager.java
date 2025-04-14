@@ -10,10 +10,8 @@ public class HDBManager extends User {
                      String name,
                      String password,
                      MaritalStatus maritalStatus,
-                     int age,
-                     Project project) {
+                     int age) {
         super(nric, name, Role.HDBMANAGER, password, maritalStatus, age); // Fixed role to HDBMANAGER
-        this.projectInCharge = project;
     }
 
     // Getter for role
@@ -21,17 +19,4 @@ public class HDBManager extends User {
         return role;
     }
 
-    // Getter for projectInCharge
-    public Project getProjectInCharge() {
-        return projectInCharge;
-    }
-
-    // Setter for projectInCharge
-    public void setProjectInCharge(Project projectInCharge) {
-        this.projectInCharge = projectInCharge;
-    }
-
-    public Project getProject() {
-        return projectInCharge;
-    }
 }

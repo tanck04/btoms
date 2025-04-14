@@ -41,10 +41,14 @@ public class ApplicationRepository extends Repository {
             directory.mkdirs();
         }
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) { // false = overwrite mode
-            // Write header
-            writer.write("Application ID,Applicant ID,Project ID,Flat Type,Application Status,Withdrawal Status");
-            writer.newLine();
+        File file = new File(filePath);
+        boolean writeHeader = !file.exists() || file.length() == 0;
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) { // true = append mode
+            if (writeHeader) {
+                writer.write("Application ID,Applicant ID,Project ID,Flat Type,Application Status,Withdrawal Status");
+                writer.newLine();
+            }
 
             // Write all applications from the HashMap
             for (Application application : applicationsMap.values()) {

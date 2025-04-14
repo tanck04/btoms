@@ -31,7 +31,7 @@ public class HDBManagerRepository extends Repository implements PasswordChangerI
         }
     }
 
-    private static void loadManagersFromCSV(String fileName, HashMap<String, HDBManager> managersMap) {
+    private static void loadManagersFromCSV(String filePath, HashMap<String, HDBManager> managersMap) {
         File file = new File(filePath);
         if (!file.exists()) {
             System.out.println("File not found: " + filePath);
@@ -64,24 +64,18 @@ public class HDBManagerRepository extends Repository implements PasswordChangerI
         String[] fields = csv.split(",");
         try {
             // Skip if this looks like a header row
-            if (fields[0].equalsIgnoreCase("Name")) {
+            if (fields[0].equalsIgnoreCase("NRIC")) {
                 return null;
             }
+            String nric = fields[0];
+            String name = fields[1];
 
-            String name = fields[0];
-            String nric = fields[1];
             int age = Integer.parseInt(fields[2]);
             MaritalStatus maritalStatus = MaritalStatus.valueOf(fields[3].toUpperCase());
             String password = fields[4];
 
-            // Handle project ID (may be empty)
-            String projectId = (fields.length > 5 && !fields[5].isEmpty()) ? fields[5] : null;
-            Project project = null;
-            if (projectId != null) {
-                project = ProjectRepository.PROJECTS.get(projectId); // Fixed variable name here
-            }
 
-            return new HDBManager(nric, name, password, maritalStatus, age, project);
+            return new HDBManager(nric, name, password, maritalStatus, age);
         } catch (Exception e) {
             System.out.println("Error parsing manager data: " + csv + " - " + e.getMessage());
             e.printStackTrace();

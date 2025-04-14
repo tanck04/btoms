@@ -20,9 +20,6 @@ public class ProjectRepository extends Repository {
     @Override
     public boolean loadFromCSV() {
         try {
-            System.out.println("Attempting to load projects from: " + filePath);
-            File file = new File(filePath);
-            System.out.println("File exists: " + file.exists());
 
             loadProjectsFromCSV(filePath, PROJECTS);
             System.out.println("Loaded " + PROJECTS.size() + " projects");

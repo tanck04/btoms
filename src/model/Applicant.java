@@ -14,7 +14,7 @@ public class Applicant extends User {
                      String password,
                      int age,
                      MaritalStatus maritalStatus) {
-        super(nric, name, Role.HDBMANAGER, password, maritalStatus, age);
+        super(nric, name, Role.APPLICANT, password, maritalStatus, age);
     }
 
 
