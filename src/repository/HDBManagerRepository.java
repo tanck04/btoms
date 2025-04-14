@@ -1,11 +1,14 @@
 package repository;
 
+import controller.PasswordController;
 import model.HDBManager;
 import enums.MaritalStatus;
 import model.Project;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class HDBManagerRepository extends Repository {
     private static final String folder = "data";
@@ -85,10 +88,64 @@ public class HDBManagerRepository extends Repository {
         return null;
     }
 
-    public static void saveAllManagersToCSV() {
-        // Implementation for saving would go here
-    }
+    public HDBManager verifyCredentials(String id, String password) {
+        PasswordController pc = new PasswordController();
+        String hashedInputPassword = pc.hashPassword(password);
 
+        try (BufferedReader reader = new BufferedReader(new FileReader("data/manager_records.csv"))) {
+            String line;
+            reader.readLine(); // Skip header
+
+            while ((line = reader.readLine()) != null) {
+                HDBManager hdbmanager = csvToManager(line);
+                if (hdbmanager != null && hdbmanager.getNRIC().equals(id)) {
+                    // Check for default password OR hashed password match
+                    if (hdbmanager.getPassword().equals("Password") && password.equals("Password")) {
+                        return hdbmanager;
+                    } else if (hdbmanager.getPassword().equals(hashedInputPassword)) {
+                        return hdbmanager;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null; // Login failed
+    }
+    public boolean changePassword(String nric, String newHashedPassword) {
+        List<String[]> allRecords = new ArrayList<>();
+        boolean passwordUpdated = false;
+
+        // Load all records from the file
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts[0].equals(nric)) {
+                    parts[4] = newHashedPassword; // Update password
+                    passwordUpdated = true;
+                }
+                allRecords.add(parts);
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading the file: " + e.getMessage());
+            return false; // Indicate failure
+        }
+
+        // Rewrite the file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            for (String[] record : allRecords) {
+                writer.write(String.join(",", record));
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error writing to the file: " + e.getMessage());
+            return false; // Indicate failure
+        }
+
+        return passwordUpdated;
+    }
     public static boolean isRepoLoaded() {
         return isRepoLoaded;
     }

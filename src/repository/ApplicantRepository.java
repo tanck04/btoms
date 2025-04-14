@@ -18,7 +18,7 @@ public class ApplicantRepository extends Repository  implements VerificationInte
     private static final String fileName = "applicant_records.csv";
     private static Boolean isRepoLoaded = true;
     public static HashMap<String, Applicant> APPLICANTS = new HashMap<>();
-
+    private static final String filePath = "./src/repository/" + folder + "/" + fileName;
     @Override
     public boolean loadFromCSV() {
         try {
@@ -36,7 +36,6 @@ public class ApplicantRepository extends Repository  implements VerificationInte
     }
 
     private static void saveApplicantsToCSV(String fileName, HashMap<String, Applicant> applicantsMap) {
-        String filePath = "./src/repository/" + folder + "/" + fileName;
 
         File directory = new File("./src/repository/" + folder);
         if (!directory.exists()) {
@@ -81,7 +80,6 @@ public class ApplicantRepository extends Repository  implements VerificationInte
     }
 
     private static void loadApplicantsFromCSV(String fileName, HashMap<String, Applicant> applicantsMap) {
-        String filePath = "./src/repository/" + folder + "/" + fileName;
 
         File file = new File(filePath);
         if (!file.exists()) {
@@ -162,7 +160,6 @@ public class ApplicantRepository extends Repository  implements VerificationInte
             return null;
         }
     public static void saveNewApplicantToCSV(Applicant applicant) {
-        String filePath = "./src/repository/" + folder + "/" + fileName;
 
         File directory = new File("./src/repository/" + folder);
         if (!directory.exists()) {
@@ -228,7 +225,7 @@ public class ApplicantRepository extends Repository  implements VerificationInte
         PasswordController pc = new PasswordController();
         String hashedInputPassword = pc.hashPassword(password);
 
-        try (BufferedReader reader = new BufferedReader(new FileReader("data/applicants.csv"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             reader.readLine(); // Skip header
 
