@@ -4,9 +4,8 @@ import controller.HDBOfficerController;
 import model.User;
 
 import java.util.Scanner;
-import java.util.Map;
 
-public class HDBOfficerView implements MenuInterface{
+public class OfficerView implements MenuInterface{
     private final HDBOfficerController controller = new HDBOfficerController();
     private final Scanner scanner = new Scanner(System.in);
     public void displayMenu(User user){
