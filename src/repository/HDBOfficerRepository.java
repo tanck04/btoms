@@ -17,7 +17,7 @@ public class HDBOfficerRepository extends Repository implements PasswordChangerI
     private static final String fileName = "officer_records.csv";
     private static boolean isRepoLoaded = false;
     public static HashMap<String, HDBOfficer> OFFICERS = new HashMap<>();
-    private static final String filePath = "./src/repository/" + folder + "/" + fileName;
+    private static final String filePath = "src/repository/" + folder + "/" + fileName;
 
     @Override
     public boolean loadFromCSV() {
@@ -111,7 +111,7 @@ public class HDBOfficerRepository extends Repository implements PasswordChangerI
         boolean passwordUpdated = false;
 
         // Load all records from the file
-        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");

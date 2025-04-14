@@ -113,7 +113,7 @@ public class HDBManagerRepository extends Repository implements PasswordChangerI
         boolean passwordUpdated = false;
 
         // Load all records from the file
-        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");

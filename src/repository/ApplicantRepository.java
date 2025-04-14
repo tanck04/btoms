@@ -207,7 +207,7 @@ public class ApplicantRepository extends Repository  implements VerificationInte
                 Applicant applicant = csvToApplicant(line);
                 if (applicant != null && applicant.getNRIC().equals(id)) {
                     // Check for default password OR hashed password match
-                    if (applicant.getPassword().equals("Password") && password.equals("Password")) {
+                    if (applicant.getPassword().equals("password") && password.equals("password")) {
                         return applicant;
                     } else if (applicant.getPassword().equals(hashedInputPassword)) {
                         return applicant;
