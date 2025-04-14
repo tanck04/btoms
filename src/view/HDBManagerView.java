@@ -11,11 +11,14 @@ import model.HDBManager;
 import model.User;
 import repository.HDBManagerRepository;
 import repository.HDBOfficerRegRepository;
+import repository.ProjectRepository;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class HDBManagerView implements MenuInterface {
-    private ProjectController projectController;;
+    private ProjectController projectController;
     private Scanner scanner;
     //instance of HDBManagerController for officer Registration
     private HDBOfficerRegController officerRegController;
@@ -81,11 +84,39 @@ public class HDBManagerView implements MenuInterface {
         return Role.HDBMANAGER;
     }
 
+    public FlatType parseFlatType(String input) {
+        switch (input.replaceAll("-", "").replaceAll("\\s+", "").toUpperCase()) {
+            case "2ROOM":
+                return FlatType.TWO_ROOMS;
+            case "3ROOM":
+                return FlatType.THREE_ROOMS;
+            default:
+                throw new IllegalArgumentException("Unknown flat type: " + input);
+        }
+    }
+
+    public String generateNextProjectID() {
+        int max = 0;
+
+        for (String existingID : ProjectRepository.PROJECTS.keySet()) {
+            if (existingID.matches("P\\d+")) {
+                int number = Integer.parseInt(existingID.substring(1));
+                if (number > max) {
+                    max = number;
+                }
+            }
+        }
+
+        int nextNumber = max + 1;
+        return String.format("P%04d", nextNumber);  // e.g., P0001, P0002
+    }
+
     private void createProject() {
         try {
             // Collect project data from user input
-            System.out.print("Enter Project ID: ");
-            String projectID = scanner.nextLine().trim();
+
+            String projectID = generateNextProjectID();  // auto-generated
+            System.out.println("Auto-generated Project ID: " + projectID);
 
             System.out.print("Enter Project Name: ");
             String projectName = scanner.nextLine().trim();
@@ -93,53 +124,98 @@ public class HDBManagerView implements MenuInterface {
             System.out.print("Enter Neighborhood: ");
             String neighborhood = scanner.nextLine().trim();
 
-            // Collect TWO_ROOMS data
-            System.out.println("\nTWO_ROOMS Flat Type");
-            System.out.print("Enter Number of Units: ");
-            int twoRoomUnits = Integer.parseInt(scanner.nextLine().trim());
+            FlatType type1 = null;
+            while (type1 == null) {
+                try {
+                    System.out.print("Enter Type 1 (e.g., 2-Room): ");
+                    String input = scanner.nextLine().trim();
+                    type1 = parseFlatType(input);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("❌ Invalid flat type. Please enter '2-Room' or '3-Room'.");
+                }
+            }
 
-            System.out.print("Enter Price: ");
-            double twoRoomPrice = Double.parseDouble(scanner.nextLine().trim());
 
-            // Collect THREE_ROOMS data
-            System.out.println("\nTHREE_ROOMS Flat Type");
-            System.out.print("Enter Number of Units: ");
-            int threeRoomUnits = Integer.parseInt(scanner.nextLine().trim());
+            System.out.print("Enter Number of units for Type 1: ");
+            int type1Units = Integer.parseInt(scanner.nextLine().trim());
 
-            System.out.print("Enter Price: ");
-            double threeRoomPrice = Double.parseDouble(scanner.nextLine().trim());
+            System.out.print("Enter Selling price for Type 1: ");
+            double type1Price = Double.parseDouble(scanner.nextLine().trim());
 
-            // Collect remaining project details
-            System.out.print("Enter Application Opening Date (MM/DD/YYYY): ");
-            String openingDate = scanner.nextLine().trim();
+            FlatType type2 = null;
+            while (type2 == null) {
+                try {
+                    System.out.print("Enter Type 2 (e.g., 3-Room): ");
+                    String input = scanner.nextLine().trim();
+                    type2 = parseFlatType(input);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("❌ Invalid flat type. Please enter '2-Room' or '3-Room'.");
+                }
+            }
 
-            System.out.print("Enter Application Closing Date (MM/DD/YYYY): ");
-            String closingDate = scanner.nextLine().trim();
+            System.out.print("Enter Number of units for Type 2: ");
+            int type2Units = Integer.parseInt(scanner.nextLine().trim());
 
-            System.out.print("Enter Manager ID: ");
+            System.out.print("Enter Selling price for Type 2: ");
+            double type2Price = Double.parseDouble(scanner.nextLine().trim());
+
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+            sdf.setLenient(false);
+            Date openingDate = null;
+
+            while (openingDate == null) {
+                try {
+                    System.out.print("Enter Opening Date (MM/dd/yyyy): ");
+                    String input = scanner.nextLine().trim();
+                    openingDate = sdf.parse(input);
+                } catch (ParseException e) {
+                    System.out.println("❌ Invalid date format. Please follow MM/dd/yyyy.");
+                }
+            }
+
+            Date closingDate = null;
+
+            while (closingDate == null) {
+                try {
+                    System.out.print("Enter Closing Date (MM/dd/yyyy): ");
+                    String input = scanner.nextLine().trim();
+                    closingDate = sdf.parse(input);
+                } catch (ParseException e) {
+                    System.out.println("❌ Invalid date format. Please follow MM/dd/yyyy.");
+                }
+            }
+
+            System.out.print("Enter Manager ID(NRIC): ");
             String managerID = scanner.nextLine().trim();
 
-            System.out.print("Enter Officer Slot (number): ");
-            int officerSlot = Integer.parseInt(scanner.nextLine().trim());
+            int officerSlot = -1;
+            while (officerSlot < 0) {
+                try {
+                    System.out.print("Enter Officer Slot (number): ");
+                    officerSlot = Integer.parseInt(scanner.nextLine().trim());
+                    if (officerSlot < 0) throw new NumberFormatException();
+                } catch (NumberFormatException e) {
+                    System.out.println("❌ Invalid number. Please enter a positive integer.");
+                }
+            }
 
             System.out.print("Enter Officer IDs (comma-separated): ");
-            String officerIDsInput = scanner.nextLine().trim();
-            List<String> officerIDs = Arrays.asList(officerIDsInput.split(","));
+            List<String> officerIDs = Arrays.asList(scanner.nextLine().trim().split("\\s*,\\s*"));
 
-            // Prepare flat type data
             Map<FlatType, Integer> flatTypeUnits = new HashMap<>();
-            flatTypeUnits.put(FlatType.TWO_ROOMS, twoRoomUnits);
-            flatTypeUnits.put(FlatType.THREE_ROOMS, threeRoomUnits);
+            flatTypeUnits.put(type1, type1Units);
+            flatTypeUnits.put(type2, type2Units);
 
             Map<FlatType, Double> flatTypePrices = new HashMap<>();
-            flatTypePrices.put(FlatType.TWO_ROOMS, twoRoomPrice);
-            flatTypePrices.put(FlatType.THREE_ROOMS, threeRoomPrice);
+            flatTypePrices.put(type1, type1Price);
+            flatTypePrices.put(type2, type2Price);
+
 
             // Call controller to handle business logic
             Project result = projectController.createProject(
                     projectID, projectName, neighborhood,
                     flatTypeUnits, flatTypePrices,
-                    openingDate, closingDate,
+                    String.valueOf(openingDate), String.valueOf(closingDate),
                     managerID, officerSlot, officerIDs
             );
 
