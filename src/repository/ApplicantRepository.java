@@ -253,4 +253,5 @@ public class ApplicantRepository extends Repository  implements VerificationInte
 
         return passwordUpdated;
     }
+
 }

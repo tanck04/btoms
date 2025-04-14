@@ -4,7 +4,7 @@ package controller;
 import enums.WithdrawalStatus;
 import model.Applicant;
 import model.Application;
-import model.HDBManager;
+import model.Manager;
 import model.Project;
 import enums.ApplicantAppStatus;
 import repository.ApplicantRepository;
@@ -24,13 +24,13 @@ public class HDBManagerController{
     /**
      * Allows HDB manager to approve an applicant's application
      *
-     * @param hdbManager The HDB manager making the approval
+     * @param manager The HDB manager making the approval
      * @return true if approval was successful, false otherwise
      */
-    public boolean approveApplication(HDBManager hdbManager) {
+    public boolean approveApplication(Manager manager) {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Manager: " + hdbManager.getNRIC());
+        System.out.println("Manager: " + manager.getNRIC());
 
         // Make sure repositories are loaded
         if (ApplicationRepository.APPLICATIONS.isEmpty()) {
@@ -48,14 +48,14 @@ public class HDBManagerController{
         // Find the project managed by this HDB manager
         Project managedProject = null;
         for (Project project : ProjectRepository.PROJECTS.values()) {
-            if (hdbManager.getNRIC().equals(project.getManagerID())) {
+            if (manager.getNRIC().equals(project.getManagerID())) {
                 managedProject = project;
                 break;
             }
         }
 
         if (managedProject == null) {
-            System.out.println("Error: No project found for manager " + hdbManager.getNRIC());
+            System.out.println("Error: No project found for manager " + manager.getNRIC());
             return false;
         }
 

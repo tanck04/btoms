@@ -2,14 +2,14 @@ package model;
 
 import enums.OfficerRegStatus;
 
-public class HDBOfficerRegistration {
-    private HDBManager manager;
+public class OfficerRegistration {
+    private Manager manager;
     private String nric;
     private String projectId;
     private OfficerRegStatus status;
     private String registrationId;
 
-    public HDBOfficerRegistration(String registrationId, String nric, String projectId) {
+    public OfficerRegistration(String registrationId, String nric, String projectId) {
         this.nric = nric;
         this.projectId = projectId;
         this.status = OfficerRegStatus.PENDING;

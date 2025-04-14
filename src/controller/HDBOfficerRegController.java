@@ -1,32 +1,30 @@
 package controller;
 
 import enums.OfficerRegStatus;
-import model.HDBOfficerRegistration;
+import model.OfficerRegistration;
 import model.Project;
-import repository.HDBOfficerRegRepository;
+import repository.OfficerRegRepository;
 import repository.ProjectRepository;
 
 import java.io.IOException;
-import java.sql.SQLOutput;
-import java.util.HashMap;
 import java.util.Scanner;
 
 public class HDBOfficerRegController {
-    private final HDBOfficerRegRepository hdbOfficerRegRepository = new HDBOfficerRegRepository();
+    private final OfficerRegRepository officerRegRepository = new OfficerRegRepository();
 
-    public void approveRegistration(HDBOfficerRegistration reg) {
+    public void approveRegistration(OfficerRegistration reg) {
         reg.setStatus(OfficerRegStatus.APPROVED);
         ProjectRepository.addOfficerToProject(reg.getProjectId(), reg.getNric());
-        HDBOfficerRegRepository.saveAll();
+        OfficerRegRepository.saveAll();
     }
 
-    public void rejectRegistration(HDBOfficerRegistration reg) {
+    public void rejectRegistration(OfficerRegistration reg) {
         reg.setStatus(OfficerRegStatus.REJECTED);
-        HDBOfficerRegRepository.saveAll();
+        OfficerRegRepository.saveAll();
     }
 
     public String generateNextRegistrationID() throws IOException {
-        String lastID = hdbOfficerRegRepository.getLastRegId();
+        String lastID = officerRegRepository.getLastRegId();
 
         if (lastID.equals("R0001")) {
             return "R0002"; // Start from R0002 if R0001 already exists
@@ -65,8 +63,8 @@ public class HDBOfficerRegController {
                 }
                 // need to check eligibility before allowing registration
                 String regId = generateNextRegistrationID();
-                HDBOfficerRegistration newRegistration = new HDBOfficerRegistration(regId, nric, projectId);
-                hdbOfficerRegRepository.createNewOfficerReg(newRegistration);
+                OfficerRegistration newRegistration = new OfficerRegistration(regId, nric, projectId);
+                officerRegRepository.createNewOfficerReg(newRegistration);
             }
         }catch (IOException e) {
             // Handle the IOException here (e.g., log or print the error message)

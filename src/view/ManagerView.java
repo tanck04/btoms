@@ -6,8 +6,8 @@ import controller.HDBManagerController;
 import enums.FlatType;
 import enums.Role;
 import model.*;
-import repository.HDBOfficerRegRepository;
-import repository.HDBManagerRepository;
+import repository.OfficerRegRepository;
+import repository.ManagerRepository;
 import repository.ProjectRepository;
 
 import java.util.*;
@@ -354,19 +354,19 @@ public class ManagerView implements MenuInterface {
     }
 
     private void approveApplication(User user) {
-        HDBManager manager = (HDBManager) user;
+        Manager manager = (Manager) user;
         try {
             System.out.println("\n===== Approve Application =====");
 
             // Ensure repository is loaded
-            if (HDBManagerRepository.MANAGERS.isEmpty() && !HDBManagerRepository.isRepoLoaded()) {
-                HDBManagerRepository repo = new HDBManagerRepository();
+            if (ManagerRepository.MANAGERS.isEmpty() && !ManagerRepository.isRepoLoaded()) {
+                ManagerRepository repo = new ManagerRepository();
                 repo.loadFromCSV();
             }
 
 
             // Find manager in the repository
-            HDBManager currentManager = HDBManagerRepository.MANAGERS.get(manager.getNRIC());
+            Manager currentManager = ManagerRepository.MANAGERS.get(manager.getNRIC());
 
             // Validate manager exists and password is correct
             if (currentManager == null) {
@@ -419,14 +419,14 @@ public class ManagerView implements MenuInterface {
         System.out.print("Enter project ID to review officer registrations: ");
         String projectID = scanner.nextLine().trim();
 
-        List<HDBOfficerRegistration> pending = HDBOfficerRegRepository.getPendingByProject(projectID);
+        List<OfficerRegistration> pending = OfficerRegRepository.getPendingByProject(projectID);
 
         if (pending.isEmpty()) {
             System.out.println("No pending officer registrations for this project.");
             return;
         }
 
-        for (HDBOfficerRegistration reg : pending) {
+        for (OfficerRegistration reg : pending) {
             System.out.println("\nOfficer ID: " + reg.getNric());
             System.out.println("Project ID: " + reg.getProjectId());
             System.out.println("Status: " + reg.getStatus());

@@ -1,7 +1,7 @@
 package repository;
 
 import enums.OfficerRegStatus;
-import model.HDBOfficerRegistration;
+import model.OfficerRegistration;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import helper.CSVUtil;
 
-public class HDBOfficerRegRepository{
+public class OfficerRegRepository {
     private static final String FILE_PATH_OFFICER_REGISTRATION = "./src/repository/data/officer_registration_records.csv";
-    public static List<HDBOfficerRegistration> registrations = new ArrayList<>();
+    public static List<OfficerRegistration> registrations = new ArrayList<>();
 
-    public static List<HDBOfficerRegistration> getPendingByProject(String projectID) {
+    public static List<OfficerRegistration> getPendingByProject(String projectID) {
         return registrations.stream()
                 .filter(r -> r.getProjectId().equals(projectID) && r.getStatus() == OfficerRegStatus.PENDING)
                 .collect(Collectors.toList());
@@ -22,7 +22,7 @@ public class HDBOfficerRegRepository{
         // Simulated CSV save
         System.out.println("📝 Saved all registration statuses.");
     }
-    public void createNewOfficerReg(HDBOfficerRegistration officerReg) {
+    public void createNewOfficerReg(OfficerRegistration officerReg) {
         File file = new File(FILE_PATH_OFFICER_REGISTRATION);
 
         // Open the CSV file in append mode
@@ -53,8 +53,8 @@ public class HDBOfficerRegRepository{
             System.out.println("Failed to clean up empty rows in officer registration file.");
         }
     }
-    public List<HDBOfficerRegistration> loadAllOfficerReg() throws IOException {
-        List<HDBOfficerRegistration> registrations = new ArrayList<>();
+    public List<OfficerRegistration> loadAllOfficerReg() throws IOException {
+        List<OfficerRegistration> registrations = new ArrayList<>();
         BufferedReader reader = null;
 
         try{
@@ -71,7 +71,7 @@ public class HDBOfficerRegRepository{
                     String projectId = fields[2];
                     OfficerRegStatus status = OfficerRegStatus.valueOf(fields[3]);
 
-                    HDBOfficerRegistration registration = new HDBOfficerRegistration(registrationId, nric, projectId);
+                    OfficerRegistration registration = new OfficerRegistration(registrationId, nric, projectId);
                     registrations.add(registration);
                 }
             }
@@ -85,7 +85,7 @@ public class HDBOfficerRegRepository{
         return registrations;
     }
     public String getLastRegId() throws IOException {
-        List<HDBOfficerRegistration> registrations = loadAllOfficerReg();
+        List<OfficerRegistration> registrations = loadAllOfficerReg();
         if (registrations.isEmpty()) {
             return "R0001";
         }
@@ -93,10 +93,10 @@ public class HDBOfficerRegRepository{
         return lastRegId;
     }
 
-    public HDBOfficerRegistration getRegistrationById(String regId) throws IOException {
-        List<HDBOfficerRegistration> Registrations = loadAllOfficerReg();
+    public OfficerRegistration getRegistrationById(String regId) throws IOException {
+        List<OfficerRegistration> Registrations = loadAllOfficerReg();
 
-        for (HDBOfficerRegistration registration : Registrations) {
+        for (OfficerRegistration registration : Registrations) {
             if (registration.getRegistrationId().equals(regId)) {
                 return registration;
             }

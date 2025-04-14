@@ -119,6 +119,7 @@ public class ApplicationRepository extends Repository {
 
     // In ApplicationRepository.java - fix the loadApplicationsFromCSV method
     private static void loadApplicationsFromCSV(String fileName, HashMap<String, Application> applicationsMap) {
+        applicationsMap.clear();
         String filePath = "./src/repository/" + folder + "/" + fileName;
 
         File file = new File(filePath);
@@ -221,4 +222,31 @@ public class ApplicationRepository extends Repository {
     public static void setRepoLoaded(boolean isRepoLoaded) {
         ApplicationRepository.isRepoLoaded = isRepoLoaded;
     }
+
+    public static String getLastApplicationId() {
+        if (APPLICATIONS.isEmpty()) {
+            new ApplicationRepository().loadFromCSV(); // <- Ensures latest state
+        }
+        if (APPLICATIONS.isEmpty()) {
+            return "A0000";
+        }
+
+        return APPLICATIONS.keySet().stream()
+                .sorted()
+                .reduce((first, second) -> second)
+                .orElse("A0000");
+    }
+
+
+    public static String generateNextApplicationId() {
+        String lastId = getLastApplicationId(); // e.g., A0042
+        if (lastId == null || !lastId.matches("A\\d{4}")) {
+            return "A0001"; // Safe default if nothing exists or malformed
+        }
+
+        int number = Integer.parseInt(lastId.substring(1));
+        number++;
+        return "A" + String.format("%04d", number); // e.g., A0043
+    }
+
 }

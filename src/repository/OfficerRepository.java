@@ -4,25 +4,24 @@ import controller.PasswordChangerInterface;
 import controller.PasswordController;
 import controller.VerificationInterface;
 import enums.MaritalStatus;
-import model.HDBOfficer;
-import model.Project;
+import model.Officer;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class HDBOfficerRepository extends Repository implements PasswordChangerInterface, VerificationInterface {
+public class OfficerRepository extends Repository implements PasswordChangerInterface, VerificationInterface {
     private static final String folder = "data";
     private static final String fileName = "officer_records.csv";
     private static boolean isRepoLoaded = false;
-    public static HashMap<String, HDBOfficer> OFFICERS = new HashMap<>();
-    private static final String filePath = "src/repository/" + folder + "/" + fileName;
+    public static HashMap<String, Officer> OFFICERS = new HashMap<>();
+    private static final String FILE_PATH_OFFICER = "src/repository/" + folder + "/" + fileName;
 
     @Override
     public boolean loadFromCSV() {
         try {
-            loadOfficersFromCSV(filePath, OFFICERS);
+            loadOfficersFromCSV(FILE_PATH_OFFICER, OFFICERS);
             isRepoLoaded = true;
             return true;
         } catch (Exception e) {
@@ -31,14 +30,14 @@ public class HDBOfficerRepository extends Repository implements PasswordChangerI
         }
     }
 
-    private static void loadOfficersFromCSV(String fileName, HashMap<String, HDBOfficer> officersMap) {
-        File file = new File(filePath);
+    private static void loadOfficersFromCSV(String fileName, HashMap<String, Officer> officersMap) {
+        File file = new File(FILE_PATH_OFFICER);
         if (!file.exists()) {
-            System.out.println("File not found: " + filePath);
+            System.out.println("File not found: " + FILE_PATH_OFFICER);
             return;
         }
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH_OFFICER))) {
             String line;
             boolean isFirstLine = true;
 
@@ -49,7 +48,7 @@ public class HDBOfficerRepository extends Repository implements PasswordChangerI
                     continue;
                 }
 
-                HDBOfficer officer = csvToOfficer(line);
+                Officer officer = csvToOfficer(line);
                 if (officer != null) {
                     officersMap.put(officer.getNRIC(), officer);
                 }
@@ -60,7 +59,7 @@ public class HDBOfficerRepository extends Repository implements PasswordChangerI
         }
     }
 
-    private static HDBOfficer csvToOfficer(String csv) {
+    private static Officer csvToOfficer(String csv) {
         String[] fields = csv.split(",");
         try {
             // Skip if this looks like a header row
@@ -73,7 +72,7 @@ public class HDBOfficerRepository extends Repository implements PasswordChangerI
             MaritalStatus maritalStatus = MaritalStatus.valueOf(fields[3].toUpperCase());
             String password = fields[4];
 
-            return new HDBOfficer(nric, name, password, age, maritalStatus);
+            return new Officer(nric, name, password, age, maritalStatus);
         } catch (Exception e) {
             System.out.println("Error parsing officer data: " + csv + " - " + e.getMessage());
             e.printStackTrace();
@@ -81,16 +80,16 @@ public class HDBOfficerRepository extends Repository implements PasswordChangerI
         return null;
     }
 
-    public HDBOfficer verifyCredentials(String id, String password) {
+    public Officer verifyCredentials(String id, String password) {
         PasswordController pc = new PasswordController();
         String hashedInputPassword = pc.hashPassword(password);
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH_OFFICER))) {
             String line;
             reader.readLine(); // Skip header
 
             while ((line = reader.readLine()) != null) {
-                HDBOfficer officer = csvToOfficer(line);
+                Officer officer = csvToOfficer(line);
                 if (officer != null && officer.getNRIC().equals(id)) {
                     // Check for default password OR hashed password match
                     if (officer.getPassword().equals("password") && password.equals("password")) {
@@ -111,7 +110,7 @@ public class HDBOfficerRepository extends Repository implements PasswordChangerI
         boolean passwordUpdated = false;
 
         // Load all records from the file
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH_OFFICER))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
@@ -127,7 +126,7 @@ public class HDBOfficerRepository extends Repository implements PasswordChangerI
         }
 
         // Rewrite the file
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH_OFFICER))) {
             for (String[] record : allRecords) {
                 writer.write(String.join(",", record));
                 writer.newLine();

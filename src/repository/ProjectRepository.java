@@ -1,8 +1,6 @@
 package repository;
 
-import enums.OfficerRegStatus;
 import enums.Visibility;
-import model.HDBOfficerRegistration;
 import model.Project;
 import enums.FlatType;
 import java.util.Map;

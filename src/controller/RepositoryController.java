@@ -4,14 +4,14 @@ import repository.*;
 
 public class RepositoryController {
     private final ApplicantRepository applicantRepository = new ApplicantRepository();
-    private final HDBOfficerRepository hdbOfficerRepository = new HDBOfficerRepository();
-    private final HDBManagerRepository hdbManagerRepository = new HDBManagerRepository();
+    private final OfficerRepository officerRepository = new OfficerRepository();
+    private final ManagerRepository managerRepository = new ManagerRepository();
 
     public Object getRepository(String role) {
         return switch (role) {
             case "APPLICANT" -> applicantRepository;
-            case "HDBOFFICER" -> hdbOfficerRepository;
-            case "HDBMANAGER" -> hdbManagerRepository;
+            case "HDBOFFICER" -> officerRepository;
+            case "HDBMANAGER" -> managerRepository;
             default -> null;
         };
     }

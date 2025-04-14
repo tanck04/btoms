@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 public class OfficerView implements MenuInterface{
     private final HDBOfficerController controller = new HDBOfficerController();
-    private final HDBOfficerRegController regController = new HDBOfficerRegController();
+    private final HDBOfficerRegController officerRegController = new HDBOfficerRegController();
 
     private final Scanner scanner = new Scanner(System.in);
     public void displayMenu(User user){
@@ -44,7 +44,7 @@ public class OfficerView implements MenuInterface{
             case "5":
                 break;
             case "6":
-                regController.createRegistration(user.getNRIC());
+                officerRegController.createRegistration(user.getNRIC());
                 break;
             case "7":
                 break;

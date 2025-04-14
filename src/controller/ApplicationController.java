@@ -15,6 +15,8 @@ import java.util.UUID;
 import java.util.Map;
 import java.util.HashMap;
 
+import static repository.ApplicationRepository.isRepoLoaded;
+
 public class ApplicationController {
 
     public boolean submitApplication(Applicant applicant, Project project, FlatType flatType) {
@@ -56,7 +58,11 @@ public class ApplicationController {
 
         // Generate a unique application ID
         String applicationID = UUID.randomUUID().toString();
-
+//        if (!ApplicationRepository.isRepoLoaded()) {
+//            new ApplicationRepository().loadFromCSV();
+//        }
+//
+//        String applicationID = ApplicationRepository.generateNextApplicationId();
         // Create a new application
         Application application = new Application(
             applicationID,
