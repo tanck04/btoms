@@ -1,6 +1,8 @@
 package repository;
 
+import enums.OfficerRegStatus;
 import enums.Visibility;
+import model.HDBOfficerRegistration;
 import model.Project;
 import enums.FlatType;
 import java.util.Map;
@@ -195,6 +197,13 @@ public class ProjectRepository extends Repository {
             System.out.println("✅ Officer " + officerID + " added to project " + projectID);
         }
     }
+    public static Project getProjectById(String projectId) {
+        if (!isRepoLoaded) {
+            new ProjectRepository().loadFromCSV(); // Ensures data is loaded before accessing
+        }
+        return PROJECTS.getOrDefault(projectId, null);
+    }
+
 }
 
 

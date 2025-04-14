@@ -7,6 +7,7 @@ import enums.FlatType;
 import enums.Role;
 import model.*;
 import repository.HDBOfficerRegRepository;
+import repository.HDBManagerRepository;
 import repository.ProjectRepository;
 
 import java.util.*;
@@ -426,8 +427,8 @@ public class ManagerView implements MenuInterface {
         }
 
         for (HDBOfficerRegistration reg : pending) {
-            System.out.println("\nOfficer ID: " + reg.getOfficerID());
-            System.out.println("Project ID: " + reg.getProjectID());
+            System.out.println("\nOfficer ID: " + reg.getNric());
+            System.out.println("Project ID: " + reg.getProjectId());
             System.out.println("Status: " + reg.getStatus());
             System.out.print("Approve this officer? (yes/no): ");
             String input = scanner.nextLine().trim();
