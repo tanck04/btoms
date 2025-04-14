@@ -14,17 +14,23 @@ import java.util.Collections;
 public class ProjectRepository extends Repository {
     private static final String folder = "data";
     private static final String fileName = "project_records" + ".csv";
-    private static Boolean isRepoLoaded = true;
+    private static Boolean isRepoLoaded = false;
     public static HashMap<String, Project> PROJECTS = new HashMap<>();
-
+    private static final String filePath = "./src/repository/" + folder + "/" + fileName;
     @Override
     public boolean loadFromCSV() {
         try {
-            loadProjectsFromCSV(fileName); // Remove the second parameter
+            System.out.println("Attempting to load projects from: " + filePath);
+            File file = new File(filePath);
+            System.out.println("File exists: " + file.exists());
+
+            loadProjectsFromCSV(filePath, PROJECTS);
+            System.out.println("Loaded " + PROJECTS.size() + " projects");
             isRepoLoaded = true;
             return true;
         } catch (Exception e) {
             System.out.println("Error loading projects repository: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
@@ -34,7 +40,7 @@ public class ProjectRepository extends Repository {
     }
 
     private static void saveProjectsToCSV(String fileName, HashMap<String, Project> projectsMap) {
-        String filePath = "./src/repository/" + folder + "/" + fileName;
+
 
         File directory = new File("./src/repository/" + folder);
         if (!directory.exists()) {
@@ -146,8 +152,7 @@ public class ProjectRepository extends Repository {
         return null;
     }
 
-    private static void loadProjectsFromCSV(String fileName) {
-        String filePath = "./src/repository/" + folder + "/" + fileName;
+    private static void loadProjectsFromCSV(String filePath, HashMap<String, Project> projectsMap) {
         File file = new File(filePath);
 
         if (!file.exists()) {
@@ -168,10 +173,10 @@ public class ProjectRepository extends Repository {
 
                 Project project = csvToProject(line);
                 if (project != null) {
-                    PROJECTS.put(project.getProjectID(), project);
+                    projectsMap.put(project.getProjectID(), project);
                 }
             }
-            System.out.println("Projects loaded successfully from " + fileName);
+            System.out.println("Projects loaded successfully from " + filePath);
         } catch (IOException e) {
             System.out.println("Error loading project data: " + e.getMessage());
         }

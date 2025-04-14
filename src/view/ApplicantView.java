@@ -31,18 +31,18 @@ public class ApplicantView implements MenuInterface {
         System.out.println("+-----------------------------------------------+");
         System.out.println();
         System.out.print("Enter your choice: ");
-    }
 
-    public void handleUserInput(String input) {
-        switch (input) {
+        String choice = scanner.nextLine().trim();
+
+        switch (choice) {
             case "1":
 //                createApplicantProfile();
                 break;
             case "2":
-                controller.checkApplicationStatus();
+                submitApplication(user);
                 break;
             case "3":
-                submitApplication();
+                controller.checkApplicationStatus();
                 break;
             case "4":
 //                updatePersonalDetails();
@@ -63,15 +63,15 @@ public class ApplicantView implements MenuInterface {
         return Role.APPLICANT;
     }
 
-    private void submitApplication() {
+    private void submitApplication(User user) {
+
         try {
             // First, get the logged in applicant
-            System.out.print("Enter your NRIC: ");
-            String nric = scanner.nextLine().trim();
+            Applicant applicant = (Applicant) user;
+            String nric = applicant.getNRIC();
 
             // Use ApplicationController instead of ApplicantController for this method
             ApplicationController applicationController = new ApplicationController();
-            Applicant applicant = applicationController.getApplicantByNRIC(nric);
 
             if (applicant == null) {
                 System.out.println("Applicant not found. Please create a profile first.");

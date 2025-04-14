@@ -188,11 +188,11 @@ public class HDBManagerView implements MenuInterface {
 
             // Create instance of HDBManagerController and process approval
             HDBManagerController hdbManagerController = new HDBManagerController();
-            boolean success = hdbManagerController.approveApplication(currentManager);
-
-            if (!success) {
-                System.out.println("Application approval process was not completed.");
-            }
+//            boolean success = hdbManagerController.approveApplication(currentManager);
+//
+//            if (!success) {
+//                System.out.println("Application approval process was not completed.");
+//            }
 
         } catch (Exception e) {
             System.out.println("Error during approval process: " + e.getMessage());

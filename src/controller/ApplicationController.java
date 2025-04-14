@@ -9,13 +9,29 @@ import enums.ApplicantAppStatus;
 import enums.WithdrawalStatus;
 import enums.FlatType;
 import enums.MaritalStatus;
+import enums.Visibility;
 import repository.ProjectRepository;
 import java.util.UUID;
 import java.util.Map;
+import java.util.HashMap;
 
 public class ApplicationController {
     public Map<String, Project> getAvailableProjects() {
-        return ProjectRepository.PROJECTS;
+        // Simply check if projects are empty
+        if (ProjectRepository.PROJECTS.isEmpty()) {
+            ProjectRepository repo = new ProjectRepository();
+            repo.loadFromCSV();
+        }
+
+        // Filter projects based on visibility
+        Map<String, Project> visibleProjects = new HashMap<>();
+        for (Project project : ProjectRepository.PROJECTS.values()) {
+            if (project.getVisibility() == Visibility.ON) {
+                visibleProjects.put(project.getProjectID(), project);
+            }
+        }
+
+        return visibleProjects;
     }
 
     public Applicant getApplicantByNRIC(String nric) {
@@ -35,9 +51,20 @@ public class ApplicationController {
 
         System.out.println("Processing application for applicant: " + applicant.getNRIC());
 
-        if (ProjectRepository.PROJECTS.isEmpty() && !ProjectRepository.isRepoLoaded()) {
+        // Ensure both repositories are loaded
+        if (ProjectRepository.PROJECTS.isEmpty()) {
             ProjectRepository projectRepo = new ProjectRepository();
             projectRepo.loadFromCSV();
+        }
+
+        if (ApplicantRepository.APPLICANTS.isEmpty()) {
+            ApplicantRepository applicantRepo = new ApplicantRepository();
+            applicantRepo.loadFromCSV();
+
+            // Make sure the current applicant is in the map
+            if (!ApplicantRepository.APPLICANTS.containsKey(applicant.getNRIC())) {
+                ApplicantRepository.APPLICANTS.put(applicant.getNRIC(), applicant);
+            }
         }
 
         // Check if the project exists in the repository
@@ -68,63 +95,11 @@ public class ApplicationController {
         // Save the application to the repository
         ApplicationRepository.APPLICATIONS.put(applicationID, application);
 
-        // Update the applicant's application ID
-        applicant.setApplicationID(applicationID);
-        applicant.setApplicantAppStatus(ApplicantAppStatus.PENDING);
-
         // Update both repositories in CSV
         ApplicantRepository.saveAllApplicantsToCSV();
         ApplicationRepository.saveAllApplicationsToCSV();
 
         System.out.println("Application submitted successfully. Application ID: " + applicationID);
         return true;
-    }
-
-    public boolean withdrawApplication(Applicant applicant) {
-        // Validate input
-        if (applicant == null || applicant.getApplicationID() == null) {
-            System.out.println("Invalid input: Applicant or Application ID is null.");
-            return false;
-        }
-
-        // Check if the application exists
-        Application application = ApplicationRepository.APPLICATIONS.get(applicant.getApplicationID());
-        if (application == null) {
-            System.out.println("Application not found.");
-            return false;
-        }
-
-        // Update the application status to withdrawn
-        application.setApplicationStatus(ApplicantAppStatus.SUCCESSFUL);
-        application.setWithdrawalStatus(WithdrawalStatus.APPROVED);
-
-        // Save the updated application to the repository
-        ApplicationRepository.saveAllApplicationsToCSV();
-
-        System.out.println("Application withdrawn successfully.");
-        return true;
-    }
-
-    public void viewApplicationStatus(Applicant applicant) {
-        // Validate input
-        if (applicant == null || applicant.getApplicationID() == null) {
-            System.out.println("Invalid input: Applicant or Application ID is null.");
-            return;
-        }
-
-        // Retrieve the application for the given applicant
-        Application application = ApplicationRepository.APPLICATIONS.get(applicant.getApplicationID());
-        if (application == null) {
-            System.out.println("No application found for the given applicant.");
-            return;
-        }
-        if (application.getWithdrawalStatus().equals(WithdrawalStatus.APPROVED)){
-            System.out.println("Application has been withdrawn.");
-            return;
-        }
-        // Display the application status
-        System.out.println("Application Status for Applicant ID " + applicant.getApplicationID() + ":");
-        System.out.println("Status: " + application.getApplicationStatus());
-
     }
 }

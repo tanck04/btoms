@@ -45,7 +45,7 @@ public class ApplicantRepository extends Repository  implements VerificationInte
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) { // false = overwrite mode
             // Write header
-            writer.write("NRIC,Name,Age,Marital Status,Password,Application ID,Enquiry ID,ApplicantAppStatus,WithdrawalStatus");
+            writer.write("NRIC,Name,Age,Marital Status,Password");
             writer.newLine();
 
             // Write all applicants from the HashMap
@@ -72,11 +72,7 @@ public class ApplicantRepository extends Repository  implements VerificationInte
                 applicant.getName(),
                 String.valueOf(applicant.getAge()),
                 applicant.getMaritalStatus().toString(),
-                applicant.getPassword(),
-                applicant.getApplicationID() != null ? applicant.getApplicationID() : "",
-                applicant.getEnquiryID() != null ? applicant.getEnquiryID() : "",
-                applicant.getApplicantAppStatus() != null ? applicant.getApplicantAppStatus().toString() : "",
-                applicant.getWithdrawalStatus() != null ? applicant.getWithdrawalStatus().toString() : ""
+                applicant.getPassword()
         );
     }
 
@@ -129,31 +125,8 @@ public class ApplicantRepository extends Repository  implements VerificationInte
                 MaritalStatus maritalStatus = MaritalStatus.valueOf(fields[3].toUpperCase());
                 String password = fields[4];
 
-                // Safely handle optional fields
-                String applicationID = (fields.length > 5 && !fields[5].isEmpty()) ? fields[5] : null;
-                String enquiryID = (fields.length > 6 && !fields[6].isEmpty()) ? fields[6] : null;
-
-                // Handle enums with default values if missing
-                ApplicantAppStatus applicantAppStatus = null;
-                if (fields.length > 7 && !fields[7].isEmpty()) {
-                    try {
-                        applicantAppStatus = ApplicantAppStatus.valueOf(fields[7].toUpperCase());
-                    } catch (IllegalArgumentException e) {
-                        System.out.println("Invalid ApplicantAppStatus value: " + fields[7]);
-                    }
-                }
-
-                WithdrawalStatus withdrawalStatus = WithdrawalStatus.NULL;
-                if (fields.length > 8 && !fields[8].isEmpty()) {
-                    try {
-                        withdrawalStatus = WithdrawalStatus.valueOf(fields[8].toUpperCase());
-                    } catch (IllegalArgumentException e) {
-                        System.out.println("Invalid WithdrawalStatus value: " + fields[8]);
-                    }
-                }
-
                 // Create applicant with all the correct values
-                return new Applicant(nric, name, password, age, maritalStatus, applicationID, enquiryID, applicantAppStatus, withdrawalStatus);
+                return new Applicant(nric, name, password, age, maritalStatus);
             } catch (Exception e) {
                 System.out.println("Error parsing applicant data: " + csv + " - " + e.getMessage());
                 e.printStackTrace();
@@ -186,7 +159,7 @@ public class ApplicantRepository extends Repository  implements VerificationInte
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) {
                 // Write header if file is new or empty
                 if (!fileExists) {
-                    writer.write("NRIC,Name,Age,Marital Status,Password,Application ID,Enquiry ID,ApplicantAppStatus,WithdrawalStatus");
+                    writer.write("NRIC,Name,Age,Marital Status,Password");
                 } else {
                     writer.write(lines.get(0)); // Write existing header
                 }
