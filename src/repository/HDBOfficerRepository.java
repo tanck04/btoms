@@ -64,12 +64,11 @@ public class HDBOfficerRepository extends Repository implements PasswordChangerI
         String[] fields = csv.split(",");
         try {
             // Skip if this looks like a header row
-            if (fields[0].equalsIgnoreCase("Name")) {
+            if (fields[1].equalsIgnoreCase("Name")) {
                 return null;
             }
-
-            String name = fields[0];
-            String nric = fields[1];
+            String nric = fields[0];
+            String name = fields[1];
             int age = Integer.parseInt(fields[2]);
             MaritalStatus maritalStatus = MaritalStatus.valueOf(fields[3].toUpperCase());
             String password = fields[4];
