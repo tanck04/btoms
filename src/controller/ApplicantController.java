@@ -4,7 +4,7 @@ import model.Applicant;
 import enums.MaritalStatus;
 import repository.ApplicantRepository;
 
-public class ApplicantController extends ViewController{
+public class ApplicantController{
 
     /**
      * Creates a new applicant and saves it to the repository

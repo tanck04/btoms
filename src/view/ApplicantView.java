@@ -36,7 +36,7 @@ public class ApplicantView implements MenuInterface {
     public void handleUserInput(String input) {
         switch (input) {
             case "1":
-                createApplicantProfile();
+//                createApplicantProfile();
                 break;
             case "2":
                 controller.checkApplicationStatus();
@@ -61,39 +61,6 @@ public class ApplicantView implements MenuInterface {
 
     public Role getUserType() {
         return Role.APPLICANT;
-    }
-
-    private void createApplicantProfile() {
-        try {
-            System.out.print("Enter NRIC: ");
-            String nric = scanner.nextLine().trim();
-
-            System.out.print("Enter Name: ");
-            String name = scanner.nextLine().trim();
-
-            System.out.print("Enter Password: ");
-            String password = scanner.nextLine().trim();
-
-            System.out.print("Enter Age: ");
-            int age = Integer.parseInt(scanner.nextLine().trim());
-
-            System.out.print("Enter Marital Status (SINGLE/MARRIED): ");
-            String statusInput = scanner.nextLine().trim().toUpperCase();
-            MaritalStatus maritalStatus = MaritalStatus.valueOf(statusInput);
-
-            // Call controller to handle business logic
-            Applicant result = controller.createApplicant(nric, name, password, age, maritalStatus);
-
-            if (result != null) {
-                System.out.println("Applicant profile created successfully!");
-            } else {
-                System.out.println("Failed to create applicant profile.");
-            }
-        } catch (IllegalArgumentException e) {
-            System.out.println("Invalid input: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-        }
     }
 
     private void submitApplication() {

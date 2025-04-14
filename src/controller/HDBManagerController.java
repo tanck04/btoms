@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class HDBManagerController extends ViewController {
+public class HDBManagerController{
 
     /**
      * Allows HDB manager to approve an applicant's application
