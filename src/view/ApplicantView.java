@@ -1,37 +1,38 @@
-package boundary;
+package view;
 
 import controller.ApplicantController;
 import controller.ApplicationController;
 import enums.MaritalStatus;
 import enums.Role;
 import enums.FlatType;
-import entity.Applicant;
-import entity.Project;
+import model.Applicant;
+import model.Project;
+import model.User;
+
 import java.util.Scanner;
 import java.util.Map;
 
 public class ApplicantView implements MenuInterface {
-    private ApplicantController controller;
-    private Scanner scanner;
-
-    public ApplicantView() {
-        this.controller = new ApplicantController();
-        this.scanner = new Scanner(System.in);
-    }
+    private final ApplicantController controller = new ApplicantController();
+    private final Scanner scanner = new Scanner(System.in);
 
     @Override
-    public void displayMenu() {
-        System.out.println("\n===== Applicant Menu =====");
-        System.out.println("1. Create New Applicant Profile");
-        System.out.println("2. View Application Status");
-        System.out.println("3. Submit Application");
-        System.out.println("4. Update Personal Details");
-        System.out.println("5. View Available Flats");
-        System.out.println("6. Exit");
+    public void displayMenu(User user) {
+        System.out.println();
+        System.out.println("+-----------------------------------------------+");
+        System.out.println("|                 Applicant Menu                |");
+        System.out.println("+-----------------------------------------------+");
+        System.out.println("| 1. View Projects                              |");
+        System.out.println("| 2. Submit Application                         |");
+        System.out.println("| 3. View Application Status                    |");
+        System.out.println("| 4. Request Withdrawal for Application         |");
+        System.out.println("| 5. Enquiry (Submit, View, Edit, Delete)       |");
+        System.out.println("| 6. Logout                                     |");
+        System.out.println("+-----------------------------------------------+");
+        System.out.println();
         System.out.print("Enter your choice: ");
     }
 
-    @Override
     public void handleUserInput(String input) {
         switch (input) {
             case "1":
@@ -44,10 +45,10 @@ public class ApplicantView implements MenuInterface {
                 submitApplication();
                 break;
             case "4":
-                updatePersonalDetails();
+//                updatePersonalDetails();
                 break;
             case "5":
-                controller.getAvailableProjects();
+//                controller.getAvailableProjects();
                 break;
             case "6":
                 System.out.println("Exiting...");
@@ -58,7 +59,6 @@ public class ApplicantView implements MenuInterface {
         }
     }
 
-    @Override
     public Role getUserType() {
         return Role.APPLICANT;
     }

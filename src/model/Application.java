@@ -1,4 +1,4 @@
-package entity;
+package model;
 
 import enums.ApplicantAppStatus;
 import enums.FlatType;

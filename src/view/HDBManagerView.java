@@ -1,13 +1,14 @@
-package boundary;
+package view;
 
 import controller.HDBOfficerRegController;
 import controller.ProjectController;
 import controller.HDBManagerController;
 import enums.FlatType;
 import enums.Role;
-import entity.HDBOfficerRegistration;
-import entity.Project;
-import entity.HDBManager;
+import model.HDBOfficerRegistration;
+import model.Project;
+import model.HDBManager;
+import model.User;
 import repository.HDBManagerRepository;
 import repository.HDBOfficerRegRepository;
 
@@ -25,8 +26,7 @@ public class HDBManagerView implements MenuInterface {
         this.scanner = new Scanner(System.in);
     }
 
-    @Override
-    public void displayMenu() {
+    public void displayMenu(User user) {
         System.out.println("\n===== HDB Manager Menu =====");
         System.out.println("1. Create New Project");
         System.out.println("2. View All Projects");
@@ -39,7 +39,6 @@ public class HDBManagerView implements MenuInterface {
         System.out.print("Enter your choice: ");
     }
 
-    @Override
     public void handleUserInput(String input) {
         switch (input) {
             case "1":
@@ -76,7 +75,6 @@ public class HDBManagerView implements MenuInterface {
         }
     }
 
-    @Override
     public Role getUserType() {
         return Role.HDBMANAGER;
     }

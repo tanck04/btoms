@@ -1,6 +1,6 @@
 package controller;
 
-import entity.Applicant;
+import model.Applicant;
 import enums.MaritalStatus;
 import repository.ApplicantRepository;
 

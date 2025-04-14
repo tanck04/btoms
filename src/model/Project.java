@@ -1,4 +1,4 @@
-package entity;
+package model;
 
 import enums.FlatType;
 import enums.Visibility;

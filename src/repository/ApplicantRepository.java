@@ -1,16 +1,19 @@
 package repository;
 
+import controller.PasswordController;
+import controller.VerificationInterface;
 import enums.ApplicantAppStatus;
 import enums.WithdrawalStatus;
 import enums.MaritalStatus;
-import entity.Applicant;
+import model.Applicant;
+import model.User;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class ApplicantRepository extends Repository {
+public class ApplicantRepository extends Repository  implements VerificationInterface {
     private static final String folder = "data";
     private static final String fileName = "applicant_records.csv";
     private static Boolean isRepoLoaded = true;
@@ -108,56 +111,56 @@ public class ApplicantRepository extends Repository {
         }
     }
 
-    private static Applicant csvToApplicant(String csv) {
-        // Skip empty lines
-        if (csv == null || csv.trim().isEmpty()) {
-            return null;
-        }
-
-        String[] fields = csv.split(",");
-        try {
-            // Skip if fields array is too small or this looks like a header row
-            if (fields.length < 5 || fields[0].equalsIgnoreCase("NRIC")) {
+        private static Applicant csvToApplicant(String csv) {
+            // Skip empty lines
+            if (csv == null || csv.trim().isEmpty()) {
                 return null;
             }
 
-            String nric = fields[0];
-            String name = fields[1];
-            int age = Integer.parseInt(fields[2]);
-            MaritalStatus maritalStatus = MaritalStatus.valueOf(fields[3].toUpperCase());
-            String password = fields[4];
-
-            // Safely handle optional fields
-            String applicationID = (fields.length > 5 && !fields[5].isEmpty()) ? fields[5] : null;
-            String enquiryID = (fields.length > 6 && !fields[6].isEmpty()) ? fields[6] : null;
-
-            // Handle enums with default values if missing
-            ApplicantAppStatus applicantAppStatus = null;
-            if (fields.length > 7 && !fields[7].isEmpty()) {
-                try {
-                    applicantAppStatus = ApplicantAppStatus.valueOf(fields[7].toUpperCase());
-                } catch (IllegalArgumentException e) {
-                    System.out.println("Invalid ApplicantAppStatus value: " + fields[7]);
+            String[] fields = csv.split(",");
+            try {
+                // Skip if fields array is too small or this looks like a header row
+                if (fields.length < 5 || fields[0].equalsIgnoreCase("NRIC")) {
+                    return null;
                 }
-            }
 
-            WithdrawalStatus withdrawalStatus = WithdrawalStatus.NULL;
-            if (fields.length > 8 && !fields[8].isEmpty()) {
-                try {
-                    withdrawalStatus = WithdrawalStatus.valueOf(fields[8].toUpperCase());
-                } catch (IllegalArgumentException e) {
-                    System.out.println("Invalid WithdrawalStatus value: " + fields[8]);
+                String nric = fields[0];
+                String name = fields[1];
+                int age = Integer.parseInt(fields[2]);
+                MaritalStatus maritalStatus = MaritalStatus.valueOf(fields[3].toUpperCase());
+                String password = fields[4];
+
+                // Safely handle optional fields
+                String applicationID = (fields.length > 5 && !fields[5].isEmpty()) ? fields[5] : null;
+                String enquiryID = (fields.length > 6 && !fields[6].isEmpty()) ? fields[6] : null;
+
+                // Handle enums with default values if missing
+                ApplicantAppStatus applicantAppStatus = null;
+                if (fields.length > 7 && !fields[7].isEmpty()) {
+                    try {
+                        applicantAppStatus = ApplicantAppStatus.valueOf(fields[7].toUpperCase());
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Invalid ApplicantAppStatus value: " + fields[7]);
+                    }
                 }
-            }
 
-            // Create applicant with all the correct values
-            return new Applicant(nric, name, password, age, maritalStatus, applicationID, enquiryID, applicantAppStatus, withdrawalStatus);
-        } catch (Exception e) {
-            System.out.println("Error parsing applicant data: " + csv + " - " + e.getMessage());
-            e.printStackTrace();
+                WithdrawalStatus withdrawalStatus = WithdrawalStatus.NULL;
+                if (fields.length > 8 && !fields[8].isEmpty()) {
+                    try {
+                        withdrawalStatus = WithdrawalStatus.valueOf(fields[8].toUpperCase());
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Invalid WithdrawalStatus value: " + fields[8]);
+                    }
+                }
+
+                // Create applicant with all the correct values
+                return new Applicant(nric, name, password, age, maritalStatus, applicationID, enquiryID, applicantAppStatus, withdrawalStatus);
+            } catch (Exception e) {
+                System.out.println("Error parsing applicant data: " + csv + " - " + e.getMessage());
+                e.printStackTrace();
+            }
+            return null;
         }
-        return null;
-    }
     public static void saveNewApplicantToCSV(Applicant applicant) {
         String filePath = "./src/repository/" + folder + "/" + fileName;
 
@@ -219,5 +222,64 @@ public class ApplicantRepository extends Repository {
 
     public static void setRepoLoaded(boolean isRepoLoaded) {
         ApplicantRepository.isRepoLoaded = isRepoLoaded;
+    }
+
+    public Applicant verifyCredentials(String id, String password) {
+        PasswordController pc = new PasswordController();
+        String hashedInputPassword = pc.hashPassword(password);
+
+        try (BufferedReader reader = new BufferedReader(new FileReader("data/applicants.csv"))) {
+            String line;
+            reader.readLine(); // Skip header
+
+            while ((line = reader.readLine()) != null) {
+                Applicant applicant = csvToApplicant(line);
+                if (applicant != null && applicant.getNRIC().equals(id)) {
+                    // Check for default password OR hashed password match
+                    if (applicant.getPassword().equals("Password") && password.equals("Password")) {
+                        return applicant;
+                    } else if (applicant.getPassword().equals(hashedInputPassword)) {
+                        return applicant;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null; // Login failed
+    }
+    public boolean changePassword(String nric, String newHashedPassword) {
+        List<String[]> allRecords = new ArrayList<>();
+        boolean passwordUpdated = false;
+
+        // Load all records from the file
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts[0].equals(nric)) {
+                    parts[4] = newHashedPassword; // Update password
+                    passwordUpdated = true;
+                }
+                allRecords.add(parts);
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading the file: " + e.getMessage());
+            return false; // Indicate failure
+        }
+
+        // Rewrite the file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            for (String[] record : allRecords) {
+                writer.write(String.join(",", record));
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error writing to the file: " + e.getMessage());
+            return false; // Indicate failure
+        }
+
+        return passwordUpdated;
     }
 }

@@ -1,4 +1,4 @@
-package entity;
+package model;
 
 import enums.MaritalStatus;import enums.ApplicantAppStatus;
 import enums.WithdrawalStatus;
