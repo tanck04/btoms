@@ -1,5 +1,6 @@
 package repository;
 
+import controller.PasswordChangerInterface;
 import controller.PasswordController;
 import controller.VerificationInterface;
 import enums.ApplicantAppStatus;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class ApplicantRepository extends Repository  implements VerificationInterface {
+public class ApplicantRepository extends Repository  implements VerificationInterface, PasswordChangerInterface {
     private static final String folder = "data";
     private static final String fileName = "applicant_records.csv";
     private static Boolean isRepoLoaded = true;
@@ -22,7 +23,7 @@ public class ApplicantRepository extends Repository  implements VerificationInte
     @Override
     public boolean loadFromCSV() {
         try {
-            loadApplicantsFromCSV(fileName, APPLICANTS);
+            loadApplicantsFromCSV(filePath, APPLICANTS);
             isRepoLoaded = true;
             return true;
         } catch (Exception e) {
@@ -251,7 +252,7 @@ public class ApplicantRepository extends Repository  implements VerificationInte
         boolean passwordUpdated = false;
 
         // Load all records from the file
-        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
@@ -267,7 +268,7 @@ public class ApplicantRepository extends Repository  implements VerificationInte
         }
 
         // Rewrite the file
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             for (String[] record : allRecords) {
                 writer.write(String.join(",", record));
                 writer.newLine();
