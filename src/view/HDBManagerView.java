@@ -78,7 +78,7 @@ public class HDBManagerView implements MenuInterface {
                     reviewApplications();
                     break;
                 case 7:
-                    //approveApplication();
+                    approveApplication(user);
                     break;
                 case 8:
                     approveWithdrawal();
@@ -343,59 +343,49 @@ public class HDBManagerView implements MenuInterface {
         }
 
         HDBManagerController controller = new HDBManagerController();
-        List<Applicant> pending_project_list = controller.getPendingApplicantsByProject(project);
+        List<Application> pending_project_list = controller.getPendingApplicationsByProject(project);
 
-        for (Applicant applicant : pending_project_list) {
-            System.out.println("Name: " + applicant.getName());
-            System.out.println("NRIC: " + applicant.getNRIC());
+        for (Application application : pending_project_list) {
+            System.out.println("Name: " + application.getApplicant().getName());
+            System.out.println("NRIC: " + application.getApplicant().getNRIC());
             System.out.print("Approve this application? (yes/no): ");
             String input = scanner.nextLine().trim();
         }
     }
 
-//    private void approveApplication() {
-//        try {
-//            System.out.println("\n===== Approve Application =====");
-//
-//            // Ensure repository is loaded
-//            if (HDBManagerRepository.MANAGERS.isEmpty() && !HDBManagerRepository.isRepoLoaded()) {
-//                HDBManagerRepository repo = new HDBManagerRepository();
-//                repo.loadFromCSV();
-//            }
-//
-//            // Get HDB Manager credentials
-//            System.out.print("Enter your NRIC: ");
-//            String managerNRIC = scanner.nextLine().trim();
-//
-//            System.out.print("Enter your password: ");
-//            String managerPassword = scanner.nextLine().trim();
-//
-//            // Find manager in the repository
-//            HDBManager currentManager = HDBManagerRepository.MANAGERS.get(managerNRIC);
-//
-//            // Validate manager exists and password is correct
-//            if (currentManager == null) {
-//                System.out.println("Error: No manager found with NRIC " + managerNRIC);
-//                return;
-//            }
-//
-//            if (!currentManager.getPassword().equals(managerPassword)) {
-//                System.out.println("Error: Incorrect password");
-//                return;
-//            }
-//
-//            // Create instance of HDBManagerController and process approval
-//            boolean success = hdbManagerController.approveApplication(currentManager);
-//
-//            if (!success) {
-//                System.out.println("Application approval process was not completed.");
-//            }
-//
-//        } catch (Exception e) {
-//            System.out.println("Error during approval process: " + e.getMessage());
-//            e.printStackTrace();
-//        }
-//    }
+    private void approveApplication(User user) {
+        HDBManager manager = (HDBManager) user;
+        try {
+            System.out.println("\n===== Approve Application =====");
+
+            // Ensure repository is loaded
+            if (HDBManagerRepository.MANAGERS.isEmpty() && !HDBManagerRepository.isRepoLoaded()) {
+                HDBManagerRepository repo = new HDBManagerRepository();
+                repo.loadFromCSV();
+            }
+
+
+            // Find manager in the repository
+            HDBManager currentManager = HDBManagerRepository.MANAGERS.get(manager.getNRIC());
+
+            // Validate manager exists and password is correct
+            if (currentManager == null) {
+                System.out.println("Error: No manager found with NRIC " + manager.getNRIC());
+                return;
+            }
+
+            // Create instance of HDBManagerController and process approval
+            boolean success = hdbManagerController.approveApplication(currentManager);
+
+            if (!success) {
+                System.out.println("Application approval process was not completed.");
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error during approval process: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
     private void approveWithdrawal() {
         System.out.println("\n===== Approve Withdrawal =====");

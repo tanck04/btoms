@@ -9,6 +9,8 @@ import enums.WithdrawalStatus;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 
 public class ApplicationRepository extends Repository {
     private static final String folder = "data";
@@ -60,6 +62,46 @@ public class ApplicationRepository extends Repository {
             System.out.println("Error saving application data: " + e.getMessage());
         }
     }
+
+    public static void updateApplicationInCSV(Application updatedApplication) {
+        String filePath = "./src/repository/" + folder + "/" + fileName;
+        File inputFile = new File(filePath);
+        List<String> updatedLines = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile))) {
+            String line;
+            boolean isFirstLine = true;
+
+            while ((line = reader.readLine()) != null) {
+                if (isFirstLine) {
+                    updatedLines.add(line); // Header
+                    isFirstLine = false;
+                    continue;
+                }
+
+                if (line.startsWith(updatedApplication.getApplicationID() + ",")) {
+                    updatedLines.add(updatedApplication.toCSV()); // Replace the old line
+                } else {
+                    updatedLines.add(line); // Keep as is
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading CSV for update: " + e.getMessage());
+            return;
+        }
+
+        // Write updated content back to file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) {
+            for (String updatedLine : updatedLines) {
+                writer.write(updatedLine);
+                writer.newLine();
+            }
+            System.out.println("Updated application saved successfully.");
+        } catch (IOException e) {
+            System.out.println("Error writing updated CSV: " + e.getMessage());
+        }
+    }
+
 
     private static boolean isApplicationInFile(File file, String applicationID) {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
