@@ -10,6 +10,8 @@ import repository.OfficerRegRepository;
 import repository.ManagerRepository;
 import repository.ProjectRepository;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class ManagerView implements MenuInterface {
@@ -112,11 +114,29 @@ public class ManagerView implements MenuInterface {
         return Role.HDBMANAGER;
     }
 
+
+
+    public String generateNextProjectID() {
+        int max = 0;
+
+        for (String existingID : ProjectRepository.PROJECTS.keySet()) {
+            if (existingID.matches("P\\d+")) {
+                int number = Integer.parseInt(existingID.substring(1));
+                if (number > max) {
+                    max = number;
+                }
+            }
+        }
+
+        int nextNumber = max + 1;
+        return String.format("P%04d", nextNumber);  // e.g., P0001, P0002
+    }
+
     private void createProject() {
         try {
             // Collect project data from user input
-            System.out.print("Enter Project ID: ");
-            String projectID = scanner.nextLine().trim();
+            String projectID = generateNextProjectID();  // auto-generate
+            System.out.println("Auto-generated Project ID: " + projectID);
 
             System.out.print("Enter Project Name: ");
             String projectName = scanner.nextLine().trim();
@@ -141,11 +161,39 @@ public class ManagerView implements MenuInterface {
             double threeRoomPrice = Double.parseDouble(scanner.nextLine().trim());
 
             // Collect remaining project details
-            System.out.print("Enter Application Opening Date (MM/DD/YYYY): ");
-            String openingDate = scanner.nextLine().trim();
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+            sdf.setLenient(false);
 
-            System.out.print("Enter Application Closing Date (MM/DD/YYYY): ");
-            String closingDate = scanner.nextLine().trim();
+            Date openingDate = null;
+
+            while (openingDate == null) {
+                try {
+                    System.out.print("Enter Opening Date (MM/dd/yyyy): ");
+                    String input = scanner.nextLine().trim();
+                    openingDate = sdf.parse(input);  // Parse as strict format
+
+                    // Confirm what the user entered
+                    System.out.println("✅ Parsed Opening Date: " + sdf.format(openingDate));
+                } catch (ParseException e) {
+                    System.out.println("❌ Invalid date format. Please follow MM/dd/yyyy.");
+                }
+            }
+
+
+            Date closingDate = null;
+
+            while (closingDate == null) {
+                try {
+                    System.out.print("Enter Closing Date (MM/dd/yyyy): ");
+                    String input = scanner.nextLine().trim();
+                    closingDate = sdf.parse(input);  // Parse as strict format
+
+                    // Confirm what the user entered
+                    System.out.println("✅ Parsed Closing Date: " + sdf.format(closingDate));
+                } catch (ParseException e) {
+                    System.out.println("❌ Invalid date format. Please follow MM/dd/yyyy.");
+                }
+            }
 
             System.out.print("Enter Manager ID: ");
             String managerID = scanner.nextLine().trim();
@@ -176,7 +224,7 @@ public class ManagerView implements MenuInterface {
             Project result = projectController.createProject(
                     projectID, projectName, neighborhood,
                     flatTypeUnits, flatTypePrices,
-                    openingDate, closingDate,
+                    String.valueOf(openingDate), String.valueOf(closingDate),
                     managerID, officerSlot, officerIDs
             );
 
