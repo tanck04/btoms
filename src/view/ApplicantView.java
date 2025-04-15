@@ -41,7 +41,7 @@ public class ApplicantView implements MenuInterface {
 
             switch (choice) {
                 case "1":
-                    viewAvailableProjects();
+                    controller.viewProject(user);
                     break;
                 case "2":
                     submitApplication(user);
