@@ -10,6 +10,8 @@ import enums.ApplicantAppStatus;
 import repository.ApplicantRepository;
 import repository.ApplicationRepository;
 import repository.ProjectRepository;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -37,21 +39,30 @@ public class HDBManagerController{
             new ApplicationRepository().loadFromCSV();
         }
 
-        if (ApplicantRepository.APPLICANTS.isEmpty()) {
-            new ApplicantRepository().loadFromCSV();
+        // Use this:
+        ApplicantRepository applicantRepo = new ApplicantRepository();
+        try {
+            List<Applicant> applicants = applicantRepo.loadApplicants();
+            // If you need applicants data elsewhere in the method, store it in a local variable
+            // Continue with your logic using the applicants list instead of the HashMap
+        } catch (IOException e) {
+            System.out.println("Error loading applicants: " + e.getMessage());
         }
 
-        if (ProjectRepository.PROJECTS.isEmpty()) {
-            new ProjectRepository().loadFromCSV();
-        }
+        ProjectRepository projectRepository = new ProjectRepository();
 
         // Find the project managed by this HDB manager
         Project managedProject = null;
-        for (Project project : ProjectRepository.PROJECTS.values()) {
-            if (manager.getNRIC().equals(project.getManagerID())) {
-                managedProject = project;
-                break;
+        try {
+            for (Project project : projectRepository.loadProjects()) {
+                if (manager.getNRIC().equals(project.getManagerID())) {
+                    managedProject = project;
+                    break;
+                }
             }
+        } catch (IOException e) {
+            System.out.println("Error loading projects: " + e.getMessage());
+            return false;
         }
 
         if (managedProject == null) {

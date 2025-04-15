@@ -10,6 +10,7 @@ import model.Applicant;
 import model.Project;
 import model.User;
 
+import java.util.List;
 import java.util.Scanner;
 import java.util.Map;
 
@@ -80,14 +81,14 @@ public class ApplicantView implements MenuInterface {
         // Display available projects for the user to select from
         ProjectController projectController = new ProjectController();
         System.out.println("\n===== Available Projects =====");
-        Map<String, Project> availableProjects = projectController.getAvailableProjects();
+        List<Project> availableProjects = projectController.getAvailableProjects();
 
         if (availableProjects.isEmpty()) {
             System.out.println("No projects available for application at this time.");
             return;
         }
 
-        for (Project project : availableProjects.values()) {
+        for (Project project : availableProjects) {
             System.out.println(project.getProjectID() + ": " + project.getProjectName() + " - " + project.getNeighborhood());
         }
     }
@@ -110,14 +111,14 @@ public class ApplicantView implements MenuInterface {
 
             // Display available projects for the user to select from
             System.out.println("\n===== Available Projects =====");
-            Map<String, Project> availableProjects = projectController.getAvailableProjects();
+            List<Project> availableProjects = projectController.getAvailableProjects();
 
             if (availableProjects.isEmpty()) {
                 System.out.println("No projects available for application at this time.");
                 return;
             }
 
-            for (Project project : availableProjects.values()) {
+            for (Project project : availableProjects) {
                 System.out.println(project.getProjectID() + ": " + project.getProjectName() + " - " + project.getNeighborhood());
             }
 
@@ -125,7 +126,8 @@ public class ApplicantView implements MenuInterface {
             System.out.print("\nEnter Project ID to apply for: ");
             String projectID = scanner.nextLine().trim();
 
-            Project selectedProject = availableProjects.get(projectID);
+            Project selectedProject = projectController.getProjectById(projectID);
+
             if (selectedProject == null) {
                 System.out.println("Invalid project ID. Please try again.");
                 return;

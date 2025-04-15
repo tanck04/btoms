@@ -11,10 +11,10 @@ import java.util.Scanner;
 
 public class HDBOfficerRegController {
     private final OfficerRegRepository officerRegRepository = new OfficerRegRepository();
-
+    private final ProjectRepository projectRepository = new ProjectRepository();
     public void approveRegistration(OfficerRegistration reg) {
         reg.setStatus(OfficerRegStatus.APPROVED);
-        ProjectRepository.addOfficerToProject(reg.getProjectId(), reg.getNric());
+        projectRepository.addOfficerToProject(reg.getProjectId(), reg.getNric());
         OfficerRegRepository.saveAll();
     }
 
@@ -42,6 +42,7 @@ public class HDBOfficerRegController {
 
     public void createRegistration(String nric) {
         try {
+            ProjectController projectController = new ProjectController();
             Scanner scanner = new Scanner(System.in);
 
             while (true) {
@@ -56,7 +57,7 @@ public class HDBOfficerRegController {
                 if (projectId.isEmpty()) {
                     continue;
                 }
-                Project project = ProjectRepository.getProjectById(projectId);
+                Project project = projectController.getProjectById(projectId);
                 if (project == null) {
                     System.out.println("The project ID you entered does not exist. Please try again.");
                     continue;

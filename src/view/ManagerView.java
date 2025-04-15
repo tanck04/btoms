@@ -10,6 +10,7 @@ import repository.OfficerRegRepository;
 import repository.ManagerRepository;
 import repository.ProjectRepository;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -118,14 +119,25 @@ public class ManagerView implements MenuInterface {
 
     public String generateNextProjectID() {
         int max = 0;
+        ProjectRepository projectRepository = new ProjectRepository();
 
-        for (String existingID : ProjectRepository.PROJECTS.keySet()) {
-            if (existingID.matches("P\\d+")) {
-                int number = Integer.parseInt(existingID.substring(1));
-                if (number > max) {
-                    max = number;
+        try {
+            // Load all projects directly from CSV
+            List<Project> projects = projectRepository.loadProjects();
+
+            // Find the highest project number
+            for (Project project : projects) {
+                String existingID = project.getProjectID();
+                if (existingID.matches("P\\d+")) {
+                    int number = Integer.parseInt(existingID.substring(1));
+                    if (number > max) {
+                        max = number;
+                    }
                 }
             }
+        } catch (IOException e) {
+            System.out.println("Error loading projects: " + e.getMessage());
+            // If we can't load existing projects, start from 1
         }
 
         int nextNumber = max + 1;
@@ -242,31 +254,27 @@ public class ManagerView implements MenuInterface {
     }
 
     private void viewAllProjects() {
+        ProjectRepository projectRepository = new ProjectRepository();
         System.out.println("\n===== All Projects =====");
 
-        if (ProjectRepository.PROJECTS.isEmpty()) {
-            new ProjectRepository().loadFromCSV();
-        }
-
-        if (ProjectRepository.PROJECTS.isEmpty()) {
-            System.out.println("No projects found.");
-            return;
-        }
-
-        for (Project project : ProjectRepository.PROJECTS.values()) {
-            System.out.println("\nID: " + project.getProjectID());
-            System.out.println("Name: " + project.getProjectName());
-            System.out.println("Neighborhood: " + project.getNeighborhood());
-            System.out.println("TWO_ROOMS Units: " + project.getUnitsForFlatType(FlatType.TWO_ROOMS) +
-                              ", Price: $" + project.getPriceForFlatType(FlatType.TWO_ROOMS));
-            System.out.println("THREE_ROOMS Units: " + project.getUnitsForFlatType(FlatType.THREE_ROOMS) +
-                              ", Price: $" + project.getPriceForFlatType(FlatType.THREE_ROOMS));
-            System.out.println("Application Period: " + project.getApplicationOpeningDate() +
-                              " to " + project.getApplicationClosingDate());
-            System.out.println("Manager: " + project.getManagerID());
-            System.out.println("Officer Slots: " + project.getOfficerSlot());
-            System.out.println("Visibility: " + project.getVisibility());
-            System.out.println("-----------------------------");
+        try {
+            for (Project project : projectRepository.loadProjects()) {
+                System.out.println("\nID: " + project.getProjectID());
+                System.out.println("Name: " + project.getProjectName());
+                System.out.println("Neighborhood: " + project.getNeighborhood());
+                System.out.println("TWO_ROOMS Units: " + project.getUnitsForFlatType(FlatType.TWO_ROOMS) +
+                                  ", Price: $" + project.getPriceForFlatType(FlatType.TWO_ROOMS));
+                System.out.println("THREE_ROOMS Units: " + project.getUnitsForFlatType(FlatType.THREE_ROOMS) +
+                                  ", Price: $" + project.getPriceForFlatType(FlatType.THREE_ROOMS));
+                System.out.println("Application Period: " + project.getApplicationOpeningDate() +
+                                  " to " + project.getApplicationClosingDate());
+                System.out.println("Manager: " + project.getManagerID());
+                System.out.println("Officer Slots: " + project.getOfficerSlot());
+                System.out.println("Visibility: " + project.getVisibility());
+                System.out.println("-----------------------------");
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading projects: " + e.getMessage());
         }
     }
 
@@ -276,45 +284,45 @@ public class ManagerView implements MenuInterface {
         System.out.print("Enter the Project ID to update: ");
         String projectId = scanner.nextLine().trim();
 
-        if (ProjectRepository.PROJECTS.isEmpty()) {
-            new ProjectRepository().loadFromCSV();
-        }
+        try {
+            Project project = projectController.getProjectById(projectId);
+            if (project == null) {
+                System.out.println("Project not found with ID: " + projectId);
+                return;
+            }
 
-        Project project = ProjectRepository.PROJECTS.get(projectId);
-        if (project == null) {
-            System.out.println("Project not found with ID: " + projectId);
-            return;
-        }
+            System.out.println("Updating Project: " + project.getProjectName());
+            System.out.println("\nWhat would you like to update?");
+            System.out.println("1. Project Name");
+            System.out.println("2. Two-Room Units");
+            System.out.println("3. Two-Room Price");
+            System.out.println("4. Three-Room Units");
+            System.out.println("5. Three-Room Price");
+            System.out.println("6. Application Opening Date");
+            System.out.println("7. Application Closing Date");
+            System.out.println("8. Officer Slots");
+            System.out.print("Enter your choice: ");
 
-        System.out.println("Updating Project: " + project.getProjectName());
-        System.out.println("\nWhat would you like to update?");
-        System.out.println("1. Project Name");
-        System.out.println("2. Two-Room Units");
-        System.out.println("3. Two-Room Price");
-        System.out.println("4. Three-Room Units");
-        System.out.println("5. Three-Room Price");
-        System.out.println("6. Application Opening Date");
-        System.out.println("7. Application Closing Date");
-        System.out.println("8. Officer Slots");
-        System.out.print("Enter your choice: ");
+            int choice = Integer.parseInt(scanner.nextLine().trim());
 
-        int choice = Integer.parseInt(scanner.nextLine().trim());
+            // Implement update logic based on choice
+            // This would call appropriate methods in your ProjectController
+            // For brevity, I'll show a simple example:
 
-        // Implement update logic based on choice
-        // This would call appropriate methods in your ProjectController
-        // For brevity, I'll show a simple example:
-
-        switch (choice) {
-            case 1:
-                System.out.print("Enter new Project Name: ");
-                String newName = scanner.nextLine().trim();
-                // Here you would call projectController method to update
-                System.out.println("Project name updated successfully.");
-                break;
-            // Implement other cases similarly
-            default:
-                System.out.println("Invalid option.");
-                break;
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter new Project Name: ");
+                    String newName = scanner.nextLine().trim();
+                    // Here you would call projectController method to update
+                    System.out.println("Project name updated successfully.");
+                    break;
+                // Implement other cases similarly
+                default:
+                    System.out.println("Invalid option.");
+                    break;
+            }
+        } catch (Exception e) {
+            System.out.println("Error retrieving project: " + e.getMessage());
         }
     }
 
@@ -324,25 +332,27 @@ public class ManagerView implements MenuInterface {
         System.out.print("Enter the Project ID to delete: ");
         String projectId = scanner.nextLine().trim();
 
-        if (ProjectRepository.PROJECTS.isEmpty()) {
-            new ProjectRepository().loadFromCSV();
-        }
+        try {
+            ProjectRepository projectRepository = new ProjectRepository();
+            Project project = projectRepository.findProjectById(projectId);
 
-        Project project = ProjectRepository.PROJECTS.get(projectId);
-        if (project == null) {
-            System.out.println("Project not found with ID: " + projectId);
-            return;
-        }
+            if (project == null) {
+                System.out.println("Project not found with ID: " + projectId);
+                return;
+            }
 
-        System.out.println("Are you sure you want to delete project: " + project.getProjectName() + "? (yes/no)");
-        String confirm = scanner.nextLine().trim();
+            System.out.println("Are you sure you want to delete project: " + project.getProjectName() + "? (yes/no)");
+            String confirm = scanner.nextLine().trim();
 
-        if (confirm.equalsIgnoreCase("yes")) {
-            // Call controller to delete the project
-            // projectController.deleteProject(projectId);
-            System.out.println("Project deleted successfully.");
-        } else {
-            System.out.println("Delete operation cancelled.");
+            if (confirm.equalsIgnoreCase("yes")) {
+                // Call controller to delete the project
+                // projectController.deleteProject(projectId);
+                System.out.println("Project deleted successfully.");
+            } else {
+                System.out.println("Delete operation cancelled.");
+            }
+        } catch (IOException e) {
+            System.out.println("Error finding project: " + e.getMessage());
         }
     }
 
@@ -352,26 +362,26 @@ public class ManagerView implements MenuInterface {
         System.out.print("Enter the Project ID to manage visibility: ");
         String projectId = scanner.nextLine().trim();
 
-        if (ProjectRepository.PROJECTS.isEmpty()) {
-            new ProjectRepository().loadFromCSV();
+        try {
+            Project project = projectController.getProjectById(projectId);
+            if (project == null) {
+                System.out.println("Project not found with ID: " + projectId);
+                return;
+            }
+
+            System.out.println("Current visibility: " + project.getVisibility());
+            System.out.println("1. Set to VISIBLE");
+            System.out.println("2. Set to HIDDEN");
+            System.out.print("Enter your choice: ");
+
+            int choice = Integer.parseInt(scanner.nextLine().trim());
+
+            // Call controller to update visibility
+            // projectController.updateVisibility(projectId, choice == 1 ? Visibility.VISIBLE : Visibility.HIDDEN);
+            System.out.println("Project visibility updated successfully.");
+        } catch (Exception e) {
+            System.out.println("Error retrieving project: " + e.getMessage());
         }
-
-        Project project = ProjectRepository.PROJECTS.get(projectId);
-        if (project == null) {
-            System.out.println("Project not found with ID: " + projectId);
-            return;
-        }
-
-        System.out.println("Current visibility: " + project.getVisibility());
-        System.out.println("1. Set to VISIBLE");
-        System.out.println("2. Set to HIDDEN");
-        System.out.print("Enter your choice: ");
-
-        int choice = Integer.parseInt(scanner.nextLine().trim());
-
-        // Call controller to update visibility
-        // projectController.updateVisibility(projectId, choice == 1 ? Visibility.VISIBLE : Visibility.HIDDEN);
-        System.out.println("Project visibility updated successfully.");
     }
 
     private void reviewApplications() {
@@ -380,24 +390,24 @@ public class ManagerView implements MenuInterface {
         System.out.print("Enter the Project ID to review applications: ");
         String projectId = scanner.nextLine().trim();
 
-        if (ProjectRepository.PROJECTS.isEmpty()) {
-            new ProjectRepository().loadFromCSV();
-        }
+        try {
+            Project project = projectController.getProjectById(projectId);
+            if (project == null) {
+                System.out.println("Project not found with ID: " + projectId);
+                return;
+            }
 
-        Project project = ProjectRepository.PROJECTS.get(projectId);
-        if (project == null) {
-            System.out.println("Project not found with ID: " + projectId);
-            return;
-        }
+            HDBManagerController controller = new HDBManagerController();
+            List<Application> pending_project_list = controller.getPendingApplicationsByProject(project);
 
-        HDBManagerController controller = new HDBManagerController();
-        List<Application> pending_project_list = controller.getPendingApplicationsByProject(project);
-
-        for (Application application : pending_project_list) {
-            System.out.println("Name: " + application.getApplicant().getName());
-            System.out.println("NRIC: " + application.getApplicant().getNRIC());
-            System.out.print("Approve this application? (yes/no): ");
-            String input = scanner.nextLine().trim();
+            for (Application application : pending_project_list) {
+                System.out.println("Name: " + application.getApplicant().getName());
+                System.out.println("NRIC: " + application.getApplicant().getNRIC());
+                System.out.print("Approve this application? (yes/no): ");
+                String input = scanner.nextLine().trim();
+            }
+        } catch (Exception e) {
+            System.out.println("Error retrieving project: " + e.getMessage());
         }
     }
 

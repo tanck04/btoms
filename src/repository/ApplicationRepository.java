@@ -1,5 +1,7 @@
 package repository;
 
+import controller.ApplicantController;
+import controller.ProjectController;
 import model.Application;
 import model.Applicant;
 import model.Project;
@@ -17,7 +19,85 @@ public class ApplicationRepository extends Repository {
     private static final String fileName = "application_records.csv";
     private static Boolean isRepoLoaded = true;
     public static HashMap<String, Application> APPLICATIONS = new HashMap<>();
+    private final ApplicantController applicantController = new ApplicantController();
+    private final ProjectController projectController = new ProjectController();
+    private static final String filePath = "./src/repository/" + folder + "/" + fileName;
 
+
+    private static Application createApplicationFromCSV(String csv) {
+        String[] fields = csv.split(",");
+        try {
+            // Skip header row
+            if (fields[0].equals("Application ID") || fields[0].trim().isEmpty()) {
+                return null;
+            }
+
+            String applicationID = fields[0];
+            String applicantNRIC = fields[1];
+            String projectID = fields[2];
+            FlatType flatType = FlatType.valueOf(fields[3]);
+            ApplicantAppStatus applicationStatus = ApplicantAppStatus.valueOf(fields[4]);
+            WithdrawalStatus withdrawalStatus = WithdrawalStatus.valueOf(fields[5]);
+
+            // Create repository instances
+            ApplicantRepository applicantRepo = new ApplicantRepository();
+            ProjectRepository projectRepo = new ProjectRepository();
+
+            // Use instance methods instead of static HashMaps
+            Applicant applicant = null;
+            Project project = null;
+
+            try {
+                applicant = applicantRepo.findApplicantById(applicantNRIC);
+                project = projectRepo.findProjectById(projectID);
+            } catch (IOException e) {
+                System.out.println("Error finding references: " + e.getMessage());
+                return null;
+            }
+
+            if (applicant == null || project == null) {
+                System.out.println("Missing reference - Applicant: " + (applicant == null ? "null" : "found") +
+                        ", Project: " + (project == null ? "null" : "found"));
+                return null;
+            }
+
+            return new Application(applicationID, applicant, project, flatType, applicationStatus, withdrawalStatus);
+        } catch (Exception e) {
+            System.out.println("Error parsing application data: " + csv + " - " + e.getMessage());
+        }
+        return null;
+    }
+
+    public List<Application> loadApplications() throws IOException {
+        List<Application> applications = new ArrayList<>();
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            System.out.println("Applications file not found, returning empty list");
+            return applications;
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            boolean isFirstLine = true;
+
+            while ((line = br.readLine()) != null) {
+                // Skip the header row
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
+
+                String[] data = line.split(",");
+                Application application = createApplicationFromCSV(data);
+                if (application != null) {
+                    applications.add(application);
+                }
+            }
+        }
+
+        return applications;
+    }
     @Override
     public boolean loadFromCSV() {
         try {
@@ -139,11 +219,19 @@ public class ApplicationRepository extends Repository {
         }
 
         // Make sure repositories are loaded first
-        if (ApplicantRepository.APPLICANTS.isEmpty()) {
-            new ApplicantRepository().loadFromCSV();
+        ApplicantRepository applicantRepo = new ApplicantRepository();
+        try {
+            List<Applicant> applicants = applicantRepo.loadApplicants();
+            // If you need applicants data elsewhere in the method, store it in a local variable
+            // Continue with your logic using the applicants list instead of the HashMap
+        } catch (IOException e) {
+            System.out.println("Error loading applicants: " + e.getMessage());
         }
-        if (ProjectRepository.PROJECTS.isEmpty()) {
-            new ProjectRepository().loadFromCSV();
+        try {
+            ProjectRepository projectRepo = new ProjectRepository();
+            List<Project> projects = projectRepo.loadProjects();
+        } catch (IOException e) {
+            System.out.println("Error loading projects: " + e.getMessage());
         }
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
@@ -176,37 +264,7 @@ public class ApplicationRepository extends Repository {
         }
     }
 
-    private static Application csvToApplication(String csv) {
-        String[] fields = csv.split(",");
-        try {
-            // Skip header row
-            if (fields[0].equals("Application ID") || fields[0].trim().isEmpty()) {
-                return null;
-            }
 
-            String applicationID = fields[0];
-            String applicantNRIC = fields[1];
-            String projectID = fields[2];
-            FlatType flatType = FlatType.valueOf(fields[3]);
-            ApplicantAppStatus applicationStatus = ApplicantAppStatus.valueOf(fields[4]);
-            WithdrawalStatus withdrawalStatus = WithdrawalStatus.valueOf(fields[5]);
-
-            // Retrieve Applicant and Project objects from their respective repositories
-            Applicant applicant = ApplicantRepository.APPLICANTS.get(applicantNRIC);
-            Project project = ProjectRepository.PROJECTS.get(projectID);
-
-            if (applicant == null || project == null) {
-                System.out.println("Missing reference - Applicant: " + (applicant == null ? "null" : "found") +
-                                 ", Project: " + (project == null ? "null" : "found"));
-                return null;
-            }
-
-            return new Application(applicationID, applicant, project, flatType, applicationStatus, withdrawalStatus);
-        } catch (Exception e) {
-            System.out.println("Error parsing application data: " + csv + " - " + e.getMessage());
-        }
-        return null;
-    }
 
     public static boolean clearApplicationDatabase() {
         APPLICATIONS.clear();

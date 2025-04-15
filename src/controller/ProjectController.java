@@ -5,6 +5,7 @@ import enums.FlatType;
 import enums.Visibility;
 import repository.ProjectRepository;
 
+import java.io.IOException;
 import java.util.*;
 
 public class ProjectController {
@@ -13,6 +14,7 @@ public class ProjectController {
      * Creates a new project with the provided details and saves it to the repository
      * @return the created Project object if successful, null otherwise
      */
+    private final ProjectRepository projectRepository = new ProjectRepository();
     public Project createProject(
             String projectID,
             String projectName,
@@ -24,10 +26,12 @@ public class ProjectController {
             String managerID,
             int officerSlot,
             List<String> officerIDs) {
+        // Validate inputs
+
 
         try {
             // Validate project ID doesn't already exist
-            if (ProjectRepository.PROJECTS.containsKey(projectID)) {
+            if (projectRepository.findProjectById(projectID) != null) {
                 System.out.println("A project with this ID already exists.");
                 return null;
             }
@@ -51,8 +55,7 @@ public class ProjectController {
             );
 
             // Save to repository
-            ProjectRepository.PROJECTS.put(projectID, newProject);
-            ProjectRepository.saveAllProjectsToCSV();
+            projectRepository.createNewProject(newProject);
 
             return newProject;
         } catch (Exception e) {
@@ -61,22 +64,33 @@ public class ProjectController {
         }
     }
 
-    public Map<String, Project> getAvailableProjects() {
+    public List<Project> getAvailableProjects() {
         // Simply check if projects are empty
-        if (ProjectRepository.PROJECTS.isEmpty()) {
-            ProjectRepository repo = new ProjectRepository();
-            repo.loadFromCSV();
-        }
+        ArrayList<Project> visibleProjects = new ArrayList<>();
+        try {
+            // Load projects using the method that returns a List<Project>
+            List<Project> projectsList = projectRepository.loadProjects();
 
-        // Filter projects based on visibility
-        Map<String, Project> visibleProjects = new HashMap<>();
-        for (Project project : ProjectRepository.PROJECTS.values()) {
-            if (project.getVisibility() == Visibility.ON) {
-                visibleProjects.put(project.getProjectID(), project);
+            // Filter projects based on visibility
+            for (Project project : projectsList) {
+                if (project.getVisibility() == Visibility.ON) {
+                    visibleProjects.add(project);
+                }
             }
+        } catch (IOException e) {
+            System.out.println("Error loading available projects: " + e.getMessage());
+            // Return empty map on error (already initialized)
         }
-
         return visibleProjects;
+    }
+
+    public Project getProjectById(String projectID) {
+        try {
+            return projectRepository.findProjectById(projectID);
+        } catch (IOException e) {
+            System.out.println("Error retrieving project: " + e.getMessage());
+            return null;
+        }
     }
 
     // Add other business logic methods related to projects

@@ -11,6 +11,8 @@ import enums.FlatType;
 import enums.MaritalStatus;
 import enums.Visibility;
 import repository.ProjectRepository;
+
+import java.io.IOException;
 import java.util.UUID;
 import java.util.Map;
 import java.util.HashMap;
@@ -21,66 +23,63 @@ public class ApplicationController {
 
     public boolean submitApplication(Applicant applicant, Project project, FlatType flatType) {
         // Validate input
-        if (applicant == null) {
-            System.out.println("Invalid input: Applicant is null.");
+        if (applicant == null || project == null) {
+            System.out.println("Invalid input: Applicant or project is null.");
             return false;
         }
 
         System.out.println("Processing application for applicant: " + applicant.getNRIC());
 
-        // Ensure both repositories are loaded
-        if (ProjectRepository.PROJECTS.isEmpty()) {
-            ProjectRepository projectRepo = new ProjectRepository();
-            projectRepo.loadFromCSV();
-        }
-
-        if (ApplicantRepository.APPLICANTS.isEmpty()) {
+        try {
+            // Use repository instance methods instead of static methods
             ApplicantRepository applicantRepo = new ApplicantRepository();
-            applicantRepo.loadFromCSV();
+            ProjectRepository projectRepo = new ProjectRepository();
+            ApplicationRepository applicationRepo = new ApplicationRepository();
 
-            // Make sure the current applicant is in the map
-            if (!ApplicantRepository.APPLICANTS.containsKey(applicant.getNRIC())) {
-                ApplicantRepository.APPLICANTS.put(applicant.getNRIC(), applicant);
+            // Validate that the project exists
+            Project validProject = projectRepo.findProjectById(project.getProjectID());
+            if (validProject == null) {
+                System.out.println("Project does not exist in the system.");
+                return false;
             }
-        }
 
-        // Check if the project exists in the repository
-        if (!ProjectRepository.PROJECTS.containsKey(project.getProjectID())) {
-            System.out.println("Project does not exist in the system.");
+            // Check if applicant exists, if not save the new applicant
+
+            // Check marital status restrictions
+            if (applicant.getMaritalStatus() == MaritalStatus.SINGLE && flatType != FlatType.TWO_ROOMS) {
+                System.out.println("Single applicants can only apply for TWO_ROOMS flat types.");
+                return false;
+            }
+
+            // Generate a unique application ID
+            String applicationID = ApplicationRepository.generateNextApplicationId();
+
+            // Create a new application using the validated project
+            Application application = new Application(
+                applicationID,
+                applicant,
+                validProject,
+                flatType,
+                ApplicantAppStatus.PENDING,  // Starting with PENDING status
+                WithdrawalStatus.NULL
+            );
+
+            // Save the application to the repository
+            if (ApplicationRepository.APPLICATIONS.isEmpty()) {
+                applicationRepo.loadFromCSV();
+            }
+            ApplicationRepository.APPLICATIONS.put(applicationID, application);
+            ApplicationRepository.saveAllApplicationsToCSV();
+
+            System.out.println("Application submitted successfully. Application ID: " + applicationID);
+            return true;
+
+        } catch (IOException e) {
+            System.out.println("Error processing application: " + e.getMessage());
             return false;
         }
-
-        // Check marital status restrictions
-        if (applicant.getMaritalStatus() == MaritalStatus.SINGLE && flatType != FlatType.TWO_ROOMS) {
-            System.out.println("Single applicants can only apply for TWO_ROOMS flat types.");
-            return false;
-        }
-
-        // Generate a unique application ID
-        String applicationID = UUID.randomUUID().toString();
-//        if (!ApplicationRepository.isRepoLoaded()) {
-//            new ApplicationRepository().loadFromCSV();
-//        }
-//
-//        String applicationID = ApplicationRepository.generateNextApplicationId();
-        // Create a new application
-        Application application = new Application(
-            applicationID,
-            applicant,
-            project,
-            flatType,
-            ApplicantAppStatus.PENDING,  // Starting with PENDING status
-            WithdrawalStatus.NULL
-        );
-
-        // Save the application to the repository
-        ApplicationRepository.APPLICATIONS.put(applicationID, application);
-
-        // Update both repositories in CSV
-        ApplicantRepository.saveAllApplicantsToCSV();
-        ApplicationRepository.saveAllApplicationsToCSV();
-
-        System.out.println("Application submitted successfully. Application ID: " + applicationID);
-        return true;
     }
+
+    // Helper method to save a new applicant without using the static HashMap
+
 }
