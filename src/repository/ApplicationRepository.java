@@ -14,13 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
-public class ApplicationRepository extends Repository {
+public class ApplicationRepository{
     private static final String folder = "data";
     private static final String fileName = "application_records.csv";
-    private static Boolean isRepoLoaded = true;
-    public static HashMap<String, Application> APPLICATIONS = new HashMap<>();
-    private final ApplicantController applicantController = new ApplicantController();
-    private final ProjectController projectController = new ProjectController();
     private static final String filePath = "./src/repository/" + folder + "/" + fileName;
 
 
@@ -88,8 +84,8 @@ public class ApplicationRepository extends Repository {
                     continue;
                 }
 
-                String[] data = line.split(",");
-                Application application = createApplicationFromCSV(data);
+
+                Application application = createApplicationFromCSV(line);
                 if (application != null) {
                     applications.add(application);
                 }
@@ -98,50 +94,130 @@ public class ApplicationRepository extends Repository {
 
         return applications;
     }
-    @Override
-    public boolean loadFromCSV() {
+
+    public Application findApplicationById(String applicationID) throws IOException {
+        List<Application> applications = this.loadApplications();
+        return (Application)applications.stream().filter((application) -> application.getApplicationID().equals(applicationID)).findFirst().orElse((Application) null);
+    }
+
+    public static String getLastApplicationId() {
         try {
-            loadApplicationsFromCSV(fileName, APPLICATIONS);
-            isRepoLoaded = true;
-            return true;
-        } catch (Exception e) {
-            System.out.println("Error loading applications repository: " + e.getMessage());
-            return false;
+            ApplicationRepository repo = new ApplicationRepository();
+            List<Application> applications = repo.loadApplications();
+
+            if (applications.isEmpty()) {
+                return "A0000";
+            }
+
+            return applications.stream()
+                    .map(Application::getApplicationID)
+                    .sorted()
+                    .reduce((first, second) -> second)
+                    .orElse("A0000");
+        } catch (IOException e) {
+            System.out.println("Error loading application data: " + e.getMessage());
+            return "A0000";
         }
     }
 
-    public static void saveAllApplicationsToCSV() {
-        saveApplicationsToCSV(fileName, APPLICATIONS);
-    }
 
-    // In ApplicationRepository.java
-    private static void saveApplicationsToCSV(String fileName, HashMap<String, Application> applicationsMap) {
-        String filePath = "./src/repository/" + folder + "/" + fileName;
-
-        File directory = new File("./src/repository/" + folder);
-        if (!directory.exists()) {
-            directory.mkdirs();
+    public static String generateNextApplicationId() {
+        String lastId = getLastApplicationId(); // e.g., A0042
+        if (lastId == null || !lastId.matches("A\\d{4}")) {
+            return "A0001"; // Safe default if nothing exists or malformed
         }
 
+        int number = Integer.parseInt(lastId.substring(1));
+        number++;
+        return "A" + String.format("%04d", number); // e.g., A0043
+    }
+
+    public void createNewApplication(Application application) throws IOException {
         File file = new File(filePath);
-        boolean writeHeader = !file.exists() || file.length() == 0;
+        boolean fileExists = file.exists() && file.length() > 0;
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) { // true = append mode
-            if (writeHeader) {
+        // Create parent directories if they don't exist
+        if (!file.exists()) {
+            file.getParentFile().mkdirs();
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, fileExists))) {
+            // If file is new/empty, write the header first
+            if (!fileExists) {
                 writer.write("Application ID,Applicant ID,Project ID,Flat Type,Application Status,Withdrawal Status");
                 writer.newLine();
-            }
-
-            // Write all applications from the HashMap
-            for (Application application : applicationsMap.values()) {
-                writer.write(application.toCSV());
+            }else {
+                // Add a newline before writing new data if the file already exists
                 writer.newLine();
             }
-            System.out.println("Applications successfully saved to " + fileName);
-        } catch (IOException e) {
-            System.out.println("Error saving application data: " + e.getMessage());
+
+            // Write the application data
+            String applicationData = String.join(",",
+                    application.getApplicationID(),
+                    application.getApplicant().getNRIC(),
+                    application.getProject().getProjectID(),
+                    application.getFlatType().toString(),
+                    application.getApplicationStatus().toString(),
+                    application.getWithdrawalStatus().toString());
+
+            writer.write(applicationData);
+            // No need to manually add newline - the next write will handle this
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+//    public boolean loadFromCSV() {
+//        try {
+//            loadApplicationsFromCSV(fileName, APPLICATIONS);
+//            isRepoLoaded = true;
+//            return true;
+//        } catch (Exception e) {
+//            System.out.println("Error loading applications repository: " + e.getMessage());
+//            return false;
+//        }
+//    }
+//
+//    public static void saveAllApplicationsToCSV() {
+//        saveApplicationsToCSV(fileName, APPLICATIONS);
+//    }
+//
+//    // In ApplicationRepository.java
+//    private static void saveApplicationsToCSV(String fileName, HashMap<String, Application> applicationsMap) {
+//        String filePath = "./src/repository/" + folder + "/" + fileName;
+//
+//        File directory = new File("./src/repository/" + folder);
+//        if (!directory.exists()) {
+//            directory.mkdirs();
+//        }
+//
+//        File file = new File(filePath);
+//        boolean writeHeader = !file.exists() || file.length() == 0;
+//
+//        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) { // true = append mode
+//            if (writeHeader) {
+//                writer.write("Application ID,Applicant ID,Project ID,Flat Type,Application Status,Withdrawal Status");
+//                writer.newLine();
+//            }
+//
+//            // Write all applications from the HashMap
+//            for (Application application : applicationsMap.values()) {
+//                writer.write(application.toCSV());
+//                writer.newLine();
+//            }
+//            System.out.println("Applications successfully saved to " + fileName);
+//        } catch (IOException e) {
+//            System.out.println("Error saving application data: " + e.getMessage());
+//        }
+//    }
 
     public static void updateApplicationInCSV(Application updatedApplication) {
         String filePath = "./src/repository/" + folder + "/" + fileName;
@@ -183,128 +259,104 @@ public class ApplicationRepository extends Repository {
     }
 
 
-    private static boolean isApplicationInFile(File file, String applicationID) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.startsWith(applicationID + ",")) {
-                    return true; // Application already exists
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error reading file to check for duplicates: " + e.getMessage());
-        }
-        return false;
-    }
-
-    // In ApplicationRepository.java - fix the loadApplicationsFromCSV method
-    private static void loadApplicationsFromCSV(String fileName, HashMap<String, Application> applicationsMap) {
-        applicationsMap.clear();
-        String filePath = "./src/repository/" + folder + "/" + fileName;
-
-        File file = new File(filePath);
-        if (!file.exists()) {
-            try {
-                new File("./src/repository/" + folder).mkdirs();
-                file.createNewFile();
-                // Write header to new file
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                    writer.write("Application ID,Applicant ID,Project ID,Flat Type,Application Status,Withdrawal Status");
-                    writer.newLine();
-                }
-            } catch (IOException e) {
-                System.out.println("Error creating file: " + e.getMessage());
-            }
-            return;
-        }
-
-        // Make sure repositories are loaded first
-        ApplicantRepository applicantRepo = new ApplicantRepository();
-        try {
-            List<Applicant> applicants = applicantRepo.loadApplicants();
-            // If you need applicants data elsewhere in the method, store it in a local variable
-            // Continue with your logic using the applicants list instead of the HashMap
-        } catch (IOException e) {
-            System.out.println("Error loading applicants: " + e.getMessage());
-        }
-        try {
-            ProjectRepository projectRepo = new ProjectRepository();
-            List<Project> projects = projectRepo.loadProjects();
-        } catch (IOException e) {
-            System.out.println("Error loading projects: " + e.getMessage());
-        }
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            boolean isFirstLine = true;
-            int linesRead = 0;
-            int applicationsLoaded = 0;
-
-            while ((line = reader.readLine()) != null) {
-                linesRead++;
-                // Skip the header row
-                if (isFirstLine) {
-                    isFirstLine = false;
-                    continue;
-                }
-
-                if (!line.trim().isEmpty()) {
-                    Application application = csvToApplication(line);
-                    if (application != null) {
-                        applicationsMap.put(application.getApplicationID(), application);
-                        applicationsLoaded++;
-                    } else {
-                        System.out.println("Failed to load application from line: " + line);
-                    }
-                }
-            }
-            System.out.println("Read " + linesRead + " lines, loaded " + applicationsLoaded + " applications from " + fileName);
-        } catch (IOException e) {
-            System.out.println("Error reading application data: " + e.getMessage());
-        }
-    }
-
-
-
-    public static boolean clearApplicationDatabase() {
-        APPLICATIONS.clear();
-        saveAllApplicationsToCSV();
-        isRepoLoaded = false;
-        return true;
-    }
-
-    public static boolean isRepoLoaded() {
-        return isRepoLoaded;
-    }
-
-    public static void setRepoLoaded(boolean isRepoLoaded) {
-        ApplicationRepository.isRepoLoaded = isRepoLoaded;
-    }
-
-    public static String getLastApplicationId() {
-        if (APPLICATIONS.isEmpty()) {
-            new ApplicationRepository().loadFromCSV(); // <- Ensures latest state
-        }
-        if (APPLICATIONS.isEmpty()) {
-            return "A0000";
-        }
-
-        return APPLICATIONS.keySet().stream()
-                .sorted()
-                .reduce((first, second) -> second)
-                .orElse("A0000");
-    }
+//    private static boolean isApplicationInFile(File file, String applicationID) {
+//        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+//            String line;
+//            while ((line = reader.readLine()) != null) {
+//                if (line.startsWith(applicationID + ",")) {
+//                    return true; // Application already exists
+//                }
+//            }
+//        } catch (IOException e) {
+//            System.out.println("Error reading file to check for duplicates: " + e.getMessage());
+//        }
+//        return false;
+//    }
+//
+//    // In ApplicationRepository.java - fix the loadApplicationsFromCSV method
+//    private static void loadApplicationsFromCSV(String fileName, HashMap<String, Application> applicationsMap) {
+//        applicationsMap.clear();
+//        String filePath = "./src/repository/" + folder + "/" + fileName;
+//
+//        File file = new File(filePath);
+//        if (!file.exists()) {
+//            try {
+//                new File("./src/repository/" + folder).mkdirs();
+//                file.createNewFile();
+//                // Write header to new file
+//                try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+//                    writer.write("Application ID,Applicant ID,Project ID,Flat Type,Application Status,Withdrawal Status");
+//                    writer.newLine();
+//                }
+//            } catch (IOException e) {
+//                System.out.println("Error creating file: " + e.getMessage());
+//            }
+//            return;
+//        }
+//
+//        // Make sure repositories are loaded first
+//        ApplicantRepository applicantRepo = new ApplicantRepository();
+//        try {
+//            List<Applicant> applicants = applicantRepo.loadApplicants();
+//            // If you need applicants data elsewhere in the method, store it in a local variable
+//            // Continue with your logic using the applicants list instead of the HashMap
+//        } catch (IOException e) {
+//            System.out.println("Error loading applicants: " + e.getMessage());
+//        }
+//        try {
+//            ProjectRepository projectRepo = new ProjectRepository();
+//            List<Project> projects = projectRepo.loadProjects();
+//        } catch (IOException e) {
+//            System.out.println("Error loading projects: " + e.getMessage());
+//        }
+//
+//        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+//            String line;
+//            boolean isFirstLine = true;
+//            int linesRead = 0;
+//            int applicationsLoaded = 0;
+//
+//            while ((line = reader.readLine()) != null) {
+//                linesRead++;
+//                // Skip the header row
+//                if (isFirstLine) {
+//                    isFirstLine = false;
+//                    continue;
+//                }
+//
+//                if (!line.trim().isEmpty()) {
+//                    Application application = createApplicationFromCSV(line);
+//                    if (application != null) {
+//                        applicationsMap.put(application.getApplicationID(), application);
+//                        applicationsLoaded++;
+//                    } else {
+//                        System.out.println("Failed to load application from line: " + line);
+//                    }
+//                }
+//            }
+//            System.out.println("Read " + linesRead + " lines, loaded " + applicationsLoaded + " applications from " + fileName);
+//        } catch (IOException e) {
+//            System.out.println("Error reading application data: " + e.getMessage());
+//        }
+//    }
+//
+//
+//
+//    public static boolean clearApplicationDatabase() {
+//        APPLICATIONS.clear();
+//        saveAllApplicationsToCSV();
+//        isRepoLoaded = false;
+//        return true;
+//    }
+//
+//    public static boolean isRepoLoaded() {
+//        return isRepoLoaded;
+//    }
+//
+//    public static void setRepoLoaded(boolean isRepoLoaded) {
+//        ApplicationRepository.isRepoLoaded = isRepoLoaded;
+//    }
 
 
-    public static String generateNextApplicationId() {
-        String lastId = getLastApplicationId(); // e.g., A0042
-        if (lastId == null || !lastId.matches("A\\d{4}")) {
-            return "A0001"; // Safe default if nothing exists or malformed
-        }
-
-        int number = Integer.parseInt(lastId.substring(1));
-        number++;
-        return "A" + String.format("%04d", number); // e.g., A0043
-    }
 
 }

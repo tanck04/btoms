@@ -15,8 +15,6 @@ import java.util.Collections;
 public class ProjectRepository{
     private static final String folder = "data";
     private static final String fileName = "project_records" + ".csv";
-    private static Boolean isRepoLoaded = false;
-    public static HashMap<String, Project> PROJECTS = new HashMap<>();
     private static final String filePath = "./src/repository/" + folder + "/" + fileName;
 
     /**
@@ -51,51 +49,85 @@ public class ProjectRepository{
     }
 
     private Project createProjectFromCSV(String[] parts) {
-        // Parse flat type data from CSV parts
-        Map<FlatType, Integer> flatTypeUnits = new HashMap<>();
-        Map<FlatType, Double> flatTypePrices = new HashMap<>();
+        try {
+            // Skip header row
+            if (parts[0].equals("ProjectID") || parts[0].trim().isEmpty()) {
+                return null;
+            }
 
-        // Assuming parts[3] and parts[4] are for TWO_ROOMS units and price
-        flatTypeUnits.put(FlatType.TWO_ROOMS, Integer.parseInt(parts[3]));
-        flatTypePrices.put(FlatType.TWO_ROOMS, Double.parseDouble(parts[4]));
+            // Parse flat type data from CSV parts
+            Map<FlatType, Integer> flatTypeUnits = new HashMap<>();
+            Map<FlatType, Double> flatTypePrices = new HashMap<>();
 
-        // Assuming parts[5] and parts[6] are for THREE_ROOMS units and price
-        flatTypeUnits.put(FlatType.THREE_ROOMS, Integer.parseInt(parts[5]));
-        flatTypePrices.put(FlatType.THREE_ROOMS, Double.parseDouble(parts[6]));
+            // TWO_ROOMS data (columns 3 and 4)
+            flatTypeUnits.put(FlatType.TWO_ROOMS, Integer.parseInt(parts[3]));
+            flatTypePrices.put(FlatType.TWO_ROOMS, Double.parseDouble(parts[4]));
 
-        // Parse officerIDs
-        List<String> officerIDs = new ArrayList<>();
-        if (parts[10].contains(";")) {
-            officerIDs = Arrays.asList(parts[10].split(";"));
-        } else if (!parts[10].isEmpty()) {
-            officerIDs = Collections.singletonList(parts[10]);
+            // THREE_ROOMS data (columns 5 and 6)
+            flatTypeUnits.put(FlatType.THREE_ROOMS, Integer.parseInt(parts[5]));
+            flatTypePrices.put(FlatType.THREE_ROOMS, Double.parseDouble(parts[6]));
+
+            // Parse officerIDs (column 11)
+            List<String> officerIDs = new ArrayList<>();
+            if (parts[11].contains(";")) {
+                officerIDs = Arrays.asList(parts[11].split(";"));
+            } else if (!parts[11].isEmpty()) {
+                officerIDs = Collections.singletonList(parts[11]);
+            }
+
+            return new Project(
+                parts[0],                     // projectID
+                parts[1],                     // projectName
+                parts[2],                     // neighborhood
+                flatTypeUnits,                // flatTypeUnits map
+                flatTypePrices,               // flatTypePrices map
+                parts[7],                     // openingDate
+                parts[8],                     // closingDate
+                parts[9],                     // managerID
+                Integer.parseInt(parts[10]),  // officerSlot
+                officerIDs,                   // officerIDs
+                Visibility.valueOf(parts[12]) // visibility (column 12)
+            );
+        } catch (Exception e) {
+            System.out.println("Error parsing project data: " +
+                               Arrays.toString(parts) + " - " + e.getMessage());
+            return null;
         }
-
-        return new Project(
-            parts[0],           // projectID
-            parts[1],           // projectName
-            parts[2],           // neighborhood
-            flatTypeUnits,      // flatTypeUnits map
-            flatTypePrices,     // flatTypePrices map
-            parts[7],           // openingDate
-            parts[8],           // closingDate
-            parts[9],           // managerID
-            Integer.parseInt(parts[10]), // officerSlot
-            officerIDs,         // officerIDs
-            Visibility.valueOf(parts[11]) // visibility
-        );
     }
+    /**
+     * Loads all projects from the CSV file.
+     *
+     * @return A list of Project objects.
+     * @throws IOException if an error occurs while reading the file.
+     */
     public List<Project> loadProjects() throws IOException {
-        List<Project> projects = new ArrayList();
-        BufferedReader br = new BufferedReader(new FileReader(filePath));
+        List<Project> projects = new ArrayList<>();
+        File file = new File(filePath);
 
-        String line;
-        while((line = br.readLine()) != null) {
-            String[] data = line.split(",");
-            projects.add(this.createProjectFromCSV(data));
+        if (!file.exists()) {
+            System.out.println("Projects file not found, returning empty list");
+            return projects;
         }
 
-        br.close();
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            boolean isFirstLine = true;
+
+            while ((line = br.readLine()) != null) {
+                // Skip the header row
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    continue;
+                }
+
+                String[] data = line.split(",");
+                Project project = this.createProjectFromCSV(data);
+                if (project != null) {
+                    projects.add(project);
+                }
+            }
+        }
+
         return projects;
     }
 
@@ -174,17 +206,6 @@ public class ProjectRepository{
                 writer.newLine();
             }
         }
-    }
-
-    public List<Project> getProjectsByOfficerId(String nric) throws IOException{
-        List<Project> filteredProjects = new ArrayList<>();
-        List<Project> projects = loadProjects();
-        for (Project project : projects) {
-            if (project.getOfficerIDs() != null && project.getOfficerIDs().contains(nric)) {
-                filteredProjects.add(project);
-            }
-        }
-        return filteredProjects;
     }
 
 //    @Override

@@ -17,8 +17,6 @@ import java.util.UUID;
 import java.util.Map;
 import java.util.HashMap;
 
-import static repository.ApplicationRepository.isRepoLoaded;
-
 public class ApplicationController {
 
     public boolean submitApplication(Applicant applicant, Project project, FlatType flatType) {
@@ -43,7 +41,13 @@ public class ApplicationController {
                 return false;
             }
 
-            // Check if applicant exists, if not save the new applicant
+            // Check if applicant has already applied for a project
+            for (Application application :applicationRepo.loadApplications()) {
+                if (application.getApplicant().getNRIC().equals(applicant.getNRIC())) {
+                    System.out.println("Applicant has already applied for a project.");
+                    return false;
+                }
+            }
 
             // Check marital status restrictions
             if (applicant.getMaritalStatus() == MaritalStatus.SINGLE && flatType != FlatType.TWO_ROOMS) {
@@ -65,11 +69,7 @@ public class ApplicationController {
             );
 
             // Save the application to the repository
-            if (ApplicationRepository.APPLICATIONS.isEmpty()) {
-                applicationRepo.loadFromCSV();
-            }
-            ApplicationRepository.APPLICATIONS.put(applicationID, application);
-            ApplicationRepository.saveAllApplicationsToCSV();
+            applicationRepo.createNewApplication(application);
 
             System.out.println("Application submitted successfully. Application ID: " + applicationID);
             return true;

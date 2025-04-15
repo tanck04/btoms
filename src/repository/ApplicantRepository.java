@@ -14,8 +14,6 @@ import java.util.*;
 public class ApplicantRepository implements VerificationInterface, PasswordChangerInterface {
     private static final String folder = "data";
     private static final String fileName = "applicant_records.csv";
-    private static Boolean isRepoLoaded = true;
-    public static HashMap<String, Applicant> APPLICANTS = new HashMap<>();
     private static final String filePath = "./src/repository/" + folder + "/" + fileName;
 
     private Applicant createApplicantFromCSV(String[] parts) {

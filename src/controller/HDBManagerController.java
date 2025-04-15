@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Scanner;
 
 public class HDBManagerController{
+    private final ApplicantRepository applicantRepository = new ApplicantRepository();
+    private final ProjectRepository projectRepository = new ProjectRepository();
+    private final ApplicationRepository applicationRepository = new ApplicationRepository();
 
     /**
      * Allows HDB manager to approve an applicant's application
@@ -34,10 +37,6 @@ public class HDBManagerController{
 
         System.out.println("Manager: " + manager.getNRIC());
 
-        // Make sure repositories are loaded
-        if (ApplicationRepository.APPLICATIONS.isEmpty()) {
-            new ApplicationRepository().loadFromCSV();
-        }
 
         // Use this:
         ApplicantRepository applicantRepo = new ApplicantRepository();
@@ -149,19 +148,21 @@ public class HDBManagerController{
         String projectID = project.getProjectID();
         System.out.println("Looking for pending applications in project: " + projectID);
 
-        // Ensure repositories are loaded
-        if (ApplicationRepository.APPLICATIONS.isEmpty()) {
-            new ApplicationRepository().loadFromCSV();
-        }
-
         // Find all applications for this project with PENDING status
-        for (Application application : ApplicationRepository.APPLICATIONS.values()) {
-            if (projectID.equals(application.getProjectID()) &&
-                    application.getApplicationStatus() == ApplicantAppStatus.PENDING &&
-                    application.getWithdrawalStatus() == WithdrawalStatus.NULL) {
+        try {
+            for (Application application : applicationRepository.loadApplications()) {
+                if (projectID.equals(application.getProject().getProjectID()) &&
+                        application.getApplicationStatus() == ApplicantAppStatus.PENDING &&
+                        application.getWithdrawalStatus() == WithdrawalStatus.NULL) {
 
-                pendingApplications.add(application);
+                    pendingApplications.add(application);
+                }
             }
+        } catch (IOException e) {
+            System.out.println("Error loading applications: " + e.getMessage());
+            System.out.println("Returning empty list of pending applications");
+            // Log could be added here if needed
+            // The method will return the empty pendingApplications list created earlier
         }
 
         return pendingApplications;

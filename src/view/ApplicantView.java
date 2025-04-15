@@ -47,7 +47,7 @@ public class ApplicantView implements MenuInterface {
                     submitApplication(user);
                     break;
                 case "3":
-                    controller.checkApplicationStatus();
+                    controller.checkApplicationStatus(user);
                     break;
                 case "4":
                     // updatePersonalDetails();

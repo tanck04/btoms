@@ -65,10 +65,6 @@ public class Application {
         return project;
     }
 
-    public String getProjectID() {
-        return project.getProjectID();
-    }
-
     public FlatType getFlatType() {
         return flatType;
     }
