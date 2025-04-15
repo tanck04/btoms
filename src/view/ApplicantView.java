@@ -2,6 +2,7 @@ package view;
 
 import controller.ApplicantController;
 import controller.ApplicationController;
+import controller.ProjectController;
 import enums.MaritalStatus;
 import enums.Role;
 import enums.FlatType;
@@ -18,49 +19,77 @@ public class ApplicantView implements MenuInterface {
 
     @Override
     public void displayMenu(User user) {
-        System.out.println();
-        System.out.println("+-----------------------------------------------+");
-        System.out.println("|                 Applicant Menu                |");
-        System.out.println("+-----------------------------------------------+");
-        System.out.println("| 1. View Projects                              |");
-        System.out.println("| 2. Submit Application                         |");
-        System.out.println("| 3. View Application Status                    |");
-        System.out.println("| 4. Request Withdrawal for Application         |");
-        System.out.println("| 5. Enquiry (Submit, View, Edit, Delete)       |");
-        System.out.println("| 6. Logout                                     |");
-        System.out.println("+-----------------------------------------------+");
-        System.out.println();
-        System.out.print("Enter your choice: ");
+        boolean running = true;
 
-        String choice = scanner.nextLine().trim();
+        while (running) {
+            System.out.println();
+            System.out.println("+-----------------------------------------------+");
+            System.out.println("|                 Applicant Menu                |");
+            System.out.println("+-----------------------------------------------+");
+            System.out.println("| 1. View Projects                              |");
+            System.out.println("| 2. Submit Application                         |");
+            System.out.println("| 3. View Application Status                    |");
+            System.out.println("| 4. Request Withdrawal for Application         |");
+            System.out.println("| 5. Enquiry (Submit, View, Edit, Delete)       |");
+            System.out.println("| 6. Logout                                     |");
+            System.out.println("+-----------------------------------------------+");
+            System.out.println();
+            System.out.print("Enter your choice: ");
 
-        switch (choice) {
-            case "1":
-//                createApplicantProfile();
-                break;
-            case "2":
-                submitApplication(user);
-                break;
-            case "3":
-                controller.checkApplicationStatus();
-                break;
-            case "4":
-//                updatePersonalDetails();
-                break;
-            case "5":
-//                controller.getAvailableProjects();
-                break;
-            case "6":
-                System.out.println("Exiting...");
-                break;
-            default:
-                System.out.println("Invalid option. Please try again.");
-                break;
+            String choice = scanner.nextLine().trim();
+
+            switch (choice) {
+                case "1":
+                    viewAvailableProjects();
+                    break;
+                case "2":
+                    submitApplication(user);
+                    break;
+                case "3":
+                    controller.checkApplicationStatus();
+                    break;
+                case "4":
+                    // updatePersonalDetails();
+                    break;
+                case "5":
+                    // controller.getAvailableProjects();
+                    break;
+                case "6":
+                    System.out.println("Logging out...");
+                    running = false;
+                    break;
+                default:
+                    System.out.println("Invalid option. Please try again.");
+                    break;
+            }
+
+            // Add a small pause before showing the menu again (except when logging out)
+            if (running) {
+                System.out.println("\nPress Enter to continue...");
+                scanner.nextLine();
+            }
         }
     }
 
     public Role getUserType() {
         return Role.APPLICANT;
+    }
+
+    private void viewAvailableProjects() {
+        // Implementation for viewing available projects
+        // Display available projects for the user to select from
+        ProjectController projectController = new ProjectController();
+        System.out.println("\n===== Available Projects =====");
+        Map<String, Project> availableProjects = projectController.getAvailableProjects();
+
+        if (availableProjects.isEmpty()) {
+            System.out.println("No projects available for application at this time.");
+            return;
+        }
+
+        for (Project project : availableProjects.values()) {
+            System.out.println(project.getProjectID() + ": " + project.getProjectName() + " - " + project.getNeighborhood());
+        }
     }
 
     private void submitApplication(User user) {
@@ -72,6 +101,7 @@ public class ApplicantView implements MenuInterface {
 
             // Use ApplicationController instead of ApplicantController for this method
             ApplicationController applicationController = new ApplicationController();
+            ProjectController projectController = new ProjectController();
 
             if (applicant == null) {
                 System.out.println("Applicant not found. Please create a profile first.");
@@ -80,7 +110,7 @@ public class ApplicantView implements MenuInterface {
 
             // Display available projects for the user to select from
             System.out.println("\n===== Available Projects =====");
-            Map<String, Project> availableProjects = applicationController.getAvailableProjects();
+            Map<String, Project> availableProjects = projectController.getAvailableProjects();
 
             if (availableProjects.isEmpty()) {
                 System.out.println("No projects available for application at this time.");

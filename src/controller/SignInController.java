@@ -32,7 +32,7 @@ public class SignInController {
             System.out.println();
             return false;
         }
-        else if (user != null && password.equals("Password")){
+        else if (user != null && password.equals("password")){
             System.out.println("You are a new user with the default password, please change it");
             PasswordController pc = new PasswordController();
             System.out.println("Please enter a new password");
@@ -41,10 +41,10 @@ public class SignInController {
             String newPassword;
             do {
                 newPassword = scanner.nextLine();
-                if (newPassword.equals("Password")) {
+                if (newPassword.equals("password")) {
                     System.out.println("The password cannot be the default 'Password'. Please enter a new password:");
                 }
-            } while (newPassword.equals("Password"));
+            } while (newPassword.equals("password"));
             if(!pc.changePassword(nric, newPassword)){
                 System.out.println("Something went wrong, please contact an administrator");
             }

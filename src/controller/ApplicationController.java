@@ -15,33 +15,10 @@ import java.util.UUID;
 import java.util.Map;
 import java.util.HashMap;
 
+import static repository.ApplicationRepository.isRepoLoaded;
+
 public class ApplicationController {
-    public Map<String, Project> getAvailableProjects() {
-        // Simply check if projects are empty
-        if (ProjectRepository.PROJECTS.isEmpty()) {
-            ProjectRepository repo = new ProjectRepository();
-            repo.loadFromCSV();
-        }
 
-        // Filter projects based on visibility
-        Map<String, Project> visibleProjects = new HashMap<>();
-        for (Project project : ProjectRepository.PROJECTS.values()) {
-            if (project.getVisibility() == Visibility.ON) {
-                visibleProjects.put(project.getProjectID(), project);
-            }
-        }
-
-        return visibleProjects;
-    }
-
-    public Applicant getApplicantByNRIC(String nric) {
-        // Ensure repository is loaded
-        if (ApplicantRepository.APPLICANTS.isEmpty() && !ApplicantRepository.isRepoLoaded()) {
-            ApplicantRepository repo = new ApplicantRepository();
-            repo.loadFromCSV();
-        }
-        return ApplicantRepository.APPLICANTS.get(nric);
-    }
     public boolean submitApplication(Applicant applicant, Project project, FlatType flatType) {
         // Validate input
         if (applicant == null) {
@@ -81,7 +58,11 @@ public class ApplicationController {
 
         // Generate a unique application ID
         String applicationID = UUID.randomUUID().toString();
-
+//        if (!ApplicationRepository.isRepoLoaded()) {
+//            new ApplicationRepository().loadFromCSV();
+//        }
+//
+//        String applicationID = ApplicationRepository.generateNextApplicationId();
         // Create a new application
         Application application = new Application(
             applicationID,

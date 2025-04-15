@@ -61,6 +61,24 @@ public class ProjectController {
         }
     }
 
+    public Map<String, Project> getAvailableProjects() {
+        // Simply check if projects are empty
+        if (ProjectRepository.PROJECTS.isEmpty()) {
+            ProjectRepository repo = new ProjectRepository();
+            repo.loadFromCSV();
+        }
+
+        // Filter projects based on visibility
+        Map<String, Project> visibleProjects = new HashMap<>();
+        for (Project project : ProjectRepository.PROJECTS.values()) {
+            if (project.getVisibility() == Visibility.ON) {
+                visibleProjects.put(project.getProjectID(), project);
+            }
+        }
+
+        return visibleProjects;
+    }
+
     // Add other business logic methods related to projects
     // For example:
     // - updateProject()

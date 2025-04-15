@@ -20,9 +20,6 @@ public class ProjectRepository extends Repository {
     @Override
     public boolean loadFromCSV() {
         try {
-            System.out.println("Attempting to load projects from: " + filePath);
-            File file = new File(filePath);
-            System.out.println("File exists: " + file.exists());
 
             loadProjectsFromCSV(filePath, PROJECTS);
             System.out.println("Loaded " + PROJECTS.size() + " projects");
@@ -198,6 +195,13 @@ public class ProjectRepository extends Repository {
             System.out.println("✅ Officer " + officerID + " added to project " + projectID);
         }
     }
+    public static Project getProjectById(String projectId) {
+        if (!isRepoLoaded) {
+            new ProjectRepository().loadFromCSV(); // Ensures data is loaded before accessing
+        }
+        return PROJECTS.getOrDefault(projectId, null);
+    }
+
 }
 
 

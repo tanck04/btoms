@@ -9,6 +9,8 @@ import enums.WithdrawalStatus;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 
 public class ApplicationRepository extends Repository {
     private static final String folder = "data";
@@ -41,10 +43,14 @@ public class ApplicationRepository extends Repository {
             directory.mkdirs();
         }
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) { // false = overwrite mode
-            // Write header
-            writer.write("Application ID,Applicant ID,Project ID,Flat Type,Application Status,Withdrawal Status");
-            writer.newLine();
+        File file = new File(filePath);
+        boolean writeHeader = !file.exists() || file.length() == 0;
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) { // true = append mode
+            if (writeHeader) {
+                writer.write("Application ID,Applicant ID,Project ID,Flat Type,Application Status,Withdrawal Status");
+                writer.newLine();
+            }
 
             // Write all applications from the HashMap
             for (Application application : applicationsMap.values()) {
@@ -56,6 +62,46 @@ public class ApplicationRepository extends Repository {
             System.out.println("Error saving application data: " + e.getMessage());
         }
     }
+
+    public static void updateApplicationInCSV(Application updatedApplication) {
+        String filePath = "./src/repository/" + folder + "/" + fileName;
+        File inputFile = new File(filePath);
+        List<String> updatedLines = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile))) {
+            String line;
+            boolean isFirstLine = true;
+
+            while ((line = reader.readLine()) != null) {
+                if (isFirstLine) {
+                    updatedLines.add(line); // Header
+                    isFirstLine = false;
+                    continue;
+                }
+
+                if (line.startsWith(updatedApplication.getApplicationID() + ",")) {
+                    updatedLines.add(updatedApplication.toCSV()); // Replace the old line
+                } else {
+                    updatedLines.add(line); // Keep as is
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading CSV for update: " + e.getMessage());
+            return;
+        }
+
+        // Write updated content back to file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) {
+            for (String updatedLine : updatedLines) {
+                writer.write(updatedLine);
+                writer.newLine();
+            }
+            System.out.println("Updated application saved successfully.");
+        } catch (IOException e) {
+            System.out.println("Error writing updated CSV: " + e.getMessage());
+        }
+    }
+
 
     private static boolean isApplicationInFile(File file, String applicationID) {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
@@ -73,6 +119,7 @@ public class ApplicationRepository extends Repository {
 
     // In ApplicationRepository.java - fix the loadApplicationsFromCSV method
     private static void loadApplicationsFromCSV(String fileName, HashMap<String, Application> applicationsMap) {
+        applicationsMap.clear();
         String filePath = "./src/repository/" + folder + "/" + fileName;
 
         File file = new File(filePath);
@@ -175,4 +222,31 @@ public class ApplicationRepository extends Repository {
     public static void setRepoLoaded(boolean isRepoLoaded) {
         ApplicationRepository.isRepoLoaded = isRepoLoaded;
     }
+
+    public static String getLastApplicationId() {
+        if (APPLICATIONS.isEmpty()) {
+            new ApplicationRepository().loadFromCSV(); // <- Ensures latest state
+        }
+        if (APPLICATIONS.isEmpty()) {
+            return "A0000";
+        }
+
+        return APPLICATIONS.keySet().stream()
+                .sorted()
+                .reduce((first, second) -> second)
+                .orElse("A0000");
+    }
+
+
+    public static String generateNextApplicationId() {
+        String lastId = getLastApplicationId(); // e.g., A0042
+        if (lastId == null || !lastId.matches("A\\d{4}")) {
+            return "A0001"; // Safe default if nothing exists or malformed
+        }
+
+        int number = Integer.parseInt(lastId.substring(1));
+        number++;
+        return "A" + String.format("%04d", number); // e.g., A0043
+    }
+
 }
