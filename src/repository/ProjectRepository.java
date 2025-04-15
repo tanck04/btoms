@@ -208,9 +208,16 @@ public class ProjectRepository{
         }
     }
 
-    public List<Project> getProjectsByOfficerId(String nric) throws IOException{
+    public List<Project> getProjectsByOfficerId(String nric){
         List<Project> filteredProjects = new ArrayList<>();
-        List<Project> projects = loadProjects();
+        List<Project> projects = new ArrayList<>();
+        try {
+            projects = loadProjects();  // handle exception internally
+        } catch (IOException e) {
+            System.out.println("Failed to load projects: " + e.getMessage());
+            // Optionally log the stack trace or return empty list
+            return filteredProjects; // or return Collections.emptyList();
+        }
         for (Project project : projects) {
             if (project.getOfficerIDs() != null && project.getOfficerIDs().contains(nric)) {
                 filteredProjects.add(project);

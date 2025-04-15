@@ -1,5 +1,6 @@
 package view;
 
+import controller.EnquiryController;
 import controller.HDBOfficerRegController;
 import controller.ProjectController;
 import controller.HDBManagerController;
@@ -16,17 +17,11 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class ManagerView implements MenuInterface {
-    private ProjectController projectController;
-    private Scanner scanner;
-    private HDBOfficerRegController officerRegController;
-    private HDBManagerController hdbManagerController;
-
-    public ManagerView() {
-        this.projectController = new ProjectController();
-        this.officerRegController = new HDBOfficerRegController();
-        this.hdbManagerController = new HDBManagerController();
-        this.scanner = new Scanner(System.in);
-    }
+    private final ProjectController projectController = new ProjectController();;
+    private final Scanner scanner = new Scanner(System.in);
+    private final HDBOfficerRegController officerRegController = new HDBOfficerRegController();
+    private final HDBManagerController hdbManagerController = new HDBManagerController();
+    private final EnquiryController enquiryController = new EnquiryController();
 
     @Override
     public void displayMenu(User user) {
@@ -93,7 +88,7 @@ public class ManagerView implements MenuInterface {
                     approveOfficerRegistration();
                     break;
                 case 11:
-                    replyEnquiries();
+                    enquiryController.viewEnquiry(user);
                     break;
                 case 12:
                     System.out.println("Logging out...");

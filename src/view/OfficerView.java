@@ -1,5 +1,6 @@
 package view;
 
+import controller.EnquiryController;
 import controller.HDBOfficerController;
 import controller.HDBOfficerRegController;
 import model.User;
@@ -8,11 +9,12 @@ import java.io.IOException;
 import java.util.Scanner;
 
 public class OfficerView implements MenuInterface{
-    private final HDBOfficerController controller = new HDBOfficerController();
+    private final HDBOfficerController officerController = new HDBOfficerController();
     private final HDBOfficerRegController officerRegController = new HDBOfficerRegController();
+    private final EnquiryController enquiryController = new EnquiryController();
 
     private final Scanner scanner = new Scanner(System.in);
-    public void displayMenu(User user) throws IOException {
+    public void displayMenu(User user) {
         boolean running = true;
         while (running){
             System.out.println();
@@ -53,6 +55,7 @@ public class OfficerView implements MenuInterface{
                     officerRegController.viewRegistrationStatus(user.getNRIC());
                     break;
                 case "8":
+                    enquiryController.viewEnquiry(user);
                     break;
                 case "9":
                     break;

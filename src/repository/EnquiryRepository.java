@@ -39,7 +39,7 @@ public class EnquiryRepository {
      * @return A list of Enquiry objects.
      * @throws IOException if an error occurs while reading the file.
      */
-    public List<Enquiry> loadAllEnquiries() throws IOException {
+    public List<Enquiry> loadAllEnquiries() {
         List<Enquiry> enquiries = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH_ENQUIRY))) {
             String line;
@@ -63,6 +63,9 @@ public class EnquiryRepository {
                     enquiries.add(enquiry);
                 }
             }
+        }catch (IOException e) {
+            System.out.println("Failed to read enquiries: " + e.getMessage());
+            // Optional: e.printStackTrace();
         }
         return enquiries;
     }

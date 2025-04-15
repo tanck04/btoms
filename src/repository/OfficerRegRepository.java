@@ -95,7 +95,7 @@ public class OfficerRegRepository {
         return lastRegId;
     }
 
-    public List<OfficerRegistration> getRegistrationByOfficerId(String nric) throws IOException {
+    public List<OfficerRegistration> getRegistrationByOfficerId(String nric) {
         try{
             List<OfficerRegistration> registrations = loadAllOfficerReg();
             List<OfficerRegistration> filteredRegistrations = new ArrayList<>();

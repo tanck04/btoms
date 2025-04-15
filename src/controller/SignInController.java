@@ -51,11 +51,7 @@ public class SignInController {
             System.out.println("Your password has been successfully changed, proceeding to login...");
             ViewController viewController = new ViewController();
             MenuInterface view = (MenuInterface) viewController.getView(role);
-            try{
-                view.displayMenu(user);
-            } catch(IOException e){
-                System.out.println("Menu did not work ");
-            }
+            view.displayMenu(user);
             return true;
 
 
@@ -63,11 +59,7 @@ public class SignInController {
         else{
             ViewController viewController = new ViewController();
             MenuInterface view = (MenuInterface) viewController.getView(role);
-            try{
-                view.displayMenu(user);
-            } catch(IOException e){
-                System.out.println("Menu did not work ");
-            }
+            view.displayMenu(user);
             return true;
         }
 

@@ -76,7 +76,7 @@ public class HDBOfficerRegController {
         }
     }
 
-    public void viewRegistrationStatus(String nric) throws IOException {
+    public void viewRegistrationStatus(String nric) {
         List<OfficerRegistration> registrations = officerRegRepository.getRegistrationByOfficerId(nric);
 
         if (registrations.isEmpty()) {
