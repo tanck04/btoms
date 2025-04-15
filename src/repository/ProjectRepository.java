@@ -176,6 +176,17 @@ public class ProjectRepository{
         }
     }
 
+    public List<Project> getProjectsByOfficerId(String nric) throws IOException{
+        List<Project> filteredProjects = new ArrayList<>();
+        List<Project> projects = loadProjects();
+        for (Project project : projects) {
+            if (project.getOfficerIDs() != null && project.getOfficerIDs().contains(nric)) {
+                filteredProjects.add(project);
+            }
+        }
+        return filteredProjects;
+    }
+
 //    @Override
 //    public boolean loadFromCSV() {
 //        try {

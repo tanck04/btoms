@@ -3,7 +3,7 @@ package controller;
 import java.util.Scanner;
 
 public class AuthenticationController {
-    private final SignInController loginController = new SignInController();
+    private final SignInController signInController = new SignInController();
 
     public void start() {
         while (true) {

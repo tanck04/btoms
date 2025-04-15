@@ -144,7 +144,7 @@ public class EnquiryRepository {
      * @return List of Enquiries.
      * @throws IOException if reading fails.
      */
-    public List<Enquiry> getEnquiriesByApplicant(String applicantID) throws IOException {
+    public List<Enquiry> getEnquiriesByApplicantId(String applicantID) throws IOException {
         List<Enquiry> result = new ArrayList<>();
         for (Enquiry e : loadAllEnquiries()) {
             if (e.getApplicantID().equals(applicantID)) {

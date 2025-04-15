@@ -1,2 +1,3 @@
-Enquiry ID,Applicant ID,Project ID,Enquiry Text,Enquiry Reply,Enquiry Status
-E0001,S1234567A,P0001,Are there penalties if I withdraw from the application after booking a flat?,,PENDING
+Enquiry ID,Applicant ID,Project ID,Enquiry Text,Enquiry Reply,Enquiry Status,Replying Officer ID
+E0001,S1234567A,P0001,Are there penalties if I withdraw from the application after booking a flat?,,PENDING,
+E0002,U2410982C,P0002,test enquiry,,PENDING,
