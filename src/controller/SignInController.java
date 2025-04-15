@@ -13,12 +13,17 @@ public class SignInController {
 
     public static boolean signIn(String nric, String password) {
         String role = userLoginRepository.getUserTypeByNRIC(nric);
+
+        if (role == null) {
+            System.out.println("❌ No role found for NRIC: " + nric + ". Returning to main menu.");
+            return false;
+        }
+
         RepositoryController repositoryController = new RepositoryController();
         VerificationInterface repository = (VerificationInterface) repositoryController.getRepository(role);
 
-        if(repository == null){
+        if (repository == null) {
             System.out.println("Invalid ID or password. Returning to main menu.");
-            System.out.println();
             return false;
         }
         User user = repository.verifyCredentials(nric, password);
