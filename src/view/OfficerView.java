@@ -4,6 +4,7 @@ import controller.HDBOfficerController;
 import controller.HDBOfficerRegController;
 import model.User;
 
+import java.io.IOException;
 import java.util.Scanner;
 
 public class OfficerView implements MenuInterface{
@@ -11,7 +12,7 @@ public class OfficerView implements MenuInterface{
     private final HDBOfficerRegController officerRegController = new HDBOfficerRegController();
 
     private final Scanner scanner = new Scanner(System.in);
-    public void displayMenu(User user){
+    public void displayMenu(User user) throws IOException {
         System.out.println();
         System.out.println("+-----------------------------------------------+");
         System.out.println("|                 Officer Menu                  |");
@@ -47,6 +48,7 @@ public class OfficerView implements MenuInterface{
                 officerRegController.createRegistration(user.getNRIC());
                 break;
             case "7":
+                officerRegController.viewRegistrationStatus(user.getNRIC());
                 break;
             case "8":
                 break;

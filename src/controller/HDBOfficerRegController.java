@@ -7,6 +7,8 @@ import repository.OfficerRegRepository;
 import repository.ProjectRepository;
 
 import java.io.IOException;
+import java.sql.SQLOutput;
+import java.util.List;
 import java.util.Scanner;
 
 public class HDBOfficerRegController {
@@ -71,6 +73,30 @@ public class HDBOfficerRegController {
             System.out.println("Error occurred while creating registration: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    public void viewRegistrationStatus(String nric) throws IOException {
+        List<OfficerRegistration> registrations = officerRegRepository.getRegistrationByOfficerId(nric);
+
+        if (registrations.isEmpty()) {
+            System.out.println("No registration found.");
+            return;
+        }
+
+        System.out.println("+-----------------------------------------------------+");
+        System.out.println("|                 Registration Record                 |");
+        System.out.println("+-----------------------------------------------------+");
+        System.out.printf("| %-15s | %-10s | %-20s |\n", "Registration ID", "Project ID", "Registration Status");
+        System.out.println("+-----------------------------------------------------+");
+
+        for (OfficerRegistration registration : registrations) {
+            System.out.printf("| %-15s | %-10s | %-20s |\n",
+                    registration.getRegistrationId(),
+                    registration.getProjectId(),
+                    registration.getStatus());
+        }
+
+        System.out.println("+-----------------------------------------------------+");
     }
 
 }

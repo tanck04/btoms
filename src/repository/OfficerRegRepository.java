@@ -22,37 +22,6 @@ public class OfficerRegRepository {
         // Simulated CSV save
         System.out.println("📝 Saved all registration statuses.");
     }
-    public void createNewOfficerReg(OfficerRegistration officerReg) {
-        File file = new File(FILE_PATH_OFFICER_REGISTRATION);
-
-        // Open the CSV file in append mode
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH_OFFICER_REGISTRATION, true))) {
-            // If the file is not empty, write a newline first
-            if (file.length() > 0) {
-                writer.newLine();
-            }
-
-            // Format the registration data as CSV
-            String registrationData = String.join(",",
-                    officerReg.getRegistrationId(),
-                    officerReg.getNric(),
-                    officerReg.getProjectId(),
-                    officerReg.getStatus().toString());
-
-            // Write the new registration data to the file
-            writer.write(registrationData);
-            writer.flush();
-        }catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Failed to save officer registration.");
-        }
-        try {
-            CSVUtil.removeEmptyRows(FILE_PATH_OFFICER_REGISTRATION);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Failed to clean up empty rows in officer registration file.");
-        }
-    }
     public List<OfficerRegistration> loadAllOfficerReg() throws IOException {
         List<OfficerRegistration> registrations = new ArrayList<>();
         BufferedReader reader = null;
@@ -84,6 +53,39 @@ public class OfficerRegRepository {
         }
         return registrations;
     }
+
+    public void createNewOfficerReg(OfficerRegistration officerReg) {
+        File file = new File(FILE_PATH_OFFICER_REGISTRATION);
+
+        // Open the CSV file in append mode
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH_OFFICER_REGISTRATION, true))) {
+            // If the file is not empty, write a newline first
+            if (file.length() > 0) {
+                writer.newLine();
+            }
+
+            // Format the registration data as CSV
+            String registrationData = String.join(",",
+                    officerReg.getRegistrationId(),
+                    officerReg.getNric(),
+                    officerReg.getProjectId(),
+                    officerReg.getStatus().toString());
+
+            // Write the new registration data to the file
+            writer.write(registrationData);
+            writer.flush();
+        }catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Failed to save officer registration.");
+        }
+        try {
+            CSVUtil.removeEmptyRows(FILE_PATH_OFFICER_REGISTRATION);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Failed to clean up empty rows in officer registration file.");
+        }
+    }
+
     public String getLastRegId() throws IOException {
         List<OfficerRegistration> registrations = loadAllOfficerReg();
         if (registrations.isEmpty()) {
@@ -93,15 +95,22 @@ public class OfficerRegRepository {
         return lastRegId;
     }
 
-    public OfficerRegistration getRegistrationById(String regId) throws IOException {
-        List<OfficerRegistration> Registrations = loadAllOfficerReg();
-
-        for (OfficerRegistration registration : Registrations) {
-            if (registration.getRegistrationId().equals(regId)) {
-                return registration;
+    public List<OfficerRegistration> getRegistrationByOfficerId(String nric) throws IOException {
+        try{
+            List<OfficerRegistration> registrations = loadAllOfficerReg();
+            List<OfficerRegistration> filteredRegistrations = new ArrayList<>();
+            for (OfficerRegistration registration : registrations) {
+                if (registration.getNric().equals(nric)) {
+                    filteredRegistrations.add(registration);
+                }
             }
+            return filteredRegistrations;
+        }catch (IOException e) {
+            System.out.println("Error loading officer registrations: " + e.getMessage());
+            return new ArrayList<>();
+            // Optionally log or rethrow as a custom exception
         }
-        return null;
+
     }
 }
 
