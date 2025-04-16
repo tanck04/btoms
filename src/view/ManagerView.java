@@ -58,7 +58,7 @@ public class ManagerView implements MenuInterface {
 
             switch (choice) {
                 case 1:
-                    createProject();
+                    createProject(user);
                     break;
                 case 2:
                     viewAllProjects();
@@ -139,7 +139,7 @@ public class ManagerView implements MenuInterface {
         return String.format("P%04d", nextNumber);  // e.g., P0001, P0002
     }
 
-    private void createProject() {
+    private void createProject(User user) {
         try {
             // Collect project data from user input
             String projectID = generateNextProjectID();  // auto-generate
@@ -202,21 +202,7 @@ public class ManagerView implements MenuInterface {
                 }
             }
 
-            System.out.print("Enter Manager ID: ");
-            String managerID = scanner.nextLine().trim();
 
-            System.out.print("Enter Officer Slot (number): ");
-            int officerSlot = Integer.parseInt(scanner.nextLine().trim());
-
-            List<String> officerIDs = new ArrayList<>();
-            System.out.print("Do you want to add officers now? (yes/no): ");
-            if (scanner.nextLine().trim().equalsIgnoreCase("yes")) {
-                System.out.print("Enter Officer IDs (comma-separated): ");
-                String officerIDsInput = scanner.nextLine().trim();
-                if (!officerIDsInput.isEmpty()) {
-                    officerIDs = Arrays.asList(officerIDsInput.split(","));
-                }
-            }
 
             // Prepare flat type data
             Map<FlatType, Integer> flatTypeUnits = new HashMap<>();
@@ -232,7 +218,7 @@ public class ManagerView implements MenuInterface {
                     projectID, projectName, neighborhood,
                     flatTypeUnits, flatTypePrices,
                     String.valueOf(openingDate), String.valueOf(closingDate),
-                    managerID, officerSlot, officerIDs
+                    user.getNRIC(), 0, new ArrayList<>()
             );
 
             if (result != null) {
@@ -412,14 +398,10 @@ public class ManagerView implements MenuInterface {
             System.out.println("\n===== Approve Application =====");
 
             // Ensure repository is loaded
-            if (ManagerRepository.MANAGERS.isEmpty() && !ManagerRepository.isRepoLoaded()) {
-                ManagerRepository repo = new ManagerRepository();
-                repo.loadFromCSV();
-            }
 
 
             // Find manager in the repository
-            Manager currentManager = ManagerRepository.MANAGERS.get(manager.getNRIC());
+            Manager currentManager = hdbManagerController.getManagerById(user.getNRIC());
 
             // Validate manager exists and password is correct
             if (currentManager == null) {

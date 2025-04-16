@@ -3,6 +3,7 @@ package controller;
 import model.Project;
 import enums.FlatType;
 import enums.Visibility;
+import repository.ManagerRepository;
 import repository.ProjectRepository;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ public class ProjectController {
      * @return the created Project object if successful, null otherwise
      */
     private final ProjectRepository projectRepository = new ProjectRepository();
+    private final ManagerRepository managerRepository = new ManagerRepository();
     public Project createProject(
             String projectID,
             String projectName,
@@ -38,6 +40,12 @@ public class ProjectController {
 
             // Perform any additional business validations
             // (e.g., date format validation, manager existence check, etc.)
+            try{
+                managerRepository.findManagerById(managerID);
+            } catch (IOException e) {
+                System.out.println("Manager ID does not exist.");
+                return null;
+            }
 
             // Create project object
             Project newProject = new Project(

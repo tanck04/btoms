@@ -165,60 +165,6 @@ public class ApplicationRepository{
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-//    public boolean loadFromCSV() {
-//        try {
-//            loadApplicationsFromCSV(fileName, APPLICATIONS);
-//            isRepoLoaded = true;
-//            return true;
-//        } catch (Exception e) {
-//            System.out.println("Error loading applications repository: " + e.getMessage());
-//            return false;
-//        }
-//    }
-//
-//    public static void saveAllApplicationsToCSV() {
-//        saveApplicationsToCSV(fileName, APPLICATIONS);
-//    }
-//
-//    // In ApplicationRepository.java
-//    private static void saveApplicationsToCSV(String fileName, HashMap<String, Application> applicationsMap) {
-//        String filePath = "./src/repository/" + folder + "/" + fileName;
-//
-//        File directory = new File("./src/repository/" + folder);
-//        if (!directory.exists()) {
-//            directory.mkdirs();
-//        }
-//
-//        File file = new File(filePath);
-//        boolean writeHeader = !file.exists() || file.length() == 0;
-//
-//        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) { // true = append mode
-//            if (writeHeader) {
-//                writer.write("Application ID,Applicant ID,Project ID,Flat Type,Application Status,Withdrawal Status");
-//                writer.newLine();
-//            }
-//
-//            // Write all applications from the HashMap
-//            for (Application application : applicationsMap.values()) {
-//                writer.write(application.toCSV());
-//                writer.newLine();
-//            }
-//            System.out.println("Applications successfully saved to " + fileName);
-//        } catch (IOException e) {
-//            System.out.println("Error saving application data: " + e.getMessage());
-//        }
-//    }
-
     public static void updateApplicationInCSV(Application updatedApplication) {
         String filePath = "./src/repository/" + folder + "/" + fileName;
         File inputFile = new File(filePath);

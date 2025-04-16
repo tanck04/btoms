@@ -7,6 +7,7 @@ import model.*;
 import enums.ApplicantAppStatus;
 import repository.ApplicantRepository;
 import repository.ApplicationRepository;
+import repository.ManagerRepository;
 import repository.ProjectRepository;
 
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.util.Scanner;
 public class HDBManagerController{
     private final ApplicantRepository applicantRepository = new ApplicantRepository();
     private final ProjectRepository projectRepository = new ProjectRepository();
+    private final ManagerRepository managerRepository = new ManagerRepository();
     private final ApplicationRepository applicationRepository = new ApplicationRepository();
 
     /**
@@ -31,6 +33,7 @@ public class HDBManagerController{
      * @param manager The HDB manager making the approval
      * @return true if approval was successful, false otherwise
      */
+
     public boolean approveApplication(Manager manager) {
         Scanner scanner = new Scanner(System.in);
 
@@ -190,6 +193,15 @@ public class HDBManagerController{
             System.out.println("Application Period: " + project.getApplicationOpeningDate() +
                     " to " + project.getApplicationClosingDate());
             System.out.println();
+        }
+    }
+
+    public Manager getManagerById(String managerID) {
+        try {
+            return managerRepository.findManagerById(managerID);
+        } catch (IOException e) {
+            System.out.println("Error retrieving project: " + e.getMessage());
+            return null;
         }
     }
 }
