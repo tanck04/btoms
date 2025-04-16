@@ -64,6 +64,7 @@ public class ProjectController {
 
             // Save to repository
             projectRepository.createNewProject(newProject);
+            managerRepository.updateManagerInCSV(managerRepository.findManagerById(managerID), newProject);
 
             return newProject;
         } catch (Exception e) {

@@ -25,9 +25,23 @@ public class ProjectRepository{
      */
     public void createNewProject(Project project) throws IOException {
         File file = new File(filePath);
+        boolean needsNewline = false;
+
+        // Check if file exists and doesn't end with newline
+        if (file.exists() && file.length() > 0) {
+            try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+                if (raf.length() > 0) {
+                    raf.seek(raf.length() - 1);
+                    byte lastByte = raf.readByte();
+                    needsNewline = lastByte != '\n';
+                }
+            }
+        }
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
             // Write a newline if file has content
-            if (file.length() > 0) writer.newLine();
+            if (needsNewline) {
+                writer.newLine();
+            }
 
             String projectData = String.join(",",
                     project.getProjectID(),

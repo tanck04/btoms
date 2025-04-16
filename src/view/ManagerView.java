@@ -61,7 +61,7 @@ public class ManagerView implements MenuInterface {
                     createProject(user);
                     break;
                 case 2:
-                    viewAllProjects();
+                    hdbManagerController.viewProject(user);
                     break;
                 case 3:
                     updateProjectDetails();
@@ -79,7 +79,7 @@ public class ManagerView implements MenuInterface {
                     approveApplication(user);
                     break;
                 case 8:
-                    approveWithdrawal();
+                    hdbManagerController.approveOrRejectWithdrawal(user);
                     break;
                 case 9:
                     reviewOfficerRegistrations();
@@ -106,9 +106,7 @@ public class ManagerView implements MenuInterface {
         }
     }
 
-    public Role getUserType() {
-        return Role.HDBMANAGER;
-    }
+
 
 
 
@@ -231,31 +229,6 @@ public class ManagerView implements MenuInterface {
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
             e.printStackTrace();
-        }
-    }
-
-    private void viewAllProjects() {
-        ProjectRepository projectRepository = new ProjectRepository();
-        System.out.println("\n===== All Projects =====");
-
-        try {
-            for (Project project : projectRepository.loadProjects()) {
-                System.out.println("\nID: " + project.getProjectID());
-                System.out.println("Name: " + project.getProjectName());
-                System.out.println("Neighborhood: " + project.getNeighborhood());
-                System.out.println("TWO_ROOMS Units: " + project.getUnitsForFlatType(FlatType.TWO_ROOMS) +
-                                  ", Price: $" + project.getPriceForFlatType(FlatType.TWO_ROOMS));
-                System.out.println("THREE_ROOMS Units: " + project.getUnitsForFlatType(FlatType.THREE_ROOMS) +
-                                  ", Price: $" + project.getPriceForFlatType(FlatType.THREE_ROOMS));
-                System.out.println("Application Period: " + project.getApplicationOpeningDate() +
-                                  " to " + project.getApplicationClosingDate());
-                System.out.println("Manager: " + project.getManagerID());
-                System.out.println("Officer Slots: " + project.getOfficerSlot());
-                System.out.println("Visibility: " + project.getVisibility());
-                System.out.println("-----------------------------");
-            }
-        } catch (IOException e) {
-            System.out.println("Error loading projects: " + e.getMessage());
         }
     }
 

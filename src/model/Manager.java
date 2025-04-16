@@ -13,7 +13,6 @@ public class Manager extends User {
                    int age) {
         super(nric, name, Role.HDBMANAGER, password, maritalStatus, age); // Fixed role to HDBMANAGER
     }
-
     // Getter for role
     public Role getRole() {
         return role;

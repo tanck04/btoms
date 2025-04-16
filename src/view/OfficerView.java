@@ -3,9 +3,14 @@ package view;
 import controller.EnquiryController;
 import controller.HDBOfficerController;
 import controller.HDBOfficerRegController;
+import enums.FlatType;
+import model.Manager;
+import model.Project;
 import model.User;
+import model.Officer;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Scanner;
 
 public class OfficerView implements MenuInterface{
@@ -39,6 +44,7 @@ public class OfficerView implements MenuInterface{
 
             switch (choice) {
                 case "1":
+                    officerController.viewProject(user);
                     break;
                 case "2":
                     break;
@@ -68,4 +74,5 @@ public class OfficerView implements MenuInterface{
             }
         }
     }
+
 }

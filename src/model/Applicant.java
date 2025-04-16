@@ -17,8 +17,6 @@ public class Applicant extends User {
         super(nric, name, Role.APPLICANT, password, maritalStatus, age);
     }
 
-
-
     public Role getRole() {
         return role;
     }

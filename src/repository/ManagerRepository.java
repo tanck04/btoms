@@ -4,6 +4,7 @@ import controller.PasswordChangerInterface;
 import controller.PasswordController;
 import controller.VerificationInterface;
 import model.Applicant;
+import model.Application;
 import model.Manager;
 import enums.MaritalStatus;
 import model.Project;
@@ -130,6 +131,60 @@ public class ManagerRepository implements PasswordChangerInterface,VerificationI
         }
 
         return passwordUpdated;
+    }
+
+    public void updateManagerInCSV(Manager updatedManager, Project project) {
+        File inputFile = new File(filePath);
+        List<String> updatedLines = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile))) {
+            String line;
+            boolean isFirstLine = true;
+
+            while ((line = reader.readLine()) != null) {
+                if (isFirstLine) {
+                    updatedLines.add(line); // Header
+                    isFirstLine = false;
+                    continue;
+                }
+
+                if (line.startsWith(updatedManager.getNRIC() + ",")) {
+                    // Get the existing line parts
+                    String[] parts = line.split(",");
+
+                    // Update the line with project information
+                    // Format: NRIC,Name,Age,MaritalStatus,Password,[ProjectID]
+                    StringBuilder updatedLine = new StringBuilder();
+                    updatedLine.append(String.join(",", parts));
+
+                    // Add project ID if it's not already in the line
+                    if (parts.length < 6) {
+                        updatedLine.append(",").append(project.getProjectID());
+                    } else {
+                        // Replace the last part with new project ID
+                        updatedLine = new StringBuilder(line.substring(0, line.lastIndexOf(",")));
+                        updatedLine.append(",").append(project.getProjectID());
+                    }
+
+                    updatedLines.add(updatedLine.toString());
+                } else {
+                    updatedLines.add(line); // Keep as is
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading CSV for update: " + e.getMessage());
+            return;
+        }
+
+        // Write updated content back to file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) {
+            for (String updatedLine : updatedLines) {
+                writer.write(updatedLine);
+                writer.newLine();
+            }
+            System.out.println("Manager updated with new project successfully.");
+        } catch (IOException e) {
+            System.out.println("Error writing updated CSV: " + e.getMessage());
+        }
     }
 
 }

@@ -1,8 +1,6 @@
 package controller;
 
-import model.Application;
-import model.Applicant;
-import model.Project;
+import model.*;
 import repository.ApplicantRepository;
 import repository.ApplicationRepository;
 import enums.ApplicantAppStatus;
@@ -13,11 +11,14 @@ import enums.Visibility;
 import repository.ProjectRepository;
 
 import java.io.IOException;
-import java.util.UUID;
+import java.util.Scanner;
 import java.util.Map;
 import java.util.HashMap;
 
 public class ApplicationController {
+    private final ApplicantRepository applicantRepo = new ApplicantRepository();
+    private final ProjectRepository projectRepo = new ProjectRepository();
+    private final ApplicationRepository applicationRepo = new ApplicationRepository();
 
     public boolean submitApplication(Applicant applicant, Project project, FlatType flatType) {
         // Validate input
@@ -30,10 +31,6 @@ public class ApplicationController {
 
         try {
             // Use repository instance methods instead of static methods
-            ApplicantRepository applicantRepo = new ApplicantRepository();
-            ProjectRepository projectRepo = new ProjectRepository();
-            ApplicationRepository applicationRepo = new ApplicationRepository();
-
             // Validate that the project exists
             Project validProject = projectRepo.findProjectById(project.getProjectID());
             if (validProject == null) {
@@ -43,7 +40,10 @@ public class ApplicationController {
 
             // Check if applicant has already applied for a project
             for (Application application :applicationRepo.loadApplications()) {
-                if (application.getApplicant().getNRIC().equals(applicant.getNRIC())) {
+                if (application.getApplicant().getNRIC().equals(applicant.getNRIC()) &&
+                        (application.getWithdrawalStatus().equals(WithdrawalStatus.PENDING) ||
+                                application.getWithdrawalStatus().equals(WithdrawalStatus.NULL) ||
+                                application.getWithdrawalStatus().equals(WithdrawalStatus.REJECTED))) {
                     System.out.println("Applicant has already applied for a project.");
                     return false;
                 }
@@ -80,6 +80,55 @@ public class ApplicationController {
         }
     }
 
-    // Helper method to save a new applicant without using the static HashMap
 
+    /// Method to withdraw an application
+    public boolean requestWithdrawal(User user) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter 1 to confirm withdrawal, 0 to cancel:");
+        int choice = scanner.nextInt();
+        if (choice == 0) {
+            System.out.println("Withdrawal cancelled.");
+            return false;
+        } else if (choice != 1) {
+            System.out.println("Invalid choice. Please enter 1 to confirm or 0 to cancel.");
+            return false;
+        }
+        if (user == null) {
+            System.out.println("Invalid input: Applicant is null.");
+            return false;
+        }
+        System.out.println("Processing withdrawal for applicant: " + user.getNRIC());
+        try {
+            ApplicationRepository applicationRepo = new ApplicationRepository();
+            ProjectRepository projectRepo = new ProjectRepository();
+
+            // Check if the applicant has any applications
+            boolean hasApplication = false;
+            for (Application application : applicationRepo.loadApplications()) {
+                if (application.getApplicant().getNRIC().equals(user.getNRIC())) {
+                    hasApplication = true;
+                    break;
+                }
+            }
+
+            if (!hasApplication) {
+                System.out.println("No applications found for the applicant.");
+                return false;
+            }
+
+            // Withdraw the application
+            for (Application application : applicationRepo.loadApplications()) {
+                if (application.getApplicant().getNRIC().equals(user.getNRIC())) {
+                    application.setWithdrawalStatus(WithdrawalStatus.PENDING);
+                    ApplicationRepository.updateApplicationInCSV(application);
+                    System.out.println("Application withdrawn successfully.");
+                    return true;
+                }
+            }
+            return false;
+        } catch (IOException e) {
+            System.out.println("Error processing withdrawal: " + e.getMessage());
+            return false;
+        }
+    }
 }

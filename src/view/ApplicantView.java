@@ -15,7 +15,8 @@ import java.util.Scanner;
 import java.util.Map;
 
 public class ApplicantView implements MenuInterface {
-    private final ApplicantController controller = new ApplicantController();
+    private final ApplicantController applicantController = new ApplicantController();
+    private final ApplicationController applicationController = new ApplicationController();
     private final Scanner scanner = new Scanner(System.in);
 
     @Override
@@ -41,16 +42,16 @@ public class ApplicantView implements MenuInterface {
 
             switch (choice) {
                 case "1":
-                    controller.viewProject(user);
+                    applicantController.viewProject(user);
                     break;
                 case "2":
-                    submitApplication(user);
+                    applicantController.submitApplication(user);
                     break;
                 case "3":
-                    controller.checkApplicationStatus(user);
+                    applicantController.checkApplicationStatus(user);
                     break;
                 case "4":
-                    // updatePersonalDetails();
+                    applicationController.requestWithdrawal(user);
                     break;
                 case "5":
                     // controller.getAvailableProjects();
@@ -70,132 +71,5 @@ public class ApplicantView implements MenuInterface {
                 scanner.nextLine();
             }
         }
-    }
-
-    public Role getUserType() {
-        return Role.APPLICANT;
-    }
-
-    private void viewAvailableProjects() {
-        // Implementation for viewing available projects
-        // Display available projects for the user to select from
-        ProjectController projectController = new ProjectController();
-        System.out.println("\n===== Available Projects =====");
-        List<Project> availableProjects = projectController.getAvailableProjects();
-
-        if (availableProjects.isEmpty()) {
-            System.out.println("No projects available for application at this time.");
-            return;
-        }
-
-        for (Project project : availableProjects) {
-            System.out.println(project.getProjectID() + ": " + project.getProjectName() + " - " + project.getNeighborhood());
-        }
-    }
-
-    private void submitApplication(User user) {
-
-        try {
-            // First, get the logged in applicant
-            Applicant applicant = (Applicant) user;
-            String nric = applicant.getNRIC();
-
-            // Use ApplicationController instead of ApplicantController for this method
-            ApplicationController applicationController = new ApplicationController();
-            ProjectController projectController = new ProjectController();
-
-            if (applicant == null) {
-                System.out.println("Applicant not found. Please create a profile first.");
-                return;
-            }
-
-            // Display available projects for the user to select from
-            System.out.println("\n===== Available Projects =====");
-            List<Project> availableProjects = projectController.getAvailableProjects();
-
-            if (availableProjects.isEmpty()) {
-                System.out.println("No projects available for application at this time.");
-                return;
-            }
-
-            for (Project project : availableProjects) {
-                System.out.println(project.getProjectID() + ": " + project.getProjectName() + " - " + project.getNeighborhood());
-            }
-
-            // Get project selection
-            System.out.print("\nEnter Project ID to apply for: ");
-            String projectID = scanner.nextLine().trim();
-
-            Project selectedProject = projectController.getProjectById(projectID);
-
-            if (selectedProject == null) {
-                System.out.println("Invalid project ID. Please try again.");
-                return;
-            }
-
-            // Display available flat types for the selected project
-            System.out.println("\n===== Available Flat Types =====");
-            Map<FlatType, Integer> flatTypes = selectedProject.getFlatTypeUnits();
-
-            for (Map.Entry<FlatType, Integer> entry : flatTypes.entrySet()) {
-                if (entry.getValue() > 0) {
-                    System.out.println(entry.getKey() + " - Units available: " + entry.getValue());
-                }
-            }
-
-            // Get flat type selection
-            System.out.println("\nSelect Flat Type:");
-            System.out.println("2 - TWO_ROOMS");
-            System.out.println("3 - THREE_ROOMS");
-            System.out.print("Enter your choice (2 or 3): ");
-            String flatTypeInput = scanner.nextLine().trim();
-            FlatType selectedFlatType;
-
-            try {
-                switch (flatTypeInput) {
-                    case "2":
-                        selectedFlatType = FlatType.TWO_ROOMS;
-                        break;
-                    case "3":
-                        selectedFlatType = FlatType.THREE_ROOMS;
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Invalid selection");
-                }
-            } catch (IllegalArgumentException e) {
-                System.out.println("Invalid flat type selection. Please try again.");
-                return;
-            }
-
-
-            // Confirm submission
-            System.out.print("\nConfirm application submission? (Y/N): ");
-            String confirm = scanner.nextLine().trim().toUpperCase();
-
-            if (confirm.equals("Y")) {
-                boolean success = applicationController.submitApplication(applicant, selectedProject, selectedFlatType);
-
-                if (success) {
-                    System.out.println("Application submitted successfully!");
-                } else {
-                    System.out.println("Failed to submit application. Please try again.");
-                }
-            } else {
-                System.out.println("Application submission cancelled.");
-            }
-
-        } catch (Exception e) {
-            System.out.println("Error submitting application: " + e.getMessage());
-        }
-    }
-    // Method to get user input for updating personal details
-    public String getUserInput() {
-        return scanner.nextLine().trim();
-    }
-
-    private void updatePersonalDetails() {
-        // Collect user input for updating details
-        System.out.println("Update Personal Details - Implementation pending");
-        // Then call controller method with the collected data
     }
 }
