@@ -2,6 +2,7 @@ package view;
 
 import controller.ApplicantController;
 import controller.ApplicationController;
+import controller.EnquiryController;
 import controller.ProjectController;
 import enums.MaritalStatus;
 import enums.Role;
@@ -17,6 +18,7 @@ import java.util.Map;
 public class ApplicantView implements MenuInterface {
     private final ApplicantController applicantController = new ApplicantController();
     private final ApplicationController applicationController = new ApplicationController();
+    private final EnquiryController enquiryController = new EnquiryController();
     private final Scanner scanner = new Scanner(System.in);
 
     @Override
@@ -32,7 +34,7 @@ public class ApplicantView implements MenuInterface {
             System.out.println("| 2. Submit Application                         |");
             System.out.println("| 3. View Application Status                    |");
             System.out.println("| 4. Request Withdrawal for Application         |");
-            System.out.println("| 5. Enquiry (Submit, View, Edit, Delete)       |");
+            System.out.println("| 5. Enquiry (View, Submit, Edit, Delete)       |");
             System.out.println("| 6. Logout                                     |");
             System.out.println("+-----------------------------------------------+");
             System.out.println();
@@ -54,7 +56,7 @@ public class ApplicantView implements MenuInterface {
                     applicationController.requestWithdrawal(user);
                     break;
                 case "5":
-                    // controller.getAvailableProjects();
+                    handleEnquiries(user);
                     break;
                 case "6":
                     System.out.println("Logging out...");
@@ -71,5 +73,47 @@ public class ApplicantView implements MenuInterface {
                 scanner.nextLine();
             }
         }
+    }
+
+    public void handleEnquiries(User user) {
+        Scanner sc = new Scanner(System.in);
+        int choice = -1;
+
+        do {
+            System.out.println();
+            System.out.println("+---------------------------------------------+");
+            System.out.println("|               Enquiry Menu                  |");
+            System.out.println("+---------------------------------------------+");
+            System.out.println("| 1. View Enquiries                           |");
+            System.out.println("| 2. Submit Enquiry                           |");
+            System.out.println("| 3. Edit Enquiry                             |");
+            System.out.println("| 4. Delete Enquiry                           |");
+            System.out.println("| 5. Back to Applicant Menu                   |");
+            System.out.println("+---------------------------------------------+");
+            System.out.print("Enter your choice: ");
+
+            choice = sc.nextInt();
+            sc.nextLine(); // consume newline
+
+            switch (choice) {
+                case 1:
+                    enquiryController.viewEnquiry(user);
+                    break;
+                case 2:
+                    enquiryController.submitEnquiry(user);
+                    break;
+                case 3:
+                    enquiryController.editEnquiry(user);
+                    break;
+                case 4:
+                    enquiryController.deleteEnquiry(user);
+                    break;
+                case 5:
+                    System.out.println("Returning to main menu...");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        } while (choice != 5);
     }
 }

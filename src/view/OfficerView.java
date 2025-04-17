@@ -66,6 +66,7 @@ public class OfficerView implements MenuInterface{
                     break;
                 case "8":
                     enquiryController.viewEnquiry(user);
+                    enquiryController.replyToEnquiry(user);
                     break;
                 case "9":
                     break;

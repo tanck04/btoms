@@ -1,6 +1,6 @@
 package repository;
 
-import model.Enquiry;
+import model.*;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -9,6 +9,7 @@ import java.util.List;
 //methods:
 public class EnquiryRepository {
     private static final String FILE_PATH_ENQUIRY = "./src/repository/data/enquiry_records.csv";
+    private static final ProjectRepository projectRepository = new ProjectRepository();
 
     /**
      * Creates a new enquiry and appends it to the CSV file.
@@ -16,7 +17,7 @@ public class EnquiryRepository {
      * @param enquiry The Enquiry object to be added.
      * @throws IOException if an error occurs while writing to the file.
      */
-    public void createNewEnquiry(Enquiry enquiry) throws IOException {
+    public boolean createNewEnquiry(Enquiry enquiry) throws IOException {
         File file = new File(FILE_PATH_ENQUIRY);
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
             // Write a newline if file has content
@@ -28,8 +29,11 @@ public class EnquiryRepository {
                     enquiry.getProjectID(),
                     enquiry.getEnquiryText(),
                     enquiry.getEnquiryReply(),
-                    enquiry.getEnquiryStatus());
+                    enquiry.getEnquiryStatus(),
+                    enquiry.getReplyingOfficerID());
             writer.write(record);
+            writer.flush();
+            return true;
         }
     }
 
@@ -104,7 +108,7 @@ public class EnquiryRepository {
      * @return true if successful.
      * @throws IOException if writing fails.
      */
-    public boolean replyToEnquiry(String enquiryID, String replyText) throws IOException {
+    public boolean replyToEnquiry(String enquiryID, String replyText, String officerId) throws IOException {
         List<Enquiry> enquiries = loadAllEnquiries();
         boolean updated = false;
 
@@ -112,6 +116,7 @@ public class EnquiryRepository {
             if (e.getEnquiryID().equals(enquiryID)) {
                 e.setEnquiryReply(replyText);
                 e.setEnquiryStatus("REPLIED");
+                e.setReplyingOfficerID(officerId);
                 updated = true;
                 break;
             }
@@ -220,10 +225,92 @@ public class EnquiryRepository {
                         e.getProjectID(),
                         e.getEnquiryText(),
                         e.getEnquiryReply(),
-                        e.getEnquiryStatus());
+                        e.getEnquiryStatus(),
+                        e.getReplyingOfficerID());
                 writer.write(record);
                 writer.newLine();
             }
         }
+    }
+    public void insertInquiryTextByEnquiryId(String enquiryID, String replyText, String officerId) throws IOException {
+        List<Enquiry> enquiries = loadAllEnquiries();
+        boolean updated = false;
+
+        for (Enquiry e : enquiries) {
+            if (e.getEnquiryID().equals(enquiryID)) {
+                e.setEnquiryReply(replyText);
+                e.setEnquiryStatus("REPLIED");
+                e.setReplyingOfficerID(officerId); // Set the replying officer ID
+                updated = true;
+                break;
+            }
+        }
+
+        if (updated) {
+            overwriteCSV(enquiries);
+        }
+    }
+    public List<Enquiry> getEnquiriesByUserType(User user){
+        List<Enquiry> enquiriesByUserType = new ArrayList<>();
+        if (user instanceof Manager) {
+            enquiriesByUserType = loadAllEnquiries();
+        } else if (user instanceof Officer) {
+            List<Project> projects = projectRepository.getProjectsByOfficerId(user.getNRIC());
+            for (Project project : projects) {
+                try {
+                    List<Enquiry> enquiriesForOneProject = getEnquiriesByProject(project.getProjectID());
+                    enquiriesByUserType.addAll(enquiriesForOneProject);
+                } catch (IOException e) {
+                    System.out.println("Failed to load enquiries for project: " + project.getProjectID());
+                }
+            }
+        } else if (user instanceof Applicant) {
+            try{
+                enquiriesByUserType = getEnquiriesByApplicantId(user.getNRIC());
+            }catch (IOException e){
+                System.out.println("Failed to load enquiries for applicant: " + user.getNRIC());
+            }
+        }
+        return enquiriesByUserType;
+    }
+
+    public boolean updateEnquiry(Enquiry updatedEnquiry) throws IOException {
+        // Load all enquiries from the file
+        List<Enquiry> existingEnquiries = loadAllEnquiries();
+
+        boolean found = false;
+
+        // Iterate over the existing enquiries to find the one with the matching EnquiryID
+        for (int i = 0; i < existingEnquiries.size(); i++) {
+            Enquiry enquiry = existingEnquiries.get(i);
+
+            if (enquiry.getEnquiryID().equals(updatedEnquiry.getEnquiryID())) {
+                // Update the enquiry
+                existingEnquiries.set(i, updatedEnquiry);
+                found = true;
+                break;
+            }
+        }
+
+        // If the enquiry was found, write the updated list back to the file
+        if (found) {
+            // Write all enquiries back to the file
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH_ENQUIRY))) {
+                for (Enquiry enquiry : existingEnquiries) {
+                    String record = String.join(",",
+                            enquiry.getEnquiryID(),
+                            enquiry.getApplicantID(),
+                            enquiry.getProjectID(),
+                            enquiry.getEnquiryText(),
+                            enquiry.getEnquiryReply(),
+                            enquiry.getEnquiryStatus(),
+                            enquiry.getReplyingOfficerID());
+                    writer.write(record);
+                    writer.newLine();
+                }
+            }
+        }
+
+        return found;
     }
 }

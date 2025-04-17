@@ -39,7 +39,7 @@ public class ManagerView implements MenuInterface {
             System.out.println("| 6. Approve or Reject Application              |");
             System.out.println("| 7. Approve or Reject Withdrawal               |");
             System.out.println("| 8. Review Officer Registrations               |");
-            System.out.println("| 9. Approve or Reject Officers Registration   |");
+            System.out.println("| 9. Approve or Reject Officers Registration    |");
             System.out.println("| 10. Reply Enquiries                           |");
             System.out.println("| 11. Logout                                    |");
             System.out.println("+-----------------------------------------------+");
@@ -86,6 +86,7 @@ public class ManagerView implements MenuInterface {
                     break;
                 case 10:
                     enquiryController.viewEnquiry(user);
+                    enquiryController.replyToEnquiry(user);
                     break;
                 case 11:
                     System.out.println("Logging out...");
