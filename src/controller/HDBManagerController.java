@@ -1,15 +1,9 @@
 package controller;
 
 
-import enums.FlatType;
-import enums.Visibility;
-import enums.WithdrawalStatus;
+import enums.*;
 import model.*;
-import enums.ApplicantAppStatus;
-import repository.ApplicantRepository;
-import repository.ApplicationRepository;
-import repository.ManagerRepository;
-import repository.ProjectRepository;
+import repository.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -387,5 +381,133 @@ public class HDBManagerController{
             ApplicationRepository.updateApplicationInCSV(selectedApp);
         }
     }
+
+    public void approveOrRejectOfficerRegistration(User user) {
+        Manager manager = (Manager) user;
+        Scanner scanner = new Scanner(System.in);
+        Project managedProject = null;
+        OfficerRegRepository officerRegRepository = new OfficerRegRepository();
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+        sdf.setLenient(false);
+        Date currentDate = new Date();
+
+        try {
+            for (Project project : projectRepository.loadProjects()) {
+                try {
+                    String closingDateStr = project.getApplicationClosingDate();
+
+                    if (closingDateStr == null || closingDateStr.isEmpty()) {
+                        System.out.println("Skipping project " + project.getProjectID() + ": Missing closing date.");
+                        continue;
+                    }
+
+                    Date closingDate = sdf.parse(closingDateStr); // Convert String to Date
+
+                    if (manager.getNRIC().equals(project.getManagerID()) && closingDate.after(currentDate)) {
+                        managedProject = project;
+                        break;
+                    }
+                } catch (java.text.ParseException e) {
+                    System.out.println("Error parsing date for project " + project.getProjectID() + ": " + e.getMessage());
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading projects: " + e.getMessage());
+            return;
+        }
+
+        // Rest of the method remains unchanged
+        if (managedProject == null) {
+            System.out.println("Error: No project found for manager " + manager.getNRIC());
+            return;
+        }
+        System.out.println("Found project: " + managedProject.getProjectID() + " - " + managedProject.getProjectName());
+
+        // Get pending officer registrations for this project
+        List<OfficerRegistration> pendingRegistrations = OfficerRegRepository.getPendingByProject(managedProject.getProjectID());
+
+        if (pendingRegistrations.isEmpty()) {
+            System.out.println("No pending officer registrations found for project " + managedProject.getProjectID());
+            return;
+        }
+
+        // Display pending registrations
+        System.out.println("\n====== PENDING OFFICER REGISTRATIONS ======");
+        System.out.println("ID\tREGISTRATION ID\tOFFICER NRIC\tOFFICER NAME\tPROJECT ID");
+        System.out.println("--------------------------------------------------------------");
+
+        int count = 1;
+        for (OfficerRegistration reg : pendingRegistrations) {
+            System.out.printf("%d\t%s\t%s\t%s\t%s\n",
+                    count++,
+                    reg.getRegistrationId(),
+                    reg.getOfficer().getNRIC(),
+                    reg.getOfficer().getName(),
+                    reg.getProject().getProjectID());
+        }
+
+        // Get user choice
+        System.out.print("\nEnter the ID of the registration to approve/reject (or 0 to cancel): ");
+        int choice;
+        try {
+            choice = Integer.parseInt(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number.");
+            return;
+        }
+
+        // Check if user wants to cancel
+        if (choice == 0) {
+            System.out.println("Operation cancelled.");
+            return;
+        }
+
+        // Validate choice
+        if (choice < 1 || choice > pendingRegistrations.size()) {
+            System.out.println("Invalid choice. Please select a valid ID.");
+            return;
+        }
+
+        // Get the selected registration
+        OfficerRegistration selectedReg = pendingRegistrations.get(choice - 1);
+
+        // Prompt for approval or rejection
+        System.out.print("Enter 1 to APPROVE or 0 to REJECT this officer registration: ");
+        int action;
+        try {
+            action = Integer.parseInt(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter 0 or 1.");
+            return;
+        }
+
+        // Process the action
+        if (action == 1) {
+            // Check if there are available officer slots
+            if (managedProject.getOfficerSlot() > 10) {
+                System.out.println("Cannot approve: Maximum number of officers already reached for this project.");
+                return;
+            }
+            approveRegistration(selectedReg);
+            System.out.println("Registration approved successfully.");
+        } else if (action == 0) {
+            rejectRegistration(selectedReg);
+            System.out.println("Registration rejected.");
+        } else {
+            System.out.println("Invalid choice. Please enter 0 or 1.");
+        }
+    }
+
+    public void approveRegistration(OfficerRegistration reg) {
+        reg.setStatus(OfficerRegStatus.APPROVED);
+        projectRepository.addOfficerToProject(reg.getProject(), reg.getOfficer());
+        OfficerRegRepository.updateOfficerRegInCSV(reg);
+    }
+
+    public void rejectRegistration(OfficerRegistration reg) {
+        reg.setStatus(OfficerRegStatus.REJECTED);
+        OfficerRegRepository.updateOfficerRegInCSV(reg);
+    }
+
 
 }

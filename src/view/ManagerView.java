@@ -78,10 +78,11 @@ public class ManagerView implements MenuInterface {
                     hdbManagerController.approveOrRejectWithdrawal(user);
                     break;
                 case 8:
-                    reviewOfficerRegistrations();
+                    //reviewOfficerRegistrations();
                     break;
                 case 9:
-                    approveOfficerRegistration();
+                    hdbManagerController.approveOrRejectOfficerRegistration(user);
+                    //approveOfficerRegistration();
                     break;
                 case 10:
                     enquiryController.viewEnquiry(user);
@@ -215,41 +216,6 @@ public class ManagerView implements MenuInterface {
         }
     }
 
-    public void reviewOfficerRegistrations() {
-        System.out.println("\n===== Review Officer Registrations =====");
-
-        System.out.print("Enter project ID to review officer registrations: ");
-        String projectID = scanner.nextLine().trim();
-
-        List<OfficerRegistration> pending = OfficerRegRepository.getPendingByProject(projectID);
-
-        if (pending.isEmpty()) {
-            System.out.println("No pending officer registrations for this project.");
-            return;
-        }
-
-        for (OfficerRegistration reg : pending) {
-            System.out.println("\nOfficer ID: " + reg.getNric());
-            System.out.println("Project ID: " + reg.getProjectId());
-            System.out.println("Status: " + reg.getStatus());
-            System.out.print("Approve this officer? (yes/no): ");
-            String input = scanner.nextLine().trim();
-
-            if (input.equalsIgnoreCase("yes")) {
-                officerRegController.approveRegistration(reg);
-                System.out.println("Officer registration approved.");
-            } else {
-                officerRegController.rejectRegistration(reg);
-                System.out.println("Officer registration rejected.");
-            }
-        }
-    }
-
-    private void approveOfficerRegistration() {
-        // This function is similar to reviewOfficerRegistrations
-        // Could call reviewOfficerRegistrations() directly
-        reviewOfficerRegistrations();
-    }
 
     private void replyEnquiries() {
         System.out.println("\n===== Reply to Enquiries =====");

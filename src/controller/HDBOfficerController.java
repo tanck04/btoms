@@ -2,10 +2,13 @@ package controller;
 
 import enums.FlatType;
 import enums.MaritalStatus;
+import enums.OfficerRegStatus;
 import enums.Visibility;
 import model.*;
+import repository.OfficerRegRepository;
 import repository.ProjectRepository;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -145,6 +148,16 @@ public class HDBOfficerController extends ApplicantController {
                 return;
             }
 
+            try{
+                if (ifRegisterOfficer(officer)) {
+                    System.out.println("You have already registered to be an officer for this project. Please select another project.");
+                    return;
+                }
+            }catch (Exception e){
+                System.out.println("Error checking registration: " + e.getMessage());
+                return;
+            }
+
             // Display available flat types for the selected project
             System.out.println("\n===== Available Flat Types =====");
             Map<FlatType, Integer> flatTypes = selectedProject.getFlatTypeUnits();
@@ -232,8 +245,22 @@ public class HDBOfficerController extends ApplicantController {
         }
     }
 
+    // Method to check if the officer has registered to become an officer for a project
     private boolean ifRegisterOfficer(Officer officer){
-        return officer.getNRIC().equals(officer.getName());
+        OfficerRegRepository officerRegRepository = new OfficerRegRepository();
+        List <OfficerRegistration> officerRegistrations = new ArrayList<>();
+        try{
+            officerRegistrations = officerRegRepository.loadAllOfficerReg();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        for (OfficerRegistration registration : officerRegistrations) {
+            if (registration.getOfficer().getNRIC().equals(officer.getNRIC()) &&
+                    registration.getStatus() != OfficerRegStatus.REJECTED){
+                return true;
+            }
+        }
+        return false;
     }
 
 }

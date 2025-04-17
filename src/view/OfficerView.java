@@ -59,7 +59,7 @@ public class OfficerView implements MenuInterface{
                 case "5":
                     break;
                 case "6":
-                    officerRegController.createRegistration(user.getNRIC());
+                    officerRegController.createRegistration(user);
                     break;
                 case "7":
                     officerRegController.viewRegistrationStatus(user.getNRIC());

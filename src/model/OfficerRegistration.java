@@ -1,23 +1,23 @@
 package model;
 
 import enums.OfficerRegStatus;
+import enums.WithdrawalStatus;
 
 public class OfficerRegistration {
-    private Manager manager;
-    private String nric;
-    private String projectId;
+    private Officer officer;
+    private Project project;
     private OfficerRegStatus status;
     private String registrationId;
 
-    public OfficerRegistration(String registrationId, String nric, String projectId) {
-        this.nric = nric;
-        this.projectId = projectId;
-        this.status = OfficerRegStatus.PENDING;
+    public OfficerRegistration(String registrationId, Officer officer, Project project, OfficerRegStatus officerRegStatus) {
+        this.officer = officer;
+        this.project = project;
+        this.status = officerRegStatus;
         this.registrationId = registrationId;
     }
 
-    public String getNric() { return nric; }
-    public String getProjectId() { return projectId; }
+    public Officer getOfficer() { return officer;}
+    public Project getProject() { return project; }
     public String getRegistrationId() { return registrationId; }
     public OfficerRegStatus getStatus() { return status; }
     public void setStatus(OfficerRegStatus status) { this.status = status; }

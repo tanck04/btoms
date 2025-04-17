@@ -3,6 +3,7 @@ package repository;
 import enums.Visibility;
 import model.Application;
 import model.Enquiry;
+import model.Officer;
 import model.Project;
 import enums.FlatType;
 import java.util.Map;
@@ -138,75 +139,20 @@ public class ProjectRepository{
         return (Project)projects.stream().filter((project) -> project.getProjectID().equals(projectID)).findFirst().orElse((Project)null);
     }
 
-    public void addOfficerToProject(String projectID, String officerID) {
-        try {
-            // Find the project by ID
-            Project project = findProjectById(projectID);
+    public void addOfficerToProject(Project project, Officer officer) {
+        if (!project.getOfficerIDs().contains(officer.getNRIC())) {
+            List<String> newOfficerIDs = new ArrayList<>(project.getOfficerIDs());
+            // Add the officer to the project
+            newOfficerIDs.add(officer.getNRIC());
+            project.setOfficerIDs(newOfficerIDs);
+            project.setOfficerSlot(project.getOfficerSlot() + 1);
 
-            if (project == null) {
-                System.out.println("Project not found with ID: " + projectID);
-                return;
-            }
+            // Save the updated project
+            updateProjectInCSV(project);
 
-            // Check if officer is already assigned
-            if (!project.getOfficerIDs().contains(officerID)) {
-                // Add the officer to the project
-                project.getOfficerIDs().add(officerID);
-
-                // Save the updated project
-                updateProject(project);
-
-                System.out.println("✅ Officer " + officerID + " added to project " + projectID);
-            } else {
-                System.out.println("Officer " + officerID + " is already assigned to this project");
-            }
-        } catch (IOException e) {
-            System.out.println("Error adding officer to project: " + e.getMessage());
-        }
-    }
-
-    private void updateProject(Project project) throws IOException {
-        // Get all projects
-        List<Project> projects = loadProjects();
-
-        // Find and replace the project
-        for (int i = 0; i < projects.size(); i++) {
-            if (projects.get(i).getProjectID().equals(project.getProjectID())) {
-                projects.set(i, project);
-                break;
-            }
-        }
-
-        // Write all projects back to the file
-        saveProjects(projects);
-    }
-
-    private void saveProjects(List<Project> projects) throws IOException {
-        File directory = new File("./src/repository/" + folder);
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) {
-            for (Project project : projects) {
-                String projectData = String.join(",",
-                    project.getProjectID(),
-                    project.getProjectName(),
-                    project.getNeighborhood(),
-                    String.valueOf(project.getUnitsForFlatType(FlatType.TWO_ROOMS)),
-                    String.valueOf(project.getPriceForFlatType(FlatType.TWO_ROOMS)),
-                    String.valueOf(project.getUnitsForFlatType(FlatType.THREE_ROOMS)),
-                    String.valueOf(project.getPriceForFlatType(FlatType.THREE_ROOMS)),
-                    project.getApplicationOpeningDate(),
-                    project.getApplicationClosingDate(),
-                    project.getManagerID(),
-                    String.valueOf(project.getOfficerSlot()),
-                    String.join(";", project.getOfficerIDs()),
-                    project.getVisibility().toString());
-
-                writer.write(projectData);
-                writer.newLine();
-            }
+            System.out.println("✅ Officer " + officer.getNRIC() + " added to project " + project.getProjectID());
+        } else {
+            System.out.println("Officer " + officer.getNRIC() + " is already assigned to this project");
         }
     }
 

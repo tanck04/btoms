@@ -1,19 +1,14 @@
 package controller;
 
+import enums.*;
 import model.*;
 import repository.ApplicantRepository;
 import repository.ApplicationRepository;
-import enums.ApplicantAppStatus;
-import enums.WithdrawalStatus;
-import enums.FlatType;
-import enums.MaritalStatus;
-import enums.Visibility;
+import repository.OfficerRegRepository;
 import repository.ProjectRepository;
 
 import java.io.IOException;
-import java.util.Scanner;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
 public class ApplicationController {
     private final ApplicantRepository applicantRepo = new ApplicantRepository();
@@ -74,9 +69,7 @@ public class ApplicationController {
 
                 for (Application app : applicationRepo.loadApplications()) {
                     if (app.getOfficer() != null && app.getOfficer().getNRIC().equals(nric) &&
-                            (app.getWithdrawalStatus() == WithdrawalStatus.PENDING ||
-                                    app.getWithdrawalStatus() == WithdrawalStatus.NULL ||
-                                    app.getWithdrawalStatus() == WithdrawalStatus.REJECTED)) {
+                            (app.getWithdrawalStatus() != WithdrawalStatus.REJECTED)) {
                         System.out.println("Officer has already applied for a project.");
                         return false;
                     }
@@ -154,7 +147,7 @@ public class ApplicationController {
                 if (application.getUser().getNRIC().equals(user.getNRIC())) {
                     application.setWithdrawalStatus(WithdrawalStatus.PENDING);
                     ApplicationRepository.updateApplicationInCSV(application);
-                    System.out.println("Application withdrawn successfully.");
+                    System.out.println("Withdrawal request submitted successfully.");
                     return true;
                 }
             }
