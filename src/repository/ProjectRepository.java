@@ -1,6 +1,7 @@
 package repository;
 
 import enums.Visibility;
+import model.Application;
 import model.Enquiry;
 import model.Project;
 import enums.FlatType;
@@ -43,20 +44,7 @@ public class ProjectRepository{
                 writer.newLine();
             }
 
-            String projectData = String.join(",",
-                    project.getProjectID(),
-                    project.getProjectName(),
-                    project.getNeighborhood(),
-                    String.valueOf(project.getUnitsForFlatType(FlatType.TWO_ROOMS)),
-                    String.valueOf(project.getPriceForFlatType(FlatType.TWO_ROOMS)),
-                    String.valueOf(project.getUnitsForFlatType(FlatType.THREE_ROOMS)),
-                    String.valueOf(project.getPriceForFlatType(FlatType.THREE_ROOMS)),
-                    project.getApplicationOpeningDate(),
-                    project.getApplicationClosingDate(),
-                    project.getManagerID(),
-                    String.valueOf(project.getOfficerSlot()),
-                    String.join(";", project.getOfficerIDs()),
-                    project.getVisibility().toString());
+            String projectData = projectToCSV(project);
 
             writer.write(projectData);
         }
@@ -238,6 +226,62 @@ public class ProjectRepository{
             }
         }
         return filteredProjects;
+    }
+
+    public static void updateProjectInCSV(Project updatedProject) {
+        File inputFile = new File(filePath);
+        List<String> updatedLines = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile))) {
+            String line;
+            boolean isFirstLine = true;
+
+            while ((line = reader.readLine()) != null) {
+                if (isFirstLine) {
+                    updatedLines.add(line); // Header
+                    isFirstLine = false;
+                    continue;
+                }
+
+                if (line.startsWith(updatedProject.getProjectID() + ",")) {
+                    updatedLines.add(projectToCSV(updatedProject)); // Use helper method
+                } else {
+                    updatedLines.add(line); // Keep as is
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error reading CSV for update: " + e.getMessage());
+            return;
+        }
+
+        // Write updated content back to file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) {
+            for (String updatedLine : updatedLines) {
+                writer.write(updatedLine);
+                writer.newLine();
+            }
+            System.out.println("Updated project saved successfully.");
+        } catch (IOException e) {
+            System.out.println("Error writing updated CSV: " + e.getMessage());
+        }
+    }
+
+    // Helper method for converting Project to CSV string
+    private static String projectToCSV(Project project) {
+        return String.join(",",
+            project.getProjectID(),
+            project.getProjectName(),
+            project.getNeighborhood(),
+            String.valueOf(project.getUnitsForFlatType(FlatType.TWO_ROOMS)),
+            String.valueOf(project.getPriceForFlatType(FlatType.TWO_ROOMS)),
+            String.valueOf(project.getUnitsForFlatType(FlatType.THREE_ROOMS)),
+            String.valueOf(project.getPriceForFlatType(FlatType.THREE_ROOMS)),
+            project.getApplicationOpeningDate(),
+            project.getApplicationClosingDate(),
+            project.getManagerID(),
+            String.valueOf(project.getOfficerSlot()),
+            String.join(";", project.getOfficerIDs()),
+            project.getVisibility().toString());
     }
 }
 

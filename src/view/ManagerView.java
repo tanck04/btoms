@@ -35,7 +35,7 @@ public class ManagerView implements MenuInterface {
             System.out.println("| 2. View All Projects                          |");
             System.out.println("| 3. Update Project Details                     |");
             System.out.println("| 4. Delete Project                             |");
-            System.out.println("| 5. Manage Project Visibility                  |");
+            //System.out.println("| 5. Manage Project Visibility                  |");
             System.out.println("| 6. Review Applications                        |");
             System.out.println("| 7. Approve or Reject Application              |");
             System.out.println("| 8. Approve or Reject Withdrawal               |");
@@ -58,19 +58,19 @@ public class ManagerView implements MenuInterface {
 
             switch (choice) {
                 case 1:
-                    createProject(user);
+                    projectController.createProject(user);
                     break;
                 case 2:
                     hdbManagerController.viewProject(user);
                     break;
                 case 3:
-                    updateProjectDetails();
+                    projectController.updateProjectDetails(user);
                     break;
                 case 4:
                     deleteProject();
                     break;
                 case 5:
-                    manageProjectVisibility();
+                    manageProjectVisibility();  //can remove this
                     break;
                 case 6:
                     reviewApplications();
@@ -103,180 +103,6 @@ public class ManagerView implements MenuInterface {
                 System.out.println("\nPress Enter to continue...");
                 scanner.nextLine();
             }
-        }
-    }
-
-
-
-
-
-    public String generateNextProjectID() {
-        int max = 0;
-        ProjectRepository projectRepository = new ProjectRepository();
-
-        try {
-            // Load all projects directly from CSV
-            List<Project> projects = projectRepository.loadProjects();
-
-            // Find the highest project number
-            for (Project project : projects) {
-                String existingID = project.getProjectID();
-                if (existingID.matches("P\\d+")) {
-                    int number = Integer.parseInt(existingID.substring(1));
-                    if (number > max) {
-                        max = number;
-                    }
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error loading projects: " + e.getMessage());
-            // If we can't load existing projects, start from 1
-        }
-
-        int nextNumber = max + 1;
-        return String.format("P%04d", nextNumber);  // e.g., P0001, P0002
-    }
-
-    private void createProject(User user) {
-        try {
-            // Collect project data from user input
-            String projectID = generateNextProjectID();  // auto-generate
-            System.out.println("Auto-generated Project ID: " + projectID);
-
-            System.out.print("Enter Project Name: ");
-            String projectName = scanner.nextLine().trim();
-
-            System.out.print("Enter Neighborhood: ");
-            String neighborhood = scanner.nextLine().trim();
-
-            // Collect TWO_ROOMS data
-            System.out.println("\nTWO_ROOMS Flat Type");
-            System.out.print("Enter Number of Units: ");
-            int twoRoomUnits = Integer.parseInt(scanner.nextLine().trim());
-
-            System.out.print("Enter Price: ");
-            double twoRoomPrice = Double.parseDouble(scanner.nextLine().trim());
-
-            // Collect THREE_ROOMS data
-            System.out.println("\nTHREE_ROOMS Flat Type");
-            System.out.print("Enter Number of Units: ");
-            int threeRoomUnits = Integer.parseInt(scanner.nextLine().trim());
-
-            System.out.print("Enter Price: ");
-            double threeRoomPrice = Double.parseDouble(scanner.nextLine().trim());
-
-            // Collect remaining project details
-            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-            sdf.setLenient(false);
-
-            Date openingDate = null;
-
-            while (openingDate == null) {
-                try {
-                    System.out.print("Enter Opening Date (MM/dd/yyyy): ");
-                    String input = scanner.nextLine().trim();
-                    openingDate = sdf.parse(input);  // Parse as strict format
-
-                    // Confirm what the user entered
-                    System.out.println("✅ Parsed Opening Date: " + sdf.format(openingDate));
-                } catch (ParseException e) {
-                    System.out.println("❌ Invalid date format. Please follow MM/dd/yyyy.");
-                }
-            }
-
-
-            Date closingDate = null;
-
-            while (closingDate == null) {
-                try {
-                    System.out.print("Enter Closing Date (MM/dd/yyyy): ");
-                    String input = scanner.nextLine().trim();
-                    closingDate = sdf.parse(input);  // Parse as strict format
-
-                    // Confirm what the user entered
-                    System.out.println("✅ Parsed Closing Date: " + sdf.format(closingDate));
-                } catch (ParseException e) {
-                    System.out.println("❌ Invalid date format. Please follow MM/dd/yyyy.");
-                }
-            }
-
-
-
-            // Prepare flat type data
-            Map<FlatType, Integer> flatTypeUnits = new HashMap<>();
-            flatTypeUnits.put(FlatType.TWO_ROOMS, twoRoomUnits);
-            flatTypeUnits.put(FlatType.THREE_ROOMS, threeRoomUnits);
-
-            Map<FlatType, Double> flatTypePrices = new HashMap<>();
-            flatTypePrices.put(FlatType.TWO_ROOMS, twoRoomPrice);
-            flatTypePrices.put(FlatType.THREE_ROOMS, threeRoomPrice);
-
-            // Call controller to handle business logic
-            Project result = projectController.createProject(
-                    projectID, projectName, neighborhood,
-                    flatTypeUnits, flatTypePrices,
-                    String.valueOf(openingDate), String.valueOf(closingDate),
-                    user.getNRIC(), 0, new ArrayList<>()
-            );
-
-            if (result != null) {
-                System.out.println("Project created successfully!");
-            } else {
-                System.out.println("Failed to create project.");
-            }
-        } catch (IllegalArgumentException e) {
-            System.out.println("Invalid input: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    private void updateProjectDetails() {
-        System.out.println("\n===== Update Project Details =====");
-
-        System.out.print("Enter the Project ID to update: ");
-        String projectId = scanner.nextLine().trim();
-
-        try {
-            Project project = projectController.getProjectById(projectId);
-            if (project == null) {
-                System.out.println("Project not found with ID: " + projectId);
-                return;
-            }
-
-            System.out.println("Updating Project: " + project.getProjectName());
-            System.out.println("\nWhat would you like to update?");
-            System.out.println("1. Project Name");
-            System.out.println("2. Two-Room Units");
-            System.out.println("3. Two-Room Price");
-            System.out.println("4. Three-Room Units");
-            System.out.println("5. Three-Room Price");
-            System.out.println("6. Application Opening Date");
-            System.out.println("7. Application Closing Date");
-            System.out.println("8. Officer Slots");
-            System.out.print("Enter your choice: ");
-
-            int choice = Integer.parseInt(scanner.nextLine().trim());
-
-            // Implement update logic based on choice
-            // This would call appropriate methods in your ProjectController
-            // For brevity, I'll show a simple example:
-
-            switch (choice) {
-                case 1:
-                    System.out.print("Enter new Project Name: ");
-                    String newName = scanner.nextLine().trim();
-                    // Here you would call projectController method to update
-                    System.out.println("Project name updated successfully.");
-                    break;
-                // Implement other cases similarly
-                default:
-                    System.out.println("Invalid option.");
-                    break;
-            }
-        } catch (Exception e) {
-            System.out.println("Error retrieving project: " + e.getMessage());
         }
     }
 

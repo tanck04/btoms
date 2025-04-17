@@ -135,10 +135,10 @@ public class HDBManagerController{
         // Rest of the method remains the same...
 
     /**
- * Gets all applications with PENDING status for a specific project
- * @param project The project to filter applications for
- * @return List of applications with pending status for the specified project
- */
+    * Gets all applications with PENDING status for a specific project
+    * @param project The project to filter applications for
+    * @return List of applications with pending status for the specified project
+    */
     public List<Application> getPendingApplicationsByProject(Project project) {
         List<Application> pendingApplications = new ArrayList<>();
 
@@ -273,15 +273,30 @@ public class HDBManagerController{
         Manager manager = (Manager) user;
         ArrayList<Application> pendingWithdrawal = new ArrayList<>();
         Scanner scanner = new Scanner(System.in);
-        Application selectedApp = null;
-
-        // Find the project managed by this HDB manager
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+        sdf.setLenient(false);
+        Date currentDate = new Date();
         Project managedProject = null;
+        Application selectedApp = null; // Added declaration for selectedApp
+
         try {
             for (Project project : projectRepository.loadProjects()) {
-                if (manager.getNRIC().equals(project.getManagerID())) {
-                    managedProject = project;
-                    break;
+                try {
+                    String closingDateStr = project.getApplicationClosingDate();
+
+                    if (closingDateStr == null || closingDateStr.isEmpty()) {
+                        System.out.println("Skipping project " + project.getProjectID() + ": Missing closing date.");
+                        continue;
+                    }
+
+                    Date closingDate = sdf.parse(closingDateStr); // Convert String to Date
+
+                    if (manager.getNRIC().equals(project.getManagerID()) && closingDate.after(currentDate)) {
+                        managedProject = project;
+                        break;
+                    }
+                } catch (java.text.ParseException e) {
+                    System.out.println("Error parsing date for project " + project.getProjectID() + ": " + e.getMessage());
                 }
             }
         } catch (IOException e) {
@@ -289,6 +304,7 @@ public class HDBManagerController{
             return;
         }
 
+        // Rest of the method remains unchanged
         if (managedProject == null) {
             System.out.println("Error: No project found for manager " + manager.getNRIC());
             return;
@@ -319,7 +335,10 @@ public class HDBManagerController{
         for (Application application : pendingWithdrawal) {
             System.out.println("Application ID: " + application.getApplicationID());
             System.out.println("Applicant NRIC: " + application.getApplicant().getNRIC());
+            System.out.println("Applicant Name: " + application.getApplicant().getName());
             System.out.println("Withdrawal Status: " + application.getWithdrawalStatus());
+            System.out.println("Project ID: " + application.getProject().getProjectID());
+            System.out.println("Project Name: " + application.getProject().getProjectName());
             System.out.println("Flat Type: " + application.getFlatType());
             System.out.println("Application Status: " + application.getApplicationStatus());
             System.out.println("--------------------------------------------------------------");

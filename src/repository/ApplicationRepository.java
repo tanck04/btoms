@@ -168,7 +168,6 @@ public class ApplicationRepository{
     }
 
     public static void updateApplicationInCSV(Application updatedApplication) {
-        String filePath = "./src/repository/" + folder + "/" + fileName;
         File inputFile = new File(filePath);
         List<String> updatedLines = new ArrayList<>();
 
@@ -204,6 +203,16 @@ public class ApplicationRepository{
         } catch (IOException e) {
             System.out.println("Error writing updated CSV: " + e.getMessage());
         }
+    }
+
+    private String applicationToCSV(Application application) {
+        return String.join(",",
+                application.getApplicationID(),
+                application.getApplicant().getNRIC(),
+                application.getProject().getProjectID(),
+                application.getFlatType().toString(),
+                application.getApplicationStatus().toString(),
+                application.getWithdrawalStatus().toString());
     }
 
 }

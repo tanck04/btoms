@@ -1,23 +1,28 @@
 package controller;
 
+import model.Manager;
 import model.Project;
 import enums.FlatType;
 import enums.Visibility;
+import model.User;
 import repository.ManagerRepository;
 import repository.ProjectRepository;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class ProjectController {
 
+
+    private final ProjectRepository projectRepository = new ProjectRepository();
+    private final ManagerRepository managerRepository = new ManagerRepository();
     /**
      * Creates a new project with the provided details and saves it to the repository
      * @return the created Project object if successful, null otherwise
      */
-    private final ProjectRepository projectRepository = new ProjectRepository();
-    private final ManagerRepository managerRepository = new ManagerRepository();
-    public Project createProject(
+    private Project createProject(
             String projectID,
             String projectName,
             String neighborhood,
@@ -73,6 +78,259 @@ public class ProjectController {
         }
     }
 
+    private String generateNextProjectID() {
+        int max = 0;
+        ProjectRepository projectRepository = new ProjectRepository();
+
+        try {
+            // Load all projects directly from CSV
+            List<Project> projects = projectRepository.loadProjects();
+
+            // Find the highest project number
+            for (Project project : projects) {
+                String existingID = project.getProjectID();
+                if (existingID.matches("P\\d+")) {
+                    int number = Integer.parseInt(existingID.substring(1));
+                    if (number > max) {
+                        max = number;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading projects: " + e.getMessage());
+            // If we can't load existing projects, start from 1
+        }
+
+        int nextNumber = max + 1;
+        return String.format("P%04d", nextNumber);  // e.g., P0001, P0002
+    }
+
+    public void createProject(User user) {
+        Scanner scanner = new Scanner(System.in);
+        try {
+            // Collect project data from user input
+            String projectID = generateNextProjectID();  // auto-generate
+            System.out.println("Auto-generated Project ID: " + projectID);
+
+            System.out.print("Enter Project Name: ");
+            String projectName = scanner.nextLine().trim();
+
+            System.out.print("Enter Neighborhood: ");
+            String neighborhood = scanner.nextLine().trim();
+
+            // Collect TWO_ROOMS data
+            System.out.println("\nTWO_ROOMS Flat Type");
+            System.out.print("Enter Number of Units: ");
+            int twoRoomUnits = Integer.parseInt(scanner.nextLine().trim());
+
+            System.out.print("Enter Price: ");
+            double twoRoomPrice = Double.parseDouble(scanner.nextLine().trim());
+
+            // Collect THREE_ROOMS data
+            System.out.println("\nTHREE_ROOMS Flat Type");
+            System.out.print("Enter Number of Units: ");
+            int threeRoomUnits = Integer.parseInt(scanner.nextLine().trim());
+
+            System.out.print("Enter Price: ");
+            double threeRoomPrice = Double.parseDouble(scanner.nextLine().trim());
+
+            // Collect remaining project details
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+            sdf.setLenient(false);
+
+            Date openingDate = null;
+            String formattedOpeningDate = null;
+
+            while (openingDate == null) {
+                try {
+                    System.out.print("Enter Opening Date (MM/dd/yyyy): ");
+                    String input = scanner.nextLine().trim();
+                    openingDate = sdf.parse(input);  // Parse as strict format
+                    formattedOpeningDate = sdf.format(openingDate);
+                    // Confirm what the user entered
+                    System.out.println("✅ Parsed Opening Date: " + sdf.format(openingDate));
+                } catch (ParseException e) {
+                    System.out.println("❌ Invalid date format. Please follow MM/dd/yyyy.");
+                }
+            }
+
+
+            Date closingDate = null;
+            String formattedClosingDate = null;
+
+            while (closingDate == null) {
+                try {
+                    System.out.print("Enter Closing Date (MM/dd/yyyy): ");
+                    String input = scanner.nextLine().trim();
+                    closingDate = sdf.parse(input);  // Parse as strict format
+                    formattedClosingDate = sdf.format(closingDate);
+                    // Confirm what the user entered
+                    System.out.println("✅ Parsed Closing Date: " + sdf.format(closingDate));
+                } catch (ParseException e) {
+                    System.out.println("❌ Invalid date format. Please follow MM/dd/yyyy.");
+                }
+            }
+
+
+
+            // Prepare flat type data
+            Map<FlatType, Integer> flatTypeUnits = new HashMap<>();
+            flatTypeUnits.put(FlatType.TWO_ROOMS, twoRoomUnits);
+            flatTypeUnits.put(FlatType.THREE_ROOMS, threeRoomUnits);
+
+            Map<FlatType, Double> flatTypePrices = new HashMap<>();
+            flatTypePrices.put(FlatType.TWO_ROOMS, twoRoomPrice);
+            flatTypePrices.put(FlatType.THREE_ROOMS, threeRoomPrice);
+
+            // Call controller to handle business logic
+            Project result = createProject(
+                    projectID, projectName, neighborhood,
+                    flatTypeUnits, flatTypePrices,
+                    formattedOpeningDate, formattedClosingDate,
+                    user.getNRIC(), 0, new ArrayList<>()
+            );
+
+            if (result != null) {
+                System.out.println("Project created successfully!");
+            } else {
+                System.out.println("Failed to create project.");
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid input: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public void updateProjectDetails(User user) {
+        Manager manager = (Manager) user;
+        Scanner scanner = new Scanner(System.in);
+        HDBManagerController hdbManagerController = new HDBManagerController();
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+        sdf.setLenient(false);
+        Date newOpeningDate = null;
+        Date newClosingDate = null;
+        Project project = null;
+        hdbManagerController.viewProject(manager);
+        System.out.println("\n===== Update Project Details =====");
+        System.out.print("Enter the Project ID to update: ");
+        String projectId = scanner.nextLine().trim();
+
+        try {
+            project = getProjectById(projectId);
+            if (project == null) {
+                System.out.println("Project not found with ID: " + projectId);
+                return;
+            }
+
+            System.out.println("Updating Project: " + project.getProjectName());
+            System.out.println("\nWhat would you like to update?");
+            System.out.println("1. Project Name");
+            System.out.println("2. Two-Room Units");
+            System.out.println("3. Two-Room Price");
+            System.out.println("4. Three-Room Units");
+            System.out.println("5. Three-Room Price");
+            System.out.println("6. Application Opening Date");
+            System.out.println("7. Application Closing Date");
+            System.out.println("8. Visibility");
+            System.out.print("Enter your choice: ");
+
+            int choice = Integer.parseInt(scanner.nextLine().trim());
+
+            // Implement update logic based on choice
+            // This would call appropriate methods in your ProjectController
+            // For brevity, I'll show a simple example:
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter new Project Name: ");
+                    String newName = scanner.nextLine().trim();
+                    project.setProjectName(newName);
+                    break;
+                case 2:
+                    System.out.print("Enter updated number of Two Rooms Units: ");
+                    int twoRoomUnits = Integer.parseInt(scanner.nextLine().trim());
+                    Map<FlatType, Integer> newTwoRoomsTypeUnits = new HashMap<>();
+                    newTwoRoomsTypeUnits.put(FlatType.TWO_ROOMS, twoRoomUnits);
+                    project.setFlatTypeUnits(newTwoRoomsTypeUnits);
+                    break;
+                case 3:
+                    System.out.print("Enter updated price of Two Rooms Units: ");
+                    double newTwoRoomPrice = Integer.parseInt(scanner.nextLine().trim());
+                    Map<FlatType, Double> newTwoRoomsTypePrice = new HashMap<>();
+                    newTwoRoomsTypePrice.put(FlatType.TWO_ROOMS, newTwoRoomPrice);
+                    project.setFlatTypePrices(newTwoRoomsTypePrice);
+                    break;
+                case 4:
+                    System.out.print("Enter updated number of Three Rooms Units: ");
+                    int threeRoomUnits = Integer.parseInt(scanner.nextLine().trim());
+                    Map<FlatType, Integer> newThreeRoomsTypeUnits = new HashMap<>();
+                    newThreeRoomsTypeUnits.put(FlatType.THREE_ROOMS, threeRoomUnits);
+                    project.setFlatTypeUnits(newThreeRoomsTypeUnits);
+                    break;
+                case 5:
+                    System.out.print("Enter updated price of Three Rooms Units: ");
+                    double newThreeRoomPrice = Integer.parseInt(scanner.nextLine().trim());
+                    Map<FlatType, Double> newThreeRoomsTypePrice = new HashMap<>();
+                    newThreeRoomsTypePrice.put(FlatType.THREE_ROOMS, newThreeRoomPrice);
+                    project.setFlatTypePrices(newThreeRoomsTypePrice);
+                    break;
+                case 6:
+                    while (newOpeningDate == null) {
+                        try {
+                            System.out.print("Enter updated Opening Date (MM/dd/yyyy): ");
+                            String input = scanner.nextLine().trim();
+                            newOpeningDate = sdf.parse(input);  // Parse as strict format
+
+                            // Confirm what the user entered
+                            System.out.println("✅ Parsed Opening Date: " + sdf.format(newOpeningDate));
+                        } catch (ParseException e) {
+                            System.out.println("❌ Invalid date format. Please follow MM/dd/yyyy.");
+                        }
+                    }
+                    project.setApplicationOpeningDate(sdf.format(newOpeningDate));
+
+                case 7:
+                    while (newClosingDate == null) {
+                        try {
+                            System.out.print("Enter updated Closing Date (MM/dd/yyyy): ");
+                            String input = scanner.nextLine().trim();
+                            newClosingDate = sdf.parse(input);  // Parse as strict format
+                            // Confirm what the user entered
+                            System.out.println("✅ Parsed Closing Date: " + sdf.format(newClosingDate));
+                        } catch (ParseException e) {
+                            System.out.println("❌ Invalid date format. Please follow MM/dd/yyyy.");
+                        }
+                    }
+                    project.setApplicationClosingDate(sdf.format(newClosingDate));
+
+                case 8:
+                    System.out.print("Current project Visibility" + project.getVisibility());
+                    System.out.println("Enter new Visibility (ON/OFF): ");
+                    String visibilityInput = scanner.nextLine().trim();
+                    if (visibilityInput.toUpperCase().trim().equals("ON")) {
+                        project.setVisibility(Visibility.ON);
+                    } else if (visibilityInput.toUpperCase().trim().equals("OFF")) {
+                        project.setVisibility(Visibility.OFF);
+                    }
+                    break;
+                default:
+                    System.out.println("Invalid option.");
+                    break;
+            }
+        } catch (Exception e) {
+            System.out.println("Error retrieving project: " + e.getMessage());
+        }
+        if (project != null){
+            ProjectRepository.updateProjectInCSV(project);
+            System.out.println("Project updated successfully!");
+        }
+    }
+
+    /**
+     * @return a list of projects matching the criteria with visibility ON
+     */
     public List<Project> getAvailableProjects() {
         // Simply check if projects are empty
         ArrayList<Project> visibleProjects = new ArrayList<>();

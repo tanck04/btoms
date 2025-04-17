@@ -16,10 +16,9 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class ApplicantController{
-    private ApplicantRepository applicantRepository;
+    private final ApplicantRepository applicantRepository = new ApplicantRepository();
     private final ApplicationRepository applicationRepository = new ApplicationRepository();
     private final ProjectRepository projectRepository = new ProjectRepository();
-    private ArrayList<Project> viewable_projects = new ArrayList<>();
     // Method to check application status
     public void checkApplicationStatus(User user) {
         // Logic to check application status
@@ -33,7 +32,6 @@ public class ApplicantController{
                     System.out.println("Withdrawal Status: " + application.getWithdrawalStatus());
                     System.out.println();
                 }
-                // Add logic to check and display application status
             }
         } catch (IOException e) {
             System.out.println("Error loading applications: " + e.getMessage());
