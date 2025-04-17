@@ -1,5 +1,6 @@
 package view;
 
+import controller.ApplicationController;
 import controller.EnquiryController;
 import controller.HDBOfficerController;
 import controller.HDBOfficerRegController;
@@ -17,7 +18,7 @@ public class OfficerView implements MenuInterface{
     private final HDBOfficerController officerController = new HDBOfficerController();
     private final HDBOfficerRegController officerRegController = new HDBOfficerRegController();
     private final EnquiryController enquiryController = new EnquiryController();
-
+    private final ApplicationController applicationController = new ApplicationController();
     private final Scanner scanner = new Scanner(System.in);
     public void displayMenu(User user) {
         boolean running = true;
@@ -47,10 +48,13 @@ public class OfficerView implements MenuInterface{
                     officerController.viewProject(user);
                     break;
                 case "2":
+                    officerController.submitApplication(user);
                     break;
                 case "3":
+                    officerController.checkApplicationStatus(user);
                     break;
                 case "4":
+                    applicationController.requestWithdrawal(user);
                     break;
                 case "5":
                     break;

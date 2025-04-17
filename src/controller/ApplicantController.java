@@ -24,7 +24,7 @@ public class ApplicantController{
         // Logic to check application status
         try {
             for (Application application : applicationRepository.loadApplications()) {
-                if (application.getApplicant().getNRIC().equals(user.getNRIC())) {
+                if (application.getUser().getNRIC().equals(user.getNRIC())) {
                     System.out.println("Application ID: " + application.getApplicationID());
                     System.out.println("Project ID: " + application.getProject().getProjectID());
                     System.out.println("Flat Type: " + application.getFlatType());

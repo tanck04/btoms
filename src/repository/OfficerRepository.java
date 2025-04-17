@@ -4,6 +4,7 @@ import controller.PasswordChangerInterface;
 import controller.PasswordController;
 import controller.VerificationInterface;
 import enums.MaritalStatus;
+import model.Applicant;
 import model.Manager;
 import model.Officer;
 
@@ -32,7 +33,7 @@ public class OfficerRepository implements PasswordChangerInterface, Verification
         }
     }
 
-    public List<Officer> loadApplicants() throws IOException {
+    public List<Officer> loadOfficers() throws IOException {
         List<Officer> officers = new ArrayList<>();
         File file = new File(filePath);
 
@@ -64,7 +65,7 @@ public class OfficerRepository implements PasswordChangerInterface, Verification
     }
 
     public Officer findOfficerById(String nric) throws IOException {
-        List<Officer> officers = loadApplicants();
+        List<Officer> officers = loadOfficers();
         return officers.stream()
                 .filter(officer -> officer.getNRIC().equals(nric))
                 .findFirst()

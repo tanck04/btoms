@@ -89,12 +89,12 @@ public class HDBManagerController{
 
         int count = 1;
         for (Application application : pendingApplications) {
-            Applicant applicant = application.getApplicant();
+            User user = application.getUser();
             System.out.printf("%d\t%s\t%s\t%s\t%s\n",
                     count++,
                     application.getApplicationID(),
-                    applicant.getNRIC(),
-                    applicant.getName(),
+                    user.getNRIC(),
+                    user.getName(),
                     application.getFlatType());
         }
 

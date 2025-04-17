@@ -7,6 +7,7 @@ import enums.WithdrawalStatus;
 public class Application {
     private String applicationID;
     private Applicant applicant;
+    private Officer officer;
     private final Project project;
     private FlatType flatType;
     private WithdrawalStatus withdrawalStatus;
@@ -32,16 +33,14 @@ public class Application {
         this.withdrawalStatus = withdrawalStatus;
     }
 
-    // Converts the Application object to a CSV-formatted string
-    // In Application.java
-    public String toCSV() {
-        return String.format("%s,%s,%s,%s,%s,%s",
-            applicationID,
-            applicant.getNRIC(),
-            project.getProjectID(),
-            flatType.toString(),
-            applicationStatus.toString(),
-            withdrawalStatus.toString());
+    public Application(String applicationID, Officer officer, Project project, FlatType flatType,
+                       ApplicantAppStatus applicationStatus, WithdrawalStatus withdrawalStatus) {
+        this.applicationID = applicationID;
+        this.officer = officer;
+        this.project = project;
+        this.flatType = flatType;
+        this.applicationStatus = applicationStatus;
+        this.withdrawalStatus = withdrawalStatus;
     }
 
     // Getter and Setter methods
@@ -59,6 +58,14 @@ public class Application {
 
     public void setApplicant(Applicant applicant) {
         this.applicant = applicant;
+    }
+
+    public Officer getOfficer() {
+        return officer;
+    }
+
+    public void setOfficer(Officer officer) {
+        this.officer = officer;
     }
 
     public Project getProject() {
@@ -87,6 +94,15 @@ public class Application {
 
     public void setApplicationStatus(ApplicantAppStatus applicationStatus) {
         this.applicationStatus = applicationStatus;
+    }
+
+    public User getUser() {
+        if (applicant != null) {
+            return applicant;
+        } else if (officer != null) {
+            return officer;
+        }
+        return null;
     }
 
 }

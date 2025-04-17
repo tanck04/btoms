@@ -4,6 +4,7 @@ import controller.ApplicantController;
 import controller.ProjectController;
 import model.Application;
 import model.Applicant;
+import model.Officer;
 import model.Project;
 import enums.ApplicantAppStatus;
 import enums.FlatType;
@@ -29,7 +30,7 @@ public class ApplicationRepository{
             }
 
             String applicationID = fields[0];
-            String applicantNRIC = fields[1];
+            String userNRIC = fields[1];
             String projectID = fields[2];
             FlatType flatType = FlatType.valueOf(fields[3]);
             ApplicantAppStatus applicationStatus = ApplicantAppStatus.valueOf(fields[4]);
@@ -37,20 +38,37 @@ public class ApplicationRepository{
 
             // Create repository instances
             ApplicantRepository applicantRepo = new ApplicantRepository();
+            OfficerRepository officerRepo = new OfficerRepository();
             ProjectRepository projectRepo = new ProjectRepository();
 
-            // Use instance methods instead of static HashMaps
+            // Create references
             Applicant applicant = null;
             Project project = null;
-
-            try {
-                applicant = applicantRepo.findApplicantById(applicantNRIC);
-                project = projectRepo.findProjectById(projectID);
-            } catch (IOException e) {
-                System.out.println("Error finding references: " + e.getMessage());
+            Officer officer = null;
+            // Use instance methods\
+            try{
+                if (officerRepo.findOfficerById(userNRIC) != null) {
+                    officer = officerRepo.findOfficerById(userNRIC);
+                    project = projectRepo.findProjectById(projectID);
+                }
+            }catch (Exception e){
+                System.out.println("Error finding officer: " + e.getMessage());
                 return null;
             }
 
+            if (officer != null) {
+                // If the user is an officer, we don't need to find the applicant
+                return new Application(applicationID, officer, project, flatType, applicationStatus, withdrawalStatus);
+            } else {
+                // If the user is not an officer, we need to find the applicant
+                try {
+                    applicant = applicantRepo.findApplicantById(userNRIC);
+                    project = projectRepo.findProjectById(projectID);
+                } catch (Exception e) {
+                    System.out.println("Error finding applicant: " + e.getMessage());
+                    return null;
+                }
+            }
             if (applicant == null || project == null) {
                 System.out.println("Missing reference - Applicant: " + (applicant == null ? "null" : "found") +
                         ", Project: " + (project == null ? "null" : "found"));
@@ -154,13 +172,7 @@ public class ApplicationRepository{
             }
 
             // Write the application data
-            String applicationData = String.join(",",
-                    application.getApplicationID(),
-                    application.getApplicant().getNRIC(),
-                    application.getProject().getProjectID(),
-                    application.getFlatType().toString(),
-                    application.getApplicationStatus().toString(),
-                    application.getWithdrawalStatus().toString());
+            String applicationData = applicationToCSV(application);
 
             writer.write(applicationData);
             // No need to manually add newline - the next write will handle this
@@ -183,7 +195,7 @@ public class ApplicationRepository{
                 }
 
                 if (line.startsWith(updatedApplication.getApplicationID() + ",")) {
-                    updatedLines.add(updatedApplication.toCSV()); // Replace the old line
+                    updatedLines.add(applicationToCSV(updatedApplication)); // Replace the old line
                 } else {
                     updatedLines.add(line); // Keep as is
                 }
@@ -205,10 +217,10 @@ public class ApplicationRepository{
         }
     }
 
-    private String applicationToCSV(Application application) {
+    private static String applicationToCSV(Application application) {
         return String.join(",",
                 application.getApplicationID(),
-                application.getApplicant().getNRIC(),
+                application.getUser().getNRIC(),
                 application.getProject().getProjectID(),
                 application.getFlatType().toString(),
                 application.getApplicationStatus().toString(),

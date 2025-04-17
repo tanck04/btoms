@@ -20,65 +20,98 @@ public class ApplicationController {
     private final ProjectRepository projectRepo = new ProjectRepository();
     private final ApplicationRepository applicationRepo = new ApplicationRepository();
 
-    public boolean submitApplication(Applicant applicant, Project project, FlatType flatType) {
-        // Validate input
-        if (applicant == null || project == null) {
-            System.out.println("Invalid input: Applicant or project is null.");
+    public boolean submitApplication(User user, Project project, FlatType flatType) {
+        if (user == null || project == null) {
+            System.out.println("Invalid input: User or project is null.");
             return false;
         }
 
-        System.out.println("Processing application for applicant: " + applicant.getNRIC());
+        String nric;
+        MaritalStatus maritalStatus;
 
         try {
-            // Use repository instance methods instead of static methods
-            // Validate that the project exists
-            Project validProject = projectRepo.findProjectById(project.getProjectID());
-            if (validProject == null) {
-                System.out.println("Project does not exist in the system.");
-                return false;
-            }
+            // Get user details
+            if (user instanceof Applicant) {
+                Applicant applicant = (Applicant) user;
+                nric = applicant.getNRIC();
+                maritalStatus = applicant.getMaritalStatus();
 
-            // Check if applicant has already applied for a project
-            for (Application application :applicationRepo.loadApplications()) {
-                if (application.getApplicant().getNRIC().equals(applicant.getNRIC()) &&
-                        (application.getWithdrawalStatus().equals(WithdrawalStatus.PENDING) ||
-                                application.getWithdrawalStatus().equals(WithdrawalStatus.NULL) ||
-                                application.getWithdrawalStatus().equals(WithdrawalStatus.REJECTED))) {
-                    System.out.println("Applicant has already applied for a project.");
+                // Validate duplicate application
+                for (Application app : applicationRepo.loadApplications()) {
+                    if (app.getApplicant() != null && app.getApplicant().getNRIC().equals(nric) &&
+                            (app.getWithdrawalStatus() == WithdrawalStatus.PENDING ||
+                                    app.getWithdrawalStatus() == WithdrawalStatus.NULL ||
+                                    app.getWithdrawalStatus() == WithdrawalStatus.REJECTED)) {
+                        System.out.println("Applicant has already applied for a project.");
+                        return false;
+                    }
+                }
+
+                if (maritalStatus == MaritalStatus.SINGLE && flatType != FlatType.TWO_ROOMS) {
+                    System.out.println("Single applicants can only apply for TWO_ROOMS flat types.");
                     return false;
                 }
-            }
 
-            // Check marital status restrictions
-            if (applicant.getMaritalStatus() == MaritalStatus.SINGLE && flatType != FlatType.TWO_ROOMS) {
-                System.out.println("Single applicants can only apply for TWO_ROOMS flat types.");
+                String applicationID = ApplicationRepository.generateNextApplicationId();
+                Project validProject = projectRepo.findProjectById(project.getProjectID());
+
+                if (validProject == null) {
+                    System.out.println("Project does not exist in the system.");
+                    return false;
+                }
+
+                Application application = new Application(applicationID, applicant, validProject, flatType,
+                        ApplicantAppStatus.PENDING, WithdrawalStatus.NULL);
+
+                applicationRepo.createNewApplication(application);
+                System.out.println("Application submitted successfully. Application ID: " + applicationID);
+                return true;
+
+            } else if (user instanceof Officer) {
+                Officer officer = (Officer) user;
+                nric = officer.getNRIC();
+                maritalStatus = officer.getMaritalStatus();
+
+                for (Application app : applicationRepo.loadApplications()) {
+                    if (app.getOfficer() != null && app.getOfficer().getNRIC().equals(nric) &&
+                            (app.getWithdrawalStatus() == WithdrawalStatus.PENDING ||
+                                    app.getWithdrawalStatus() == WithdrawalStatus.NULL ||
+                                    app.getWithdrawalStatus() == WithdrawalStatus.REJECTED)) {
+                        System.out.println("Officer has already applied for a project.");
+                        return false;
+                    }
+                }
+
+                if (maritalStatus == MaritalStatus.SINGLE && flatType != FlatType.TWO_ROOMS) {
+                    System.out.println("Single officers can only apply for TWO_ROOMS flat types.");
+                    return false;
+                }
+
+                String applicationID = ApplicationRepository.generateNextApplicationId();
+                Project validProject = projectRepo.findProjectById(project.getProjectID());
+
+                if (validProject == null) {
+                    System.out.println("Project does not exist in the system.");
+                    return false;
+                }
+
+                Application application = new Application(applicationID, officer, validProject, flatType,
+                        ApplicantAppStatus.PENDING, WithdrawalStatus.NULL);
+
+                applicationRepo.createNewApplication(application);
+                System.out.println("Application submitted successfully. Application ID: " + applicationID);
+                return true;
+
+            } else {
+                System.out.println("Only Applicants or Officers can apply.");
                 return false;
             }
-
-            // Generate a unique application ID
-            String applicationID = ApplicationRepository.generateNextApplicationId();
-
-            // Create a new application using the validated project
-            Application application = new Application(
-                applicationID,
-                applicant,
-                validProject,
-                flatType,
-                ApplicantAppStatus.PENDING,  // Starting with PENDING status
-                WithdrawalStatus.NULL
-            );
-
-            // Save the application to the repository
-            applicationRepo.createNewApplication(application);
-
-            System.out.println("Application submitted successfully. Application ID: " + applicationID);
-            return true;
-
         } catch (IOException e) {
             System.out.println("Error processing application: " + e.getMessage());
             return false;
         }
     }
+
 
 
     /// Method to withdraw an application
@@ -105,7 +138,7 @@ public class ApplicationController {
             // Check if the applicant has any applications
             boolean hasApplication = false;
             for (Application application : applicationRepo.loadApplications()) {
-                if (application.getApplicant().getNRIC().equals(user.getNRIC())) {
+                if (application.getUser().getNRIC().equals(user.getNRIC())) {
                     hasApplication = true;
                     break;
                 }
@@ -118,7 +151,7 @@ public class ApplicationController {
 
             // Withdraw the application
             for (Application application : applicationRepo.loadApplications()) {
-                if (application.getApplicant().getNRIC().equals(user.getNRIC())) {
+                if (application.getUser().getNRIC().equals(user.getNRIC())) {
                     application.setWithdrawalStatus(WithdrawalStatus.PENDING);
                     ApplicationRepository.updateApplicationInCSV(application);
                     System.out.println("Application withdrawn successfully.");

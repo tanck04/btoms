@@ -35,14 +35,13 @@ public class ManagerView implements MenuInterface {
             System.out.println("| 2. View All Projects                          |");
             System.out.println("| 3. Update Project Details                     |");
             System.out.println("| 4. Delete Project                             |");
-            //System.out.println("| 5. Manage Project Visibility                  |");
-            System.out.println("| 6. Review Applications                        |");
-            System.out.println("| 7. Approve or Reject Application              |");
-            System.out.println("| 8. Approve or Reject Withdrawal               |");
-            System.out.println("| 9. Review Officer Registrations               |");
-            System.out.println("| 10. Approve or Reject Officers Registration   |");
-            System.out.println("| 11. Reply Enquiries                           |");
-            System.out.println("| 12. Logout                                    |");
+            System.out.println("| 5. Review Applications                        |");
+            System.out.println("| 6. Approve or Reject Application              |");
+            System.out.println("| 7. Approve or Reject Withdrawal               |");
+            System.out.println("| 8. Review Officer Registrations               |");
+            System.out.println("| 9. Approve or Reject Officers Registration   |");
+            System.out.println("| 10. Reply Enquiries                           |");
+            System.out.println("| 11. Logout                                    |");
             System.out.println("+-----------------------------------------------+");
             System.out.print("Enter your choice: ");
 
@@ -70,27 +69,24 @@ public class ManagerView implements MenuInterface {
                     deleteProject();
                     break;
                 case 5:
-                    manageProjectVisibility();  //can remove this
-                    break;
-                case 6:
                     reviewApplications();
                     break;
-                case 7:
+                case 6:
                     approveApplication(user);
                     break;
-                case 8:
+                case 7:
                     hdbManagerController.approveOrRejectWithdrawal(user);
                     break;
-                case 9:
+                case 8:
                     reviewOfficerRegistrations();
                     break;
-                case 10:
+                case 9:
                     approveOfficerRegistration();
                     break;
-                case 11:
+                case 10:
                     enquiryController.viewEnquiry(user);
                     break;
-                case 12:
+                case 11:
                     System.out.println("Logging out...");
                     running = false;
                     break;
@@ -133,34 +129,6 @@ public class ManagerView implements MenuInterface {
             }
         } catch (IOException e) {
             System.out.println("Error finding project: " + e.getMessage());
-        }
-    }
-
-    private void manageProjectVisibility() {
-        System.out.println("\n===== Manage Project Visibility =====");
-
-        System.out.print("Enter the Project ID to manage visibility: ");
-        String projectId = scanner.nextLine().trim();
-
-        try {
-            Project project = projectController.getProjectById(projectId);
-            if (project == null) {
-                System.out.println("Project not found with ID: " + projectId);
-                return;
-            }
-
-            System.out.println("Current visibility: " + project.getVisibility());
-            System.out.println("1. Set to VISIBLE");
-            System.out.println("2. Set to HIDDEN");
-            System.out.print("Enter your choice: ");
-
-            int choice = Integer.parseInt(scanner.nextLine().trim());
-
-            // Call controller to update visibility
-            // projectController.updateVisibility(projectId, choice == 1 ? Visibility.VISIBLE : Visibility.HIDDEN);
-            System.out.println("Project visibility updated successfully.");
-        } catch (Exception e) {
-            System.out.println("Error retrieving project: " + e.getMessage());
         }
     }
 
