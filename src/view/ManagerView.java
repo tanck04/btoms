@@ -67,7 +67,7 @@ public class ManagerView implements MenuInterface {
                     projectController.updateProjectDetails(user);
                     break;
                 case 4:
-                    deleteProject();
+                    projectController.deleteProject(user);
                     break;
                 case 5:
                     reviewApplications();
@@ -79,7 +79,7 @@ public class ManagerView implements MenuInterface {
                     hdbManagerController.approveOrRejectWithdrawal(user);
                     break;
                 case 8:
-                    //reviewOfficerRegistrations();
+                    hdbManagerController.reviewOfficerRegistration(user);
                     break;
                 case 9:
                     hdbManagerController.approveOrRejectOfficerRegistration(user);
@@ -108,36 +108,6 @@ public class ManagerView implements MenuInterface {
                 System.out.println("\nPress Enter to continue...");
                 scanner.nextLine();
             }
-        }
-    }
-
-    private void deleteProject() {
-        System.out.println("\n===== Delete Project =====");
-
-        System.out.print("Enter the Project ID to delete: ");
-        String projectId = scanner.nextLine().trim();
-
-        try {
-            ProjectRepository projectRepository = new ProjectRepository();
-            Project project = projectRepository.findProjectById(projectId);
-
-            if (project == null) {
-                System.out.println("Project not found with ID: " + projectId);
-                return;
-            }
-
-            System.out.println("Are you sure you want to delete project: " + project.getProjectName() + "? (yes/no)");
-            String confirm = scanner.nextLine().trim();
-
-            if (confirm.equalsIgnoreCase("yes")) {
-                // Call controller to delete the project
-                // projectController.deleteProject(projectId);
-                System.out.println("Project deleted successfully.");
-            } else {
-                System.out.println("Delete operation cancelled.");
-            }
-        } catch (IOException e) {
-            System.out.println("Error finding project: " + e.getMessage());
         }
     }
 
@@ -186,7 +156,7 @@ public class ManagerView implements MenuInterface {
             }
 
             // Create instance of HDBManagerController and process approval
-            boolean success = hdbManagerController.approveApplication(currentManager);
+            boolean success = hdbManagerController.approveOrRejectApplication(currentManager);
 
             if (!success) {
                 System.out.println("Application approval process was not completed.");

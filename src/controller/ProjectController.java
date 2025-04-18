@@ -1,10 +1,12 @@
 package controller;
 
+import model.Application;
 import model.Manager;
 import model.Project;
 import enums.FlatType;
 import enums.Visibility;
 import model.User;
+import repository.ApplicationRepository;
 import repository.ManagerRepository;
 import repository.ProjectRepository;
 
@@ -337,6 +339,65 @@ public class ProjectController {
         }
     }
 
+    public void deleteProject(User user) {
+        Scanner scanner = new Scanner(System.in);
+        HDBManagerController hdbManagerController = new HDBManagerController();
+        ApplicationRepository applicationRepository = new ApplicationRepository();
+        hdbManagerController.viewProject(user);
+        Project deletedProject = null;
+        System.out.println("\n===== Delete Project =====");
+        System.out.print("Enter the Project ID to delete: ");
+        String projectId = scanner.nextLine().trim();
+
+
+        Project project = getProjectById(projectId);
+        if (project == null) {
+            System.out.println("Project not found with ID: " + projectId);
+            return;
+        }
+
+        try{
+            // Check if there are any applications associated with the project
+            List<Application> applications = applicationRepository.loadApplications();
+            for (Application application : applications) {
+                if (application.getProject().getProjectID().equals(projectId)) {
+                    System.out.println("Cannot delete project with existing applications.");
+                    return;
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading applications: " + e.getMessage());
+            return;
+        }
+
+        System.out.println("Are you sure you want to delete project: " + project.getProjectName() + "? (yes/no)");
+        String confirm = scanner.nextLine().trim();
+
+        if (confirm.equalsIgnoreCase("yes")) {
+            // Call controller to delete the project
+            try{
+                deletedProject = projectRepository.findProjectById(projectId);
+            } catch (IOException e) {
+                System.out.println("Project not found with ID: " + projectId);
+                return;
+            }
+            try{
+                projectRepository.deleteProject(deletedProject);
+                System.out.println("Project deleted successfully.");
+            } catch (IOException e) {
+                System.out.println("Error deleting project: " + e.getMessage());
+            }
+        } else {
+            System.out.println("Delete operation cancelled.");
+        }
+    }
+
+
+    /**
+     * Retrieves a project by its ID
+     * @param projectID the ID of the project to retrieve
+     * @return the Project object if found, null otherwise
+     */
     public Project getProjectById(String projectID) {
         try {
             return projectRepository.findProjectById(projectID);
