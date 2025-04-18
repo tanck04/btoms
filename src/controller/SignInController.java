@@ -36,7 +36,6 @@ public class SignInController {
             System.out.println("You are a new user with the default password, please change it");
             PasswordController pc = new PasswordController();
             System.out.println("Please enter a new password");
-            @SuppressWarnings("resource")
             Scanner scanner = new Scanner(System.in);
             String newPassword;
             do {

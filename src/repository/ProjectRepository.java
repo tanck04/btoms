@@ -222,6 +222,22 @@ public class ProjectRepository{
         }
     }
 
+    public void deleteProject(Project project) throws IOException {
+        List<Project> projects = loadProjects();
+        projects.removeIf(p -> p.getProjectID().equals(project.getProjectID()));
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            // Write header
+            writer.write("ProjectID,ProjectName,Neighborhood,TwoRoomUnits,TwoRoomPrice,ThreeRoomUnits,ThreeRoomPrice,OpeningDate,ClosingDate,ManagerID,OfficerSlot,OfficerIDs,Visibility");
+            writer.newLine();
+
+            for (Project p : projects) {
+                writer.write(projectToCSV(p));
+                writer.newLine();
+            }
+        }
+    }
+
     // Helper method for converting Project to CSV string
     private static String projectToCSV(Project project) {
         return String.join(",",

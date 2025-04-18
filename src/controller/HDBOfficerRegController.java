@@ -8,7 +8,9 @@ import repository.OfficerRegRepository;
 import repository.ProjectRepository;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
@@ -17,12 +19,46 @@ public class HDBOfficerRegController {
     private final ProjectRepository projectRepository = new ProjectRepository();
     private final ApplicationRepository applicationRepo = new ApplicationRepository();
 
+    public Project getInChargeActiveProject(Officer officer) {
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+        sdf.setLenient(false);
+        Date currentDate = new Date();
+
+        try {
+            for (Project project : projectRepository.loadProjects()) {
+                try {
+                    String closingDateStr = project.getApplicationClosingDate();
+
+                    if (closingDateStr == null || closingDateStr.isEmpty()) {
+                        System.out.println("Skipping project " + project.getProjectID() + ": Missing closing date.");
+                        continue;
+                    }
+
+                    Date projectClosingDate = sdf.parse(closingDateStr);
+
+                    if (project.getOfficerIDs().contains(officer.getNRIC()) && projectClosingDate.after(currentDate)) {
+                        return project;
+                    }
+                } catch (java.text.ParseException e) {
+                    System.out.println("Error parsing date for project " + project.getProjectID() + ": " + e.getMessage());
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading projects: " + e.getMessage());
+        }
+        return null;
+    }
 
     public void createRegistration(User user) {
         Officer officer = (Officer) user;
             ProjectController projectController = new ProjectController();
             HDBOfficerController officerController = new HDBOfficerController();
             Scanner scanner = new Scanner(System.in);
+            Project inChargeActiveProject = getInChargeActiveProject(officer);
+            if (inChargeActiveProject != null) {
+                System.out.println("You are in charge of an active project. You cannot register for another project.");
+                return;
+            }
             officerController.viewProject(officer);
             while (true) {
                 System.out.println("Please enter the Project ID for which you wish to register (press 'x' to exit):");
@@ -56,7 +92,9 @@ public class HDBOfficerRegController {
             }
     }
 
-    public void viewRegistrationStatus(String nric) {
+    public void viewRegistrationStatus(User user) {
+        Officer officer = (Officer) user;
+        String nric = officer.getNRIC();
         List<OfficerRegistration> registrations = officerRegRepository.getRegistrationByOfficerId(nric);
 
         if (registrations.isEmpty()) {

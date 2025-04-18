@@ -20,6 +20,17 @@ public class HDBManagerController{
     private final ManagerRepository managerRepository = new ManagerRepository();
     private final ApplicationRepository applicationRepository = new ApplicationRepository();
 
+
+    public Manager getManagerById(String managerID) {
+        try {
+            return managerRepository.findManagerById(managerID);
+        } catch (IOException e) {
+            System.out.println("Error retrieving project: " + e.getMessage());
+            return null;
+        }
+    }
+
+
     /**
      * Gets the active project managed by the specified manager
      * @param manager The manager whose project we're looking for
@@ -62,7 +73,7 @@ public class HDBManagerController{
      * @return true if approval was successful, false otherwise
      */
 
-    public boolean approveApplication(Manager manager) {
+    public boolean approveOrRejectApplication(Manager manager) {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Manager: " + manager.getNRIC());
@@ -88,48 +99,57 @@ public class HDBManagerController{
 
         // Display pending applications
         System.out.println("\n======== PENDING APPLICATIONS ========");
-        System.out.println("ID\tAPPLICATION ID\t\tNRIC\t\tNAME\t\tFLAT TYPE");
-        System.out.println("------------------------------------------------------------");
+        System.out.println("+-----------------------------------------------+");
+        System.out.printf("| %-15s | %-12s | %-20s | %-12s |\n",
+                "APPLICATION ID", "NRIC", "NAME", "FLAT TYPE");
+        System.out.println("+-----------------------------------------------+");
 
-        int count = 1;
         for (Application application : pendingApplications) {
             User user = application.getUser();
-            System.out.printf("%d\t%s\t%s\t%s\t%s\n",
-                    count++,
+            System.out.printf("| %-15s | %-12s | %-20s | %-12s |\n",
                     application.getApplicationID(),
                     user.getNRIC(),
                     user.getName(),
                     application.getFlatType());
         }
+        System.out.println("+-----------------------------------------------+");
 
         // Get user choice
-        System.out.print("\nEnter the ID of the application to approve (or 0 to cancel): ");
-        int choice;
-        try {
-            choice = Integer.parseInt(scanner.nextLine());
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid input. Please enter a number.");
-            return false;
-        }
+        System.out.print("\nEnter the ID of the application to approve or reject (or 0 to cancel): ");
+        String choice = scanner.nextLine().trim();
 
         // Check if user wants to cancel
-        if (choice == 0) {
+        if (choice.equals("0")) {
             System.out.println("Operation cancelled.");
             return false;
         }
-
         // Validate choice
-        if (choice < 1 || choice > pendingApplications.size()) {
-            System.out.println("Invalid choice. Please select a valid ID.");
+        Application selectedApplication = null;
+        try {
+            selectedApplication = applicationRepository.findApplicationById(choice);
+        } catch (IOException e) {
+            System.out.println("Error finding application: " + e.getMessage());
             return false;
         }
-
-        // Get the selected application
-        Application selectedApplication = pendingApplications.get(choice - 1);
-
-        // Update application status
-        selectedApplication.setApplicationStatus(ApplicantAppStatus.SUCCESSFUL);
-
+        if (selectedApplication == null) {
+            System.out.println("Invalid Application ID.");
+            return false;
+        }
+        System.out.println("Enter 1 to approve or 0 to reject the application:");
+        String actionInput = scanner.nextLine().trim();
+        if (!actionInput.equals("0") && !actionInput.equals("1")) {
+            System.out.println("Invalid input. Please enter 0 or 1.");
+            return false;
+        }
+        if (actionInput.equals("0")) {
+            // Reject the application
+            selectedApplication.setApplicationStatus(ApplicantAppStatus.UNSUCCESSFUL);
+            System.out.println("Application rejected successfully.");
+        } else if (actionInput.equals("1")) {
+            // Approve the application
+            selectedApplication.setApplicationStatus(ApplicantAppStatus.SUCCESSFUL);
+        }
+        // Update the application status
         // Save changes to file
         ApplicationRepository.updateApplicationInCSV(selectedApplication);
         System.out.println("Application approved successfully.");
@@ -197,15 +217,11 @@ public class HDBManagerController{
             return new ArrayList<>();
         }
     }
-    public Manager getManagerById(String managerID) {
-        try {
-            return managerRepository.findManagerById(managerID);
-        } catch (IOException e) {
-            System.out.println("Error retrieving project: " + e.getMessage());
-            return null;
-        }
-    }
 
+    /**
+     * Prints the list of projects in a formatted table
+     * @param projects The list of projects to print
+     */
     public void printProjectList(List<Project> projects) {
         // Assuming user is an instance of Manager
 
@@ -273,6 +289,11 @@ public class HDBManagerController{
         }
     }
 
+
+    /**
+     * Allows HDB manager to approve or reject withdrawal applications
+     * @param user The HDB manager approving/rejecting the application
+     */
     public void approveOrRejectWithdrawal(User user) {
         Manager manager = (Manager) user;
         ArrayList<Application> pendingWithdrawal = new ArrayList<>();
@@ -366,6 +387,64 @@ public class HDBManagerController{
         }
     }
 
+
+    public void reviewOfficerRegistration(User user) {
+        Scanner scanner = new Scanner(System.in);
+        Manager manager = (Manager) user;
+        OfficerRegRepository officerRegRepository = new OfficerRegRepository();
+        List<OfficerRegistration> registrations;
+        try {
+            registrations = officerRegRepository.loadAllOfficerReg();
+        } catch (IOException e) {
+            System.out.println("Error loading officer registrations: " + e.getMessage());
+            return;
+        }
+
+        showRegistrations(registrations);
+
+        System.out.println("Apply filter to view registrations? (yes/no): ");
+        String response = scanner.nextLine().trim().toLowerCase();
+        if (response.equals("yes")) {
+
+            System.out.print("View registrations you are managing? (Y/N): ");
+            String filterProject = scanner.nextLine().trim();
+
+            List<OfficerRegistration> filteredRegistrations = registrations.stream()
+                        .filter(registration -> {
+                            if (filterProject.equalsIgnoreCase("Y")) {
+                                return registration.getProject().getManagerID().equals(manager.getNRIC());
+                            } else {
+                                return true; // Show all if not filtering by managed projects
+                            }
+                        })
+                        .collect(Collectors.toList());
+
+            showRegistrations(filteredRegistrations);
+        }
+    }
+
+    private void showRegistrations(List<OfficerRegistration> registrations) {
+        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
+        System.out.println("|                                                                                 Officer Registrations                                                                                 |");
+        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
+        System.out.printf("| %-15s | %-12s | %-20s | %-12s |\n",
+                "REGISTRATION ID", "OFFICER NRIC", "OFFICER NAME", "STATUS");
+        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
+
+        for (OfficerRegistration registration : registrations) {
+            System.out.printf("| %-15s | %-12s | %-20s | %-12s |\n",
+                    registration.getRegistrationId(),
+                    registration.getOfficer().getNRIC(),
+                    registration.getOfficer().getName(),
+                    registration.getStatus());
+        }
+        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
+    }
+
+    /**
+     * Allows HDB manager to approve or reject officer registration
+     * @param user The HDB manager approving/rejecting the registration
+     */
     public void approveOrRejectOfficerRegistration(User user) {
         Manager manager = (Manager) user;
         Scanner scanner = new Scanner(System.in);
@@ -445,25 +524,17 @@ public class HDBManagerController{
                 System.out.println("Cannot approve: Maximum number of officers already reached for this project.");
                 return;
             }
-            approveRegistration(selectedReg);
+            selectedReg.setStatus(OfficerRegStatus.APPROVED);
+            addOfficerToProject(selectedReg.getProject(), selectedReg.getOfficer());
+            OfficerRegRepository.updateOfficerRegInCSV(selectedReg);
             System.out.println("Registration approved successfully.");
         } else if (action == 0) {
-            rejectRegistration(selectedReg);
+            selectedReg.setStatus(OfficerRegStatus.REJECTED);
+            OfficerRegRepository.updateOfficerRegInCSV(selectedReg);
             System.out.println("Registration rejected.");
         } else {
             System.out.println("Invalid choice. Please enter 0 or 1.");
         }
-    }
-
-    public void approveRegistration(OfficerRegistration reg) {
-        reg.setStatus(OfficerRegStatus.APPROVED);
-        addOfficerToProject(reg.getProject(), reg.getOfficer());
-        OfficerRegRepository.updateOfficerRegInCSV(reg);
-    }
-
-    public void rejectRegistration(OfficerRegistration reg) {
-        reg.setStatus(OfficerRegStatus.REJECTED);
-        OfficerRegRepository.updateOfficerRegInCSV(reg);
     }
 
     public void addOfficerToProject(Project project, Officer officer) {

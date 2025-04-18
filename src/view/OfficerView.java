@@ -57,12 +57,13 @@ public class OfficerView implements MenuInterface{
                     applicationController.requestWithdrawal(user);
                     break;
                 case "5":
+                    enquiryController.submitEnquiry(user);
                     break;
                 case "6":
                     officerRegController.createRegistration(user);
                     break;
                 case "7":
-                    officerRegController.viewRegistrationStatus(user.getNRIC());
+                    officerRegController.viewRegistrationStatus(user);
                     break;
                 case "8":
                     enquiryController.viewEnquiry(user);

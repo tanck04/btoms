@@ -176,9 +176,11 @@ public class ApplicantController{
         try {
             // First, get the logged in applicant
             Applicant applicant = (Applicant) user;
-            String nric = applicant.getNRIC();
             MaritalStatus maritalStatus = applicant.getMaritalStatus();
-
+            if (user.getAge()<35 && maritalStatus == MaritalStatus.SINGLE) {
+                System.out.println("You are not eligible to apply for a flat.");
+                return;
+            }
             // Use ApplicationController for submission
             ApplicationController applicationController = new ApplicationController();
 
@@ -194,7 +196,7 @@ public class ApplicantController{
             List<Project> availableProjects = listProject(applicant, lastNeighbourhoodFilter, lastFlatTypeFilter);
             printProjectList(availableProjects, lastFlatTypeFilter);
 
-            System.out.print("Do you want to change the filters? (yes/no): ");
+            System.out.print("Do you want to apply/change the filters? (yes/no): ");
             String changeFilters = scanner.nextLine().trim().toLowerCase();
 
             if (changeFilters.equals("yes")) {
