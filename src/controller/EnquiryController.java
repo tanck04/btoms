@@ -122,7 +122,7 @@ public class EnquiryController {
             enquiryText = scanner.nextLine().trim();
         }
 
-        String enquiryID = generateNewEnquiryID();
+        String enquiryID = enquiryRepository.generateNextEnquiryID();
 
         try {
             Enquiry newEnquiry = new Enquiry(enquiryID, user.getNRIC(), projectID, enquiryText, null, "PENDING", null);
@@ -231,23 +231,6 @@ public class EnquiryController {
 
         lines.add(text);
         return lines;
-    }
-
-    private String truncate(String text, int maxLength) {
-        if (text == null) return "N/A";
-        return text.length() > maxLength ? text.substring(0, maxLength - 3) + "..." : text;
-    }
-
-    private String generateNewEnquiryID() {
-        try{
-            String lastRecordId = enquiryRepository.getLastEnquiryId();
-            String numberPart = lastRecordId.substring(1);
-            int nextNumber = Integer.parseInt(numberPart) + 1;
-            return "E" + String.format("%04d", nextNumber);
-        }catch(IOException e){
-            System.out.println("Error generating new enquiry ID: " + e.getMessage());
-            return null;
-        }
     }
 }
 

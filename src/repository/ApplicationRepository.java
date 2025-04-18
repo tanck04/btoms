@@ -20,7 +20,6 @@ public class ApplicationRepository{
     private static final String fileName = "application_records.csv";
     private static final String filePath = "./src/repository/" + folder + "/" + fileName;
 
-
     private static Application createApplicationFromCSV(String csv) {
         String[] fields = csv.split(",");
         try {
@@ -115,39 +114,33 @@ public class ApplicationRepository{
 
     public Application findApplicationById(String applicationID) throws IOException {
         List<Application> applications = this.loadApplications();
-        return (Application)applications.stream().filter((application) -> application.getApplicationID().equals(applicationID)).findFirst().orElse((Application) null);
+        return applications.stream()
+                .filter((application) -> application.getApplicationID().equals(applicationID)).findFirst().orElse((Application) null);
     }
 
-    public static String getLastApplicationId() {
+    public String generateNextApplicationID() {
+        int max = 0;
         try {
-            ApplicationRepository repo = new ApplicationRepository();
-            List<Application> applications = repo.loadApplications();
+            // Load all applications directly from CSV
+            List<Application> applications = loadApplications();
 
-            if (applications.isEmpty()) {
-                return "A0000";
+            // Find the highest project number
+            for (Application application : applications) {
+                String existingID = application.getApplicationID();
+                if (existingID.matches("A\\d+")) {
+                    int number = Integer.parseInt(existingID.substring(1));
+                    if (number > max) {
+                        max = number;
+                    }
+                }
             }
-
-            return applications.stream()
-                    .map(Application::getApplicationID)
-                    .sorted()
-                    .reduce((first, second) -> second)
-                    .orElse("A0000");
         } catch (IOException e) {
-            System.out.println("Error loading application data: " + e.getMessage());
-            return "A0000";
-        }
-    }
-
-
-    public static String generateNextApplicationId() {
-        String lastId = getLastApplicationId(); // e.g., A0042
-        if (lastId == null || !lastId.matches("A\\d{4}")) {
-            return "A0001"; // Safe default if nothing exists or malformed
+            System.out.println("Error loading applications: " + e.getMessage());
+            // If we can't load existing applications, start from 1
         }
 
-        int number = Integer.parseInt(lastId.substring(1));
-        number++;
-        return "A" + String.format("%04d", number); // e.g., A0043
+        int nextNumber = max + 1;
+        return String.format("A%04d", nextNumber);  // e.g., A0001, A0002
     }
 
     public void createNewApplication(Application application) throws IOException {

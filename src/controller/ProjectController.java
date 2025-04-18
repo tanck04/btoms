@@ -114,38 +114,11 @@ public class ProjectController {
         }
     }
 
-    private String generateNextProjectID() {
-        int max = 0;
-        ProjectRepository projectRepository = new ProjectRepository();
-
-        try {
-            // Load all projects directly from CSV
-            List<Project> projects = projectRepository.loadProjects();
-
-            // Find the highest project number
-            for (Project project : projects) {
-                String existingID = project.getProjectID();
-                if (existingID.matches("P\\d+")) {
-                    int number = Integer.parseInt(existingID.substring(1));
-                    if (number > max) {
-                        max = number;
-                    }
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error loading projects: " + e.getMessage());
-            // If we can't load existing projects, start from 1
-        }
-
-        int nextNumber = max + 1;
-        return String.format("P%04d", nextNumber);  // e.g., P0001, P0002
-    }
-
     public void createProject(User user) {
         Scanner scanner = new Scanner(System.in);
         try {
             // Collect project data from user input
-            String projectID = generateNextProjectID();  // auto-generate
+            String projectID = projectRepository.generateNextProjectID();  // auto-generate
             System.out.println("Auto-generated Project ID: " + projectID);
 
             System.out.print("Enter Project Name: ");
@@ -364,29 +337,6 @@ public class ProjectController {
         }
     }
 
-    /**
-     * @return a list of projects matching the criteria with visibility ON
-     */
-    public List<Project> getAvailableProjects() {
-        // Simply check if projects are empty
-        ArrayList<Project> visibleProjects = new ArrayList<>();
-        try {
-            // Load projects using the method that returns a List<Project>
-            List<Project> projectsList = projectRepository.loadProjects();
-
-            // Filter projects based on visibility
-            for (Project project : projectsList) {
-                if (project.getVisibility() == Visibility.ON) {
-                    visibleProjects.add(project);
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error loading available projects: " + e.getMessage());
-            // Return empty map on error (already initialized)
-        }
-        return visibleProjects;
-    }
-
     public Project getProjectById(String projectID) {
         try {
             return projectRepository.findProjectById(projectID);
@@ -395,11 +345,4 @@ public class ProjectController {
             return null;
         }
     }
-
-    // Add other business logic methods related to projects
-    // For example:
-    // - updateProject()
-    // - toggleProjectVisibility()
-    // - assignOfficers()
-    // - getProjectsByNeighborhood()
 }

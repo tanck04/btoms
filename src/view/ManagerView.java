@@ -191,32 +191,6 @@ public class ManagerView implements MenuInterface {
         }
     }
 
-    private void approveWithdrawal() {
-        System.out.println("\n===== Approve Withdrawal =====");
-
-        System.out.print("Enter the Application ID to review withdrawal: ");
-        String applicationId = scanner.nextLine().trim();
-
-        // Call controller to get withdrawal details
-        // Withdrawal withdrawal = withdrawalController.getWithdrawalByApplicationId(applicationId);
-
-        System.out.println("Withdrawal details:");
-        // Display withdrawal details
-
-        System.out.print("Approve withdrawal? (yes/no): ");
-        String decision = scanner.nextLine().trim();
-
-        if (decision.equalsIgnoreCase("yes")) {
-            // Call controller to approve withdrawal
-            // withdrawalController.approveWithdrawal(applicationId);
-            System.out.println("Withdrawal approved successfully.");
-        } else {
-            // Call controller to reject withdrawal
-            // withdrawalController.rejectWithdrawal(applicationId);
-            System.out.println("Withdrawal rejected.");
-        }
-    }
-
 
     private void replyEnquiries() {
         System.out.println("\n===== Reply to Enquiries =====");

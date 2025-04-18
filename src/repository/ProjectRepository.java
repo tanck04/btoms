@@ -19,12 +19,39 @@ public class ProjectRepository{
     private static final String fileName = "project_records" + ".csv";
     private static final String filePath = "./src/repository/" + folder + "/" + fileName;
 
+
+    public String generateNextProjectID() {
+        int max = 0;
+        try {
+            // Load all projects directly from CSV
+            List<Project> projects = loadProjects();
+
+            // Find the highest project number
+            for (Project project : projects) {
+                String existingID = project.getProjectID();
+                if (existingID.matches("P\\d+")) {
+                    int number = Integer.parseInt(existingID.substring(1));
+                    if (number > max) {
+                        max = number;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading projects: " + e.getMessage());
+            // If we can't load existing projects, start from 1
+        }
+
+        int nextNumber = max + 1;
+        return String.format("P%04d", nextNumber);  // e.g., P0001, P0002
+    }
+
     /**
      * Creates a new project and appends it to the CSV file.
      *
      * @param project The Project object to be added.
      * @throws IOException if an error occurs while writing to the file.
      */
+
     public void createNewProject(Project project) throws IOException {
         File file = new File(filePath);
         boolean needsNewline = false;
@@ -137,23 +164,6 @@ public class ProjectRepository{
     public Project findProjectById(String projectID) throws IOException {
         List<Project> projects = this.loadProjects();
         return (Project)projects.stream().filter((project) -> project.getProjectID().equals(projectID)).findFirst().orElse((Project)null);
-    }
-
-    public void addOfficerToProject(Project project, Officer officer) {
-        if (!project.getOfficerIDs().contains(officer.getNRIC())) {
-            List<String> newOfficerIDs = new ArrayList<>(project.getOfficerIDs());
-            // Add the officer to the project
-            newOfficerIDs.add(officer.getNRIC());
-            project.setOfficerIDs(newOfficerIDs);
-            project.setOfficerSlot(project.getOfficerSlot() + 1);
-
-            // Save the updated project
-            updateProjectInCSV(project);
-
-            System.out.println("✅ Officer " + officer.getNRIC() + " added to project " + project.getProjectID());
-        } else {
-            System.out.println("Officer " + officer.getNRIC() + " is already assigned to this project");
-        }
     }
 
     public List<Project> getProjectsByOfficerId(String nric){

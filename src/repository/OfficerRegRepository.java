@@ -3,21 +3,44 @@ package repository;
 import enums.FlatType;
 import enums.MaritalStatus;
 import enums.OfficerRegStatus;
-import model.Applicant;
-import model.Officer;
-import model.OfficerRegistration;
+import model.*;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import helper.CSVUtil;
-import model.Project;
 
 public class OfficerRegRepository {
     private static final String FILE_PATH_OFFICER_REGISTRATION = "./src/repository/data/officer_registration_records.csv";
     public static List<OfficerRegistration> registrations = new ArrayList<>();
 
+
+    public String generateNextRegistrationID() {
+        int max = 0;
+        try {
+            // Load all registrations directly from CSV
+            List<OfficerRegistration> registrations = loadAllOfficerReg();
+
+
+            // Find the highest project number
+            for (OfficerRegistration registration : registrations) {
+                String existingID = registration.getRegistrationId();
+                if (existingID.matches("R\\d+")) {
+                    int number = Integer.parseInt(existingID.substring(1));
+                    if (number > max) {
+                        max = number;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading projects: " + e.getMessage());
+            // If we can't load existing projects, start from 1
+        }
+
+        int nextNumber = max + 1;
+        return String.format("R%04d", nextNumber);  // e.g., R0001, R0002
+    }
     // Add this method to OfficerRegRepository.java to help debug
     public static List<OfficerRegistration> getPendingByProject(String projectID) {
         try {

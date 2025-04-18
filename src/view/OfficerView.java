@@ -69,6 +69,7 @@ public class OfficerView implements MenuInterface{
                     enquiryController.replyToEnquiry(user);
                     break;
                 case "9":
+                    officerController.BookBTO(user);
                     break;
                 case "10":
                     System.out.println("Logging out...");

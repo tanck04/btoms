@@ -1,10 +1,8 @@
 package controller;
 
-import enums.FlatType;
-import enums.MaritalStatus;
-import enums.OfficerRegStatus;
-import enums.Visibility;
+import enums.*;
 import model.*;
+import repository.ApplicationRepository;
 import repository.OfficerRegRepository;
 import repository.ProjectRepository;
 
@@ -283,6 +281,101 @@ public class HDBOfficerController extends ApplicantController {
             }
         }
         return false;
+    }
+
+    /**
+     * Find successful applications for the project the officer is in charge of
+     * @param user The officer user
+     * @return List of successful applications
+     */
+    public List<Application> getSuccessfulApplicationsForOfficerProject(User user) {
+        List<Application> successfulApplications = new ArrayList<>();
+        Project inChargeProject = null;
+        ApplicationRepository applicationRepo = new ApplicationRepository();
+
+        try {
+            List<Project> projects = projectRepository.loadProjects();
+            for (Project project : projects) {
+                if (project.getOfficerIDs().contains(user.getNRIC())) {
+                    inChargeProject = project;
+                    break;
+                }
+            }
+
+            if (inChargeProject == null) {
+                System.out.println("You are not assigned to any project as an officer.");
+                return successfulApplications;
+            }
+
+            for (Application application : applicationRepo.loadApplications()) {
+                if (application.getProject().getProjectID().equals(inChargeProject.getProjectID()) &&
+                        application.getApplicationStatus() == ApplicantAppStatus.SUCCESSFUL &&
+                        application.getWithdrawalStatus() != WithdrawalStatus.PENDING) {
+                    successfulApplications.add(application);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error accessing data: " + e.getMessage());
+        }
+        return successfulApplications;
+    }
+
+    public void BookBTO(User user) {
+        ApplicationController applicationController = new ApplicationController();
+        Scanner scanner = new Scanner(System.in);
+        List<Application> successfulApplications = getSuccessfulApplicationsForOfficerProject(user);
+
+        if (successfulApplications.isEmpty()) {
+            System.out.println("No successful applications found for your project.");
+            return;
+        }
+
+        System.out.println("\n======================= Successful Applications =======================");
+        System.out.printf("%-15s %-20s %-10s %-20s %-12s %-15s\n",
+                "Application ID", "Applicant Name", "Project ID", "Project Name", "Flat Type", "Status");
+        System.out.println("----------------------------------------------------------------------");
+
+        for (Application application : successfulApplications) {
+            String applicationID = application.getApplicationID();
+            String applicantName = application.getUser().getName();
+            String projectID = application.getProject().getProjectID();
+            String projectName = application.getProject().getProjectName();
+            String flatType = application.getFlatType().toString();
+            String applicationStatus = application.getApplicationStatus().toString();
+
+            System.out.printf("%-15s %-20s %-10s %-20s %-12s %-15s\n",
+                    applicationID, applicantName, projectID, projectName, flatType, applicationStatus);
+        }
+
+        System.out.print("Enter the Application ID to book: ");
+        String applicationID = scanner.nextLine().trim();
+
+        Application selectedApplication = successfulApplications.stream()
+                .filter(app -> app.getApplicationID().equals(applicationID))
+                .findFirst()
+                .orElse(null);
+        if (selectedApplication == null) {
+            System.out.println("Invalid Application ID. Please try again.");
+            return;
+        }
+
+        Project selectedProject = selectedApplication.getProject();
+        FlatType selectedFlatType = selectedApplication.getFlatType();
+        Map<FlatType, Integer> flatTypeUnits = selectedProject.getFlatTypeUnits();
+
+        int currentUnits = flatTypeUnits.getOrDefault(selectedFlatType, 0);
+        if (currentUnits > 0) {
+            flatTypeUnits.put(selectedFlatType, currentUnits - 1);
+            selectedProject.setFlatTypeUnits(flatTypeUnits);
+            ProjectRepository.updateProjectInCSV(selectedProject);
+
+            selectedApplication.setApplicationStatus(ApplicantAppStatus.BOOKED);
+            ApplicationRepository.updateApplicationInCSV(selectedApplication);
+
+            System.out.println("Booking successful! Application status updated to BOOKED.");
+        } else {
+            System.out.println("No units left to book for " + selectedFlatType);
+        }
     }
 
 }

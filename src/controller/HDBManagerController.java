@@ -21,10 +21,40 @@ public class HDBManagerController{
     private final ApplicationRepository applicationRepository = new ApplicationRepository();
 
     /**
-     * Allows HDB manager to approve an applicant's application
-     * @param hdbManager The HDB manager making the approval
-     * @return true if approval was successful, false otherwise
+     * Gets the active project managed by the specified manager
+     * @param manager The manager whose project we're looking for
+     * @return The managed project if found and still active (closing date after current date), null otherwise
      */
+    public Project getManagedActiveProject(Manager manager) {
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+        sdf.setLenient(false);
+        Date currentDate = new Date();
+
+        try {
+            for (Project project : projectRepository.loadProjects()) {
+                try {
+                    String closingDateStr = project.getApplicationClosingDate();
+
+                    if (closingDateStr == null || closingDateStr.isEmpty()) {
+                        System.out.println("Skipping project " + project.getProjectID() + ": Missing closing date.");
+                        continue;
+                    }
+
+                    Date projectClosingDate = sdf.parse(closingDateStr);
+
+                    if (manager.getNRIC().equals(project.getManagerID()) && projectClosingDate.after(currentDate)) {
+                        return project;
+                    }
+                } catch (java.text.ParseException e) {
+                    System.out.println("Error parsing date for project " + project.getProjectID() + ": " + e.getMessage());
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading projects: " + e.getMessage());
+        }
+        return null;
+    }
+
     /**
      * Allows HDB manager to approve an applicant's application
      *
@@ -37,29 +67,9 @@ public class HDBManagerController{
 
         System.out.println("Manager: " + manager.getNRIC());
 
-
-        // Use this:
-        try {
-            List<Applicant> applicants = applicantRepository.loadApplicants();
-            // If you need applicants data elsewhere in the method, store it in a local variable
-            // Continue with your logic using the applicants list instead of the HashMap
-        } catch (IOException e) {
-            System.out.println("Error loading applicants: " + e.getMessage());
-        }
-
         // Find the project managed by this HDB manager
         Project managedProject = null;
-        try {
-            for (Project project : projectRepository.loadProjects()) {
-                if (manager.getNRIC().equals(project.getManagerID())) {
-                    managedProject = project;
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error loading projects: " + e.getMessage());
-            return false;
-        }
+        managedProject = getManagedActiveProject(manager);
 
         if (managedProject == null) {
             System.out.println("Error: No project found for manager " + manager.getNRIC());
@@ -267,36 +277,10 @@ public class HDBManagerController{
         Manager manager = (Manager) user;
         ArrayList<Application> pendingWithdrawal = new ArrayList<>();
         Scanner scanner = new Scanner(System.in);
-        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-        sdf.setLenient(false);
-        Date currentDate = new Date();
         Project managedProject = null;
         Application selectedApp = null; // Added declaration for selectedApp
 
-        try {
-            for (Project project : projectRepository.loadProjects()) {
-                try {
-                    String closingDateStr = project.getApplicationClosingDate();
-
-                    if (closingDateStr == null || closingDateStr.isEmpty()) {
-                        System.out.println("Skipping project " + project.getProjectID() + ": Missing closing date.");
-                        continue;
-                    }
-
-                    Date closingDate = sdf.parse(closingDateStr); // Convert String to Date
-
-                    if (manager.getNRIC().equals(project.getManagerID()) && closingDate.after(currentDate)) {
-                        managedProject = project;
-                        break;
-                    }
-                } catch (java.text.ParseException e) {
-                    System.out.println("Error parsing date for project " + project.getProjectID() + ": " + e.getMessage());
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error loading projects: " + e.getMessage());
-            return;
-        }
+        managedProject = getManagedActiveProject(manager);
 
         // Rest of the method remains unchanged
         if (managedProject == null) {
@@ -385,36 +369,9 @@ public class HDBManagerController{
     public void approveOrRejectOfficerRegistration(User user) {
         Manager manager = (Manager) user;
         Scanner scanner = new Scanner(System.in);
-        Project managedProject = null;
-        OfficerRegRepository officerRegRepository = new OfficerRegRepository();
-        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-        sdf.setLenient(false);
-        Date currentDate = new Date();
+        Project managedProject;
 
-        try {
-            for (Project project : projectRepository.loadProjects()) {
-                try {
-                    String closingDateStr = project.getApplicationClosingDate();
-
-                    if (closingDateStr == null || closingDateStr.isEmpty()) {
-                        System.out.println("Skipping project " + project.getProjectID() + ": Missing closing date.");
-                        continue;
-                    }
-
-                    Date closingDate = sdf.parse(closingDateStr); // Convert String to Date
-
-                    if (manager.getNRIC().equals(project.getManagerID()) && closingDate.after(currentDate)) {
-                        managedProject = project;
-                        break;
-                    }
-                } catch (java.text.ParseException e) {
-                    System.out.println("Error parsing date for project " + project.getProjectID() + ": " + e.getMessage());
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error loading projects: " + e.getMessage());
-            return;
-        }
+        managedProject = getManagedActiveProject(manager);
 
         // Rest of the method remains unchanged
         if (managedProject == null) {
@@ -500,7 +457,7 @@ public class HDBManagerController{
 
     public void approveRegistration(OfficerRegistration reg) {
         reg.setStatus(OfficerRegStatus.APPROVED);
-        projectRepository.addOfficerToProject(reg.getProject(), reg.getOfficer());
+        addOfficerToProject(reg.getProject(), reg.getOfficer());
         OfficerRegRepository.updateOfficerRegInCSV(reg);
     }
 
@@ -509,5 +466,20 @@ public class HDBManagerController{
         OfficerRegRepository.updateOfficerRegInCSV(reg);
     }
 
+    public void addOfficerToProject(Project project, Officer officer) {
+        if (!project.getOfficerIDs().contains(officer.getNRIC())) {
+            List<String> newOfficerIDs = new ArrayList<>(project.getOfficerIDs());
+            // Add the officer to the project
+            newOfficerIDs.add(officer.getNRIC());
+            project.setOfficerIDs(newOfficerIDs);
+            project.setOfficerSlot(project.getOfficerSlot() + 1);
 
+            // Save the updated project
+            projectRepository.updateProjectInCSV(project);
+
+            System.out.println("✅ Officer " + officer.getNRIC() + " added to project " + project.getProjectID());
+        } else {
+            System.out.println("Officer " + officer.getNRIC() + " is already assigned to this project");
+        }
+    }
 }

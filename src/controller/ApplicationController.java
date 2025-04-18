@@ -15,6 +15,15 @@ public class ApplicationController {
     private final ProjectRepository projectRepo = new ProjectRepository();
     private final ApplicationRepository applicationRepo = new ApplicationRepository();
 
+    public Application getApplicationById(String applicationID) {
+        try {
+            applicationRepo.findApplicationById(applicationID);
+        } catch (IOException e) {
+            System.out.println("Error loading applications: " + e.getMessage());
+        }
+        return null;
+    }
+
     public boolean submitApplication(User user, Project project, FlatType flatType) {
         if (user == null || project == null) {
             System.out.println("Invalid input: User or project is null.");
@@ -47,7 +56,7 @@ public class ApplicationController {
                     return false;
                 }
 
-                String applicationID = ApplicationRepository.generateNextApplicationId();
+                String applicationID = applicationRepo.generateNextApplicationID();
                 Project validProject = projectRepo.findProjectById(project.getProjectID());
 
                 if (validProject == null) {
@@ -80,7 +89,7 @@ public class ApplicationController {
                     return false;
                 }
 
-                String applicationID = ApplicationRepository.generateNextApplicationId();
+                String applicationID = applicationRepo.generateNextApplicationID();
                 Project validProject = projectRepo.findProjectById(project.getProjectID());
 
                 if (validProject == null) {
