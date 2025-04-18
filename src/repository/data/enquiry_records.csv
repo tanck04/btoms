@@ -1,5 +1,4 @@
-Enquiry ID,Applicant ID,Project ID,Enquiry Text,Enquiry Reply,Enquiry Status
+Enquiry ID,Applicant ID,Project ID,Enquiry Text,Enquiry Reply,Enquiry Status,Replying Personnel
 E0002,U2410982C,P0002,test enquiry,test reply 2,REPLIED,T1234567J
-E0003,S1234567A,P0001,Are there penalties if I withdraw from the application after booking a flat?Are there penalties if I withdraw from the application after booking a flat?Are there penalties if I withdraw from the application after booking a flat?Are there penalties if I withdraw from the application after booking a flat?,"",PENDING,
-
-E0004,U2410982C,P0003,my name is john cena,null,PENDING,null
+E0003,S1234567A,P0001,Are there penalties if I withdraw from the application after booking a flat?Are there penalties if I withdraw from the application after booking a flat?Are there penalties if I withdraw from the application after booking a flat?Are there penalties if I withdraw from the application after booking a flat?,no penalty,REPLIED,T1234567J
+E0004,U2410982C,P0003,my name is john cena,youre not john cena i am john wick,REPLIED,T8765432F

@@ -52,6 +52,42 @@ public class ProjectController {
                 return null;
             }
 
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+            sdf.setLenient(false);
+            Date currentDate = new Date();
+            Project managedProject = null;
+
+            try {
+                for (Project project : projectRepository.loadProjects()) {
+                    try {
+                        String closingDateStr = project.getApplicationClosingDate();
+
+                        if (closingDateStr == null || closingDateStr.isEmpty()) {
+                            System.out.println("Skipping project " + project.getProjectID() + ": Missing closing date.");
+                            continue;
+                        }
+
+                        Date projectClosingDate = sdf.parse(closingDateStr); // Renamed variable
+
+                        if (managerID.equals(project.getManagerID()) && projectClosingDate.after(currentDate)) {
+                            managedProject = project;
+                            break;
+                        }
+                    } catch (java.text.ParseException e) {
+                        System.out.println("Error parsing date for project " + project.getProjectID() + ": " + e.getMessage());
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("Error loading projects: " + e.getMessage());
+                return null; // Return null instead of void
+            }
+
+            if (managedProject != null) {
+                System.out.println("You are already managing a project with an open application period.");
+                return null;
+            }
+            
+
             // Create project object
             Project newProject = new Project(
                     projectID,

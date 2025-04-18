@@ -9,23 +9,26 @@ import repository.OfficerRegRepository;
 import repository.ProjectRepository;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class HDBOfficerController extends ApplicantController {
     private final ProjectRepository projectRepository = new ProjectRepository();
+    private String lastNeighbourhoodFilter = null;
+    private FlatType lastFlatTypeFilter = null;
 
     public void viewProject(User user) {
         Scanner scanner = new Scanner(System.in);
         Officer officer = (Officer) user;
 
         // Step 1: Show all projects
-        List<Project> allProjects = listProject(officer, null, null);
+        lastNeighbourhoodFilter = null;
+        lastFlatTypeFilter = null;
+        List<Project> allProjects = listProject(officer, lastNeighbourhoodFilter, null);
         System.out.println("All Available Projects:");
-        printProjectList(allProjects);
+        printProjectList(allProjects, null);
 
         // Step 2: Ask user if they want to filter
         System.out.print("\nWould you like to apply a filter? (yes/no): ");
@@ -34,22 +37,15 @@ public class HDBOfficerController extends ApplicantController {
         if (response.equals("yes")) {
             System.out.print("Enter neighbourhood to filter by (or leave blank): ");
             String neighbourhood = scanner.nextLine().trim();
+            lastNeighbourhoodFilter = neighbourhood.isEmpty() ? null : neighbourhood;
 
             System.out.print("Enter flat type to filter by (e.g., TWO_ROOMS, THREE_ROOMS) or leave blank: ");
-            String flatTypeInput = scanner.nextLine().trim();
-            FlatType flatType = null;
+            String flatTypeInput = scanner.nextLine().trim().toUpperCase();
+            lastFlatTypeFilter = flatTypeInput.isEmpty() ? null : FlatType.valueOf(flatTypeInput);
 
-            if (!flatTypeInput.isEmpty()) {
-                try {
-                    flatType = FlatType.valueOf(flatTypeInput.toUpperCase());
-                } catch (IllegalArgumentException e) {
-                    System.out.println("Invalid flat type, ignoring flat type filter.");
-                }
-            }
-
-            List<Project> filteredProjects = listProject(officer, neighbourhood, flatType);
+            List<Project> filteredProjects = listProject(officer, lastNeighbourhoodFilter, lastFlatTypeFilter);
             System.out.println("\nFiltered Projects:");
-            printProjectList(filteredProjects);
+            printProjectList(filteredProjects, lastFlatTypeFilter);
         }
     }
 
@@ -75,8 +71,8 @@ public class HDBOfficerController extends ApplicantController {
         }
     }
 
-    public void printProjectList(List<Project> projects) {
-        // Assuming user is an instance of Manager
+    public void printProjectList(List<Project> projects, FlatType flatTypeFilter){
+        // Assuming user is an instance of Officer
 
         // Header
         System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
@@ -107,9 +103,14 @@ public class HDBOfficerController extends ApplicantController {
                 FlatType flatType = entry.getKey();
                 Double price = entry.getValue();
                 int units = project.getUnitsForFlatType(flatType);
-                System.out.printf("|    - %-10s : $%-10.2f (%-3d units available)\n",
-                        flatType.toString(), price, units);
+
+                // Filter logic based on flatTypeFilter
+                if (flatTypeFilter == null || flatTypeFilter == flatType) {
+                    System.out.printf("|    - %-10s : $%-10.2f (%-3d units available)\n",
+                            flatType.toString(), price, units);
+                }
             }
+
 
             // Separator after each project
             System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
@@ -118,7 +119,6 @@ public class HDBOfficerController extends ApplicantController {
 
     public void submitApplication(User user) {
         FlatType selectedFlatType;
-        List<Project> availableProjects;
         Scanner scanner = new Scanner(System.in);
         try {
             // First, get the logged in applicant
@@ -128,15 +128,36 @@ public class HDBOfficerController extends ApplicantController {
             // Use ApplicationController instead of ApplicantController for this method
             ApplicationController applicationController = new ApplicationController();
             ProjectController projectController = new ProjectController();
-
-
             // Get available projects for the applicant
-            availableProjects = projectController.getAvailableProjects();
 
-            for (Project project : availableProjects) {
-                System.out.println(project.getProjectID() + ": " + project.getProjectName() + " - " + project.getNeighborhood());
+            // Show currently applied filters
+            System.out.println("\nCurrently applied filters:");
+            System.out.println("Neighbourhood: " + (lastNeighbourhoodFilter == null ? "None" : lastNeighbourhoodFilter));
+            System.out.println("Flat Type: " + (lastFlatTypeFilter == null ? "All" : lastFlatTypeFilter));
+            List<Project> availableProjects = listProject(officer, lastNeighbourhoodFilter, lastFlatTypeFilter);
+            printProjectList(availableProjects, lastFlatTypeFilter);
+
+            System.out.print("Do you want to change the filters? (yes/no): ");
+            String changeFilters = scanner.nextLine().trim().toLowerCase();
+
+            if (changeFilters.equals("yes")) {
+                System.out.print("Enter neighbourhood to filter by (or leave blank): ");
+                String neighbourhood = scanner.nextLine().trim();
+                lastNeighbourhoodFilter = neighbourhood.isEmpty() ? null : neighbourhood;
+                System.out.print("Enter flat type to filter by (e.g., TWO_ROOMS, THREE_ROOMS) or leave blank: ");
+                String flatTypeInput = scanner.nextLine().trim();
+                lastFlatTypeFilter = flatTypeInput.isEmpty() ? null : FlatType.valueOf(flatTypeInput);
             }
 
+            // Use the filters to get available projects
+            List<Project> filerProjectsAgain = listProject(officer, lastNeighbourhoodFilter, lastFlatTypeFilter);
+
+            if (filerProjectsAgain.isEmpty()) {
+                System.out.println("No projects available with the selected filters.");
+                return;
+            }
+
+            printProjectList(filerProjectsAgain, lastFlatTypeFilter);
             // Get project selection
             System.out.print("\nEnter Project ID to apply for: ");
             String projectID = scanner.nextLine().trim();
@@ -149,7 +170,7 @@ public class HDBOfficerController extends ApplicantController {
             }
 
             try{
-                if (ifRegisterOfficer(officer)) {
+                if (ifRegisterOfficer(officer, selectedProject)) {
                     System.out.println("You have already registered to be an officer for this project. Please select another project.");
                     return;
                 }
@@ -246,7 +267,7 @@ public class HDBOfficerController extends ApplicantController {
     }
 
     // Method to check if the officer has registered to become an officer for a project
-    private boolean ifRegisterOfficer(Officer officer){
+    private boolean ifRegisterOfficer(Officer officer, Project project){
         OfficerRegRepository officerRegRepository = new OfficerRegRepository();
         List <OfficerRegistration> officerRegistrations = new ArrayList<>();
         try{
@@ -256,7 +277,8 @@ public class HDBOfficerController extends ApplicantController {
         }
         for (OfficerRegistration registration : officerRegistrations) {
             if (registration.getOfficer().getNRIC().equals(officer.getNRIC()) &&
-                    registration.getStatus() != OfficerRegStatus.REJECTED){
+                    registration.getStatus() != OfficerRegStatus.REJECTED &&
+                        registration.getProject().getProjectID().equals(project.getProjectID())) {
                 return true;
             }
         }

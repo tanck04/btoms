@@ -146,6 +146,7 @@ public class ApplicationController {
             for (Application application : applicationRepo.loadApplications()) {
                 if (application.getUser().getNRIC().equals(user.getNRIC())) {
                     application.setWithdrawalStatus(WithdrawalStatus.PENDING);
+                    application.setApplicationStatus(ApplicantAppStatus.UNSUCCESSFUL);
                     ApplicationRepository.updateApplicationInCSV(application);
                     System.out.println("Withdrawal request submitted successfully.");
                     return true;

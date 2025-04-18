@@ -9,16 +9,17 @@ import repository.ApplicationRepository;
 import repository.ProjectRepository;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ApplicantController{
     private final ApplicantRepository applicantRepository = new ApplicantRepository();
     private final ApplicationRepository applicationRepository = new ApplicationRepository();
     private final ProjectRepository projectRepository = new ProjectRepository();
+    private String lastNeighbourhoodFilter = null;
+    private FlatType lastFlatTypeFilter = null;
     // Method to check application status
     public void checkApplicationStatus(User user) {
         // Logic to check application status
@@ -49,7 +50,19 @@ public class ApplicantController{
 
     public List<Project> listProject(Applicant applicant, String neighbourhoodFilter, FlatType flatTypeFilter) {
         try {
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy"); // Adjust the format to your actual date format
+            Date now = new Date();
+
             return projectRepository.loadProjects().stream()
+                    .filter(project -> {
+                        try {
+                            Date closingDate = sdf.parse(project.getApplicationClosingDate());
+                            return closingDate.after(now); // Only include projects with future closing dates
+                        } catch (ParseException e) {
+                            System.out.println("Invalid date format for project: " + project.getProjectID());
+                            return false; // Skip invalid dates
+                        }
+                    })
                     .filter(project ->
                             project.getVisibility() == Visibility.ON || isApplyProject(project, applicant)
                     )
@@ -69,10 +82,12 @@ public class ApplicantController{
         }
     }
 
+
     public boolean isApplyProject(Project project, User user) {
         try {
             for (Application application : applicationRepository.loadApplications()) {
-                if (application.getProject().equals(project) && application.getApplicant().equals(user)) {
+                if (application.getProject().getProjectID().equals(project.getProjectID()) &&
+                    application.getUser().getNRIC().equals(user.getNRIC())) {
                     return true;
                 }
             }
@@ -130,14 +145,15 @@ public class ApplicantController{
         Scanner scanner = new Scanner(System.in);
         Applicant applicant = (Applicant) user;
         MaritalStatus maritalStatus = applicant.getMaritalStatus();
-        // Step 1: Show all projects
-        List<Project> allProjects = listProject(applicant, null, null);
+
+        // Reset filters initially
+        lastFlatTypeFilter = maritalStatus == MaritalStatus.SINGLE ? FlatType.TWO_ROOMS : null;
+        lastNeighbourhoodFilter = null;
+
+        // Step 1: Show all projects with initial filters
+        List<Project> allProjects = listProject(applicant, lastNeighbourhoodFilter, lastFlatTypeFilter);
         System.out.println("All Available Projects:");
-        if (maritalStatus == MaritalStatus.MARRIED) {
-            printProjectList(allProjects, null);
-        } else {
-            printProjectList(allProjects, FlatType.TWO_ROOMS);
-        }
+        printProjectList(allProjects, lastFlatTypeFilter);
 
         // Step 2: Ask user if they want to filter
         System.out.print("\nWould you like to apply a filter? (yes/no): ");
@@ -146,44 +162,69 @@ public class ApplicantController{
         if (response.equals("yes")) {
             System.out.print("Enter neighbourhood to filter by (or leave blank): ");
             String neighbourhood = scanner.nextLine().trim();
+            lastNeighbourhoodFilter = neighbourhood.isEmpty() ? null : neighbourhood;
 
-            FlatType flatType = maritalStatus == MaritalStatus.SINGLE ? FlatType.TWO_ROOMS : null;
-
-            List<Project> filteredProjects = listProject(applicant, neighbourhood, flatType);
+            List<Project> filteredProjects = listProject(applicant, lastNeighbourhoodFilter, lastFlatTypeFilter);
             System.out.println("\nFiltered Projects:");
-            printProjectList(filteredProjects, flatType);
+            printProjectList(filteredProjects, lastFlatTypeFilter);
         }
     }
 
     public void submitApplication(User user) {
         FlatType selectedFlatType;
-        List<Project> availableProjects;
         Scanner scanner = new Scanner(System.in);
         try {
             // First, get the logged in applicant
             Applicant applicant = (Applicant) user;
             String nric = applicant.getNRIC();
+            MaritalStatus maritalStatus = applicant.getMaritalStatus();
 
-            // Use ApplicationController instead of ApplicantController for this method
+            // Use ApplicationController for submission
             ApplicationController applicationController = new ApplicationController();
-            ProjectController projectController = new ProjectController();
 
-
-            // Get available projects for the applicant
-            availableProjects = projectController.getAvailableProjects();
-
-            for (Project project : availableProjects) {
-                System.out.println(project.getProjectID() + ": " + project.getProjectName() + " - " + project.getNeighborhood());
+            // If no filters were previously set, initialize them
+            if (lastFlatTypeFilter == null) {
+                lastFlatTypeFilter = maritalStatus == MaritalStatus.SINGLE ? FlatType.TWO_ROOMS : null;
             }
+
+            // Show currently applied filters
+            System.out.println("\nCurrently applied filters:");
+            System.out.println("Neighbourhood: " + (lastNeighbourhoodFilter == null ? "None" : lastNeighbourhoodFilter));
+            System.out.println("Flat Type: " + (lastFlatTypeFilter == null ? "All" : lastFlatTypeFilter));
+            List<Project> availableProjects = listProject(applicant, lastNeighbourhoodFilter, lastFlatTypeFilter);
+            printProjectList(availableProjects, lastFlatTypeFilter);
+
+            System.out.print("Do you want to change the filters? (yes/no): ");
+            String changeFilters = scanner.nextLine().trim().toLowerCase();
+
+            if (changeFilters.equals("yes")) {
+                System.out.print("Enter neighbourhood to filter by (or leave blank): ");
+                String neighbourhood = scanner.nextLine().trim();
+                lastNeighbourhoodFilter = neighbourhood.isEmpty() ? null : neighbourhood;
+            }
+
+            // Use the filters to get available projects
+            List<Project> filerProjectsAgain = listProject(applicant, lastNeighbourhoodFilter, lastFlatTypeFilter);
+
+            if (filerProjectsAgain.isEmpty()) {
+                System.out.println("No projects available with the selected filters.");
+                return;
+            }
+
+            printProjectList(filerProjectsAgain, lastFlatTypeFilter);
 
             // Get project selection
             System.out.print("\nEnter Project ID to apply for: ");
             String projectID = scanner.nextLine().trim();
 
-            Project selectedProject = projectController.getProjectById(projectID);
+            // Find the project from our filtered list
+            Project selectedProject = availableProjects.stream()
+                    .filter(p -> p.getProjectID().equals(projectID))
+                    .findFirst()
+                    .orElse(null);
 
             if (selectedProject == null) {
-                System.out.println("Invalid project ID. Please try again.");
+                System.out.println("Invalid project ID or project not available with current filters.");
                 return;
             }
 
@@ -191,8 +232,6 @@ public class ApplicantController{
             System.out.println("\n===== Available Flat Types =====");
             Map<FlatType, Integer> flatTypes = selectedProject.getFlatTypeUnits();
 
-            // Filter and display flat types based on marital status
-            MaritalStatus maritalStatus = user.getMaritalStatus();
             List<FlatType> availableOptions = new ArrayList<>();
 
             for (Map.Entry<FlatType, Integer> entry : flatTypes.entrySet()) {
@@ -215,7 +254,6 @@ public class ApplicantController{
                 }
             }
 
-            // Flat type selection
             if (availableOptions.isEmpty()) {
                 System.out.println("No available flat types for your eligibility.");
                 return;
@@ -250,8 +288,6 @@ public class ApplicantController{
                 }
                 System.out.println("Single applicants can only apply for TWO_ROOMS flat types.");
             }
-
-
 
             // Confirm submission
             System.out.print("\nConfirm application submission? (Y/N): ");

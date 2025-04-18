@@ -38,12 +38,23 @@ public class HDBOfficerRegController {
         Officer officer = (Officer) user;
         try {
             ProjectController projectController = new ProjectController();
+            ProjectRepository projectRepository = new ProjectRepository();
+            List<Project> projects = new ArrayList<>();
             Scanner scanner = new Scanner(System.in);
 
             while (true) {
                 System.out.println("Please enter the Project ID for which you wish to register (press 'x' to exit):");
                 String projectId = scanner.nextLine();
 
+                try{
+                    projects = projectRepository.loadProjects();
+                    for (Project project : projects) {
+                        System.out.println("Project ID: " + project.getProjectID() + ", Project Name: " + project.getProjectName());
+                    }
+                }catch (Exception e){
+                    System.out.println("Error loading projects: " + e.getMessage());
+                    return;
+                }
                 if (projectId.equals("x")) {
                     System.out.println("Exiting registration process.");
                     break;
