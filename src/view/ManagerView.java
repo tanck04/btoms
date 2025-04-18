@@ -1,9 +1,6 @@
 package view;
 
-import controller.EnquiryController;
-import controller.HDBOfficerRegController;
-import controller.ProjectController;
-import controller.HDBManagerController;
+import controller.*;
 import enums.FlatType;
 import enums.Role;
 import model.*;
@@ -22,6 +19,8 @@ public class ManagerView implements MenuInterface {
     private final HDBOfficerRegController officerRegController = new HDBOfficerRegController();
     private final HDBManagerController hdbManagerController = new HDBManagerController();
     private final EnquiryController enquiryController = new EnquiryController();
+    private final SecQuesController secQuesController = new SecQuesController();
+    private final PasswordController passwordController = new PasswordController();
 
     @Override
     public void displayMenu(User user) {
@@ -40,8 +39,10 @@ public class ManagerView implements MenuInterface {
             System.out.println("| 7. Approve or Reject Withdrawal               |");
             System.out.println("| 8. Review Officer Registrations               |");
             System.out.println("| 9. Approve or Reject Officers Registration    |");
-            System.out.println("| 10. Reply Enquiries                           |");
-            System.out.println("| 11. Logout                                    |");
+            System.out.println("| 10. View and Reply Enquiries                  |");
+            System.out.println("| 11. Set Security Question for Recovery        |");
+            System.out.println("| 12. Change Password                           |");
+            System.out.println("| 13. Logout                                    |");
             System.out.println("+-----------------------------------------------+");
             System.out.print("Enter your choice: ");
 
@@ -89,6 +90,12 @@ public class ManagerView implements MenuInterface {
                     enquiryController.replyToEnquiry(user);
                     break;
                 case 11:
+                    secQuesController.changeSecurityQuestionAndAnswer(user);
+                    break;
+                case 12:
+                    passwordController.handlePasswordChange(user);
+                    break;
+                case 13:
                     System.out.println("Logging out...");
                     running = false;
                     break;
@@ -189,21 +196,5 @@ public class ManagerView implements MenuInterface {
             System.out.println("Error during approval process: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-
-    private void replyEnquiries() {
-        System.out.println("\n===== Reply to Enquiries =====");
-
-        System.out.println("Pending enquiries:");
-        // Display list of pending enquiries
-        // Logic to fetch and display enquiries
-
-        System.out.println("No pending enquiries found."); // Placeholder
-
-        // If there were enquiries, you would:
-        // 1. Let the manager select an enquiry to reply to
-        // 2. Let them enter a response
-        // 3. Call the controller to save the response
     }
 }

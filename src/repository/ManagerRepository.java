@@ -1,20 +1,16 @@
 package repository;
 
-import controller.PasswordChangerInterface;
-import controller.PasswordController;
-import controller.VerificationInterface;
-import model.Applicant;
-import model.Application;
+import controller.*;
 import model.Manager;
 import enums.MaritalStatus;
 import model.Project;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 
-public class ManagerRepository implements PasswordChangerInterface,VerificationInterface {
+public class ManagerRepository implements PasswordChangerInterface,VerificationInterface, CheckSecQuesInterface, SecQuesChangerInterface {
     private static final String folder = "data";
     private static final String fileName = "manager_records.csv";
     private static final String filePath = "./src/repository/" + folder + "/" + fileName;
@@ -187,4 +183,95 @@ public class ManagerRepository implements PasswordChangerInterface,VerificationI
         }
     }
 
+    @Override
+    public boolean changeSecQuesAndAns(String nric, String newSecQues, String newSecAns) {
+        List<String[]> records = new ArrayList<>();
+        boolean secQuesUpdated = false;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+
+                if (parts[0].equals(nric)) {
+                    // Ensure the CSV has enough columns for Question and Answer
+                    if (parts.length < 8) {
+                        parts = Arrays.copyOf(parts, 8); // Extend to at least 8 elements
+                    }
+                    // Update security question and answer
+                    parts[6] = newSecQues;
+                    parts[7] = newSecAns;
+                    secQuesUpdated = true;
+                }
+                records.add(parts); // Add the record to the list
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading the file: " + e.getMessage());
+            return false; // Indicate failure
+        }
+
+        // Rewrite the file with updated records
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            for (String[] record : records) {
+                writer.write(String.join(",", record));
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error writing to the file: " + e.getMessage());
+            return false; // Indicate failure
+        }
+
+        return secQuesUpdated;
+    }
+
+    @Override
+    public boolean checkHaveSecQues(String nric) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            reader.readLine(); // skip header
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length > 6 && parts[0].equals(nric) && !parts[6].isEmpty()) { // NRIC and Password
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public String retrieveSecQues(String nric) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            reader.readLine(); // Skip header
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts[0].equals(nric) && !parts[6].isEmpty()) { // NRIC and Password
+                    return parts[6];
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "Error retrieving security question"; // Default return value
+    }
+
+    @Override
+    public boolean verifyAnsToSecQues(String nric, String answer) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            reader.readLine(); // Skip header
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts[0].equals(nric) && parts[7].equals(answer.toLowerCase())) { // Match ID and Answer
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

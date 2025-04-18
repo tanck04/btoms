@@ -14,24 +14,19 @@ public class EnquiryRepository {
 
     public String generateNextEnquiryID() {
         int max = 0;
-        try {
-            // Load all enquiries directly from CSV
-            List<Enquiry> enquiries = loadAllEnquiries();
+        // Load all enquiries directly from CSV
+        List<Enquiry> enquiries = loadAllEnquiries();
 
-            // Find the highest project number
-                for (Enquiry enquiry : enquiries) {
-                String existingID = enquiry.getEnquiryID();
-                if (existingID.matches("E\\d+")) {
-                    int number = Integer.parseInt(existingID.substring(1));
-                    if (number > max) {
-                        max = number;
-                    }
-                }
+        // Find the highest project number
+        for (Enquiry enquiry : enquiries) {
+        String existingID = enquiry.getEnquiryID();
+        if (existingID.matches("E\\d+")) {
+            int number = Integer.parseInt(existingID.substring(1));
+            if (number > max) {
+                max = number;
             }
-        } catch (IOException e) {
-            System.out.println("Error loading enquiries: " + e.getMessage());
-            // If we can't load existing enquiries, start from 1
         }
+    }
 
         int nextNumber = max + 1;
         return String.format("E%04d", nextNumber);  // e.g., E0001, E0002
@@ -67,9 +62,8 @@ public class EnquiryRepository {
      * Loads all enquiries from the CSV file.
      *
      * @return A list of Enquiry objects.
-     * @throws IOException if an error occurs while reading the file.
      */
-    public List<Enquiry> loadAllEnquiries() throws IOException {
+    public List<Enquiry> loadAllEnquiries() {
         List<Enquiry> enquiries = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH_ENQUIRY))) {
             String line;
@@ -176,9 +170,8 @@ public class EnquiryRepository {
      *
      * @param applicantID The applicant ID.
      * @return List of Enquiries.
-     * @throws IOException if reading fails.
      */
-    public List<Enquiry> getEnquiriesByApplicantId(String applicantID) throws IOException {
+    public List<Enquiry> getEnquiriesByApplicantId(String applicantID) {
         List<Enquiry> result = new ArrayList<>();
         for (Enquiry e : loadAllEnquiries()) {
             if (e.getApplicantID().equals(applicantID)) {
@@ -279,12 +272,7 @@ public class EnquiryRepository {
     public List<Enquiry> getEnquiriesByUserType(User user){
         List<Enquiry> enquiriesByUserType = new ArrayList<>();
         if (user instanceof Manager) {
-            try{
-                enquiriesByUserType = loadAllEnquiries();
-            }
-            catch (IOException e){
-                System.out.println("Failed to load enquiries: " + e.getMessage());
-            }
+            enquiriesByUserType = loadAllEnquiries();
         } else if (user instanceof Officer) {
             List<Project> projects = projectRepository.getProjectsByOfficerId(user.getNRIC());
             for (Project project : projects) {
@@ -296,11 +284,7 @@ public class EnquiryRepository {
                 }
             }
         } else if (user instanceof Applicant) {
-            try{
-                enquiriesByUserType = getEnquiriesByApplicantId(user.getNRIC());
-            }catch (IOException e){
-                System.out.println("Failed to load enquiries for applicant: " + user.getNRIC());
-            }
+            enquiriesByUserType = getEnquiriesByApplicantId(user.getNRIC());
         }
         return enquiriesByUserType;
     }

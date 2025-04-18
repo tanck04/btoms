@@ -210,16 +210,54 @@ public class HDBManagerController{
         // Assuming user is an instance of Manager
 
         // Header
-        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
-        System.out.println("|                                                                                 Project List                                                                                 |");
-        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
-        System.out.printf("| %-10s | %-20s | %-15s | %-12s | %-12s | %-10s | %-12s | %-15s |\n",
+//        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
+//        System.out.println("|                                                                                 Project List                                                                                 |");
+//        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
+//        System.out.printf("| %-10s | %-20s | %-15s | %-12s | %-12s | %-10s | %-12s | %-15s |\n",
+//                "Project ID", "Project Name", "Neighbourhood", "App. Start", "App. End", "Visibility", "OfficerSlot", "Manager ID");
+//        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
+//
+//        // Project rows
+//        for (Project project : projects) {
+//            System.out.printf("| %-10s | %-20s | %-15s | %-12s | %-12s | %-10s | %-12d | %-15s |\n",
+//                    project.getProjectID(),
+//                    project.getProjectName(),
+//                    project.getNeighborhood(),
+//                    project.getApplicationOpeningDate(),
+//                    project.getApplicationClosingDate(),
+//                    project.getVisibility(),
+//                    project.getOfficerSlot(),
+//                    project.getManagerID()
+//            );
+//
+//            // Officer IDs
+//            System.out.println("| Officer IDs: " + String.join(", ", project.getOfficerIDs()));
+//            // Flat types
+//            System.out.println("| Flat Types:");
+//            for (Map.Entry<FlatType, Double> entry : project.getFlatTypePrices().entrySet()) {
+//                FlatType flatType = entry.getKey();
+//                Double price = entry.getValue();
+//                int units = project.getUnitsForFlatType(flatType);
+//                System.out.printf("|    - %-10s : $%-10.2f (%-3d units available)\n",
+//                        flatType.toString(), price, units);
+//            }
+//
+//            // Separator after each project
+//            System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
+//        }
+        // print centered title
+        System.out.println("+------------+----------------------+-----------------+--------------+--------------+------------+--------------+----------------+");
+        System.out.println("|                                                          Project List                                                          |");
+        System.out.println("+------------+----------------------+-----------------+--------------+--------------+------------+--------------+----------------+");
+        // print project header
+        System.out.printf("| %-10s | %-20s | %-15s | %-12s | %-12s | %-10s | %-12s | %-14s |\n",
                 "Project ID", "Project Name", "Neighbourhood", "App. Start", "App. End", "Visibility", "OfficerSlot", "Manager ID");
-        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
+        System.out.println("+------------+----------------------+-----------------+--------------+--------------+------------+--------------+----------------+");
 
-        // Project rows
+        // print projects
         for (Project project : projects) {
-            System.out.printf("| %-10s | %-20s | %-15s | %-12s | %-12s | %-10s | %-12d | %-15s |\n",
+            // Main project row
+            System.out.printf("| %-10s | %-20s | %-15s | %-12s | %-12s | %-10s | %-12d | %-14s |\n",
                     project.getProjectID(),
                     project.getProjectName(),
                     project.getNeighborhood(),
@@ -227,23 +265,29 @@ public class HDBManagerController{
                     project.getApplicationClosingDate(),
                     project.getVisibility(),
                     project.getOfficerSlot(),
-                    project.getManagerID()
-            );
+                    project.getManagerID());
+            System.out.println("+------------+----------------------+-----------------+--------------+--------------+------------+--------------+----------------+");
 
             // Officer IDs
-            System.out.println("| Officer IDs: " + String.join(", ", project.getOfficerIDs()));
-            // Flat types
-            System.out.println("| Flat Types:");
+            String officerLine = "Officer IDs: " + String.join(", ", project.getOfficerIDs());
+            System.out.printf("| %-126s |\n", "   " + officerLine);
+
+            // Flat Types header
+            System.out.printf("| %-126s |\n", "   Flat Types:");
+
+            // Flat Types rows
             for (Map.Entry<FlatType, Double> entry : project.getFlatTypePrices().entrySet()) {
                 FlatType flatType = entry.getKey();
                 Double price = entry.getValue();
                 int units = project.getUnitsForFlatType(flatType);
-                System.out.printf("|    - %-10s : $%-10.2f (%-3d units available)\n",
+
+                String flatTypeLine = String.format("    - %-12s: $%-10.2f (%-3d units available)",
                         flatType.toString(), price, units);
+                System.out.printf("| %-126s |\n", flatTypeLine);
             }
 
-            // Separator after each project
-            System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
+            // End divider after each project
+            System.out.println("+------------+----------------------+-----------------+--------------+--------------+------------+--------------+----------------+");
         }
     }
 

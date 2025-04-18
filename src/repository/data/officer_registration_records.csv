@@ -1,3 +1,4 @@
-Registration ID,Officer ID,Project ID,Registration Status
+RegistrationID,OfficerID,ProjectID,RegistrationStatus
 R0002,T2109876H,P0001,APPROVED
 R0003,T1234567J,P0001,APPROVED
+R0004,T2109876H,P0003,PENDING

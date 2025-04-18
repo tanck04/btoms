@@ -1,18 +1,65 @@
 package controller;
 
 import model.*;
-import org.w3c.dom.ls.LSOutput;
 import repository.EnquiryRepository;
 import repository.ProjectRepository;
+import helper.TableUtil;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class EnquiryController {
     EnquiryRepository enquiryRepository = new EnquiryRepository();
     ProjectRepository projectRepository = new ProjectRepository();
+    TableUtil tableUtil = new TableUtil();
+
+    public void handleEnquiries(User user, boolean viewAsApplicant) {
+        Scanner sc = new Scanner(System.in);
+        int choice = -1;
+
+        do {
+            System.out.println();
+            System.out.println("+---------------------------------------------+");
+            System.out.println("|               Enquiry Menu                  |");
+            System.out.println("+---------------------------------------------+");
+            System.out.println("| 1. View Enquiries                           |");
+            System.out.println("| 2. Submit Enquiry                           |");
+            System.out.println("| 3. Edit Enquiry                             |");
+            System.out.println("| 4. Delete Enquiry                           |");
+            System.out.println("| 5. Back to Previous Menu                    |");
+            System.out.println("+---------------------------------------------+");
+            System.out.print("Enter your choice: ");
+
+            choice = sc.nextInt();
+            sc.nextLine(); // consume newline
+
+            switch (choice) {
+                case 1:
+                if (viewAsApplicant) {
+                    viewEnquiry(user, "view as applicant");
+                }else{
+                    viewEnquiry(user);
+                }
+                    break;
+                case 2:
+                    submitEnquiry(user);
+                    break;
+                case 3:
+                    editEnquiry(user);
+                    break;
+                case 4:
+                    deleteEnquiry(user);
+                    break;
+                case 5:
+                    System.out.println("Returning to main menu...");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        } while (choice != 5);
+    }
+
     public void viewEnquiry(User user) {
         List<Enquiry> enquiries = enquiryRepository.getEnquiriesByUserType(user);
 
@@ -21,11 +68,28 @@ public class EnquiryController {
             System.out.println("No enquiries found.");
             return;
         }
+        printEnquiries(enquiries);
 
+    }
+
+    public void viewEnquiry(User user, String viewAsApplicant) {
+        if (viewAsApplicant.equalsIgnoreCase("view as applicant")) {
+            List<Enquiry> enquiries = enquiryRepository.getEnquiriesByApplicantId(user.getNRIC());
+
+            // check if enquiry list is empty
+            if (enquiries.isEmpty()) {
+                System.out.println("No enquiries found.");
+                return;
+            }
+            printEnquiries(enquiries);
+        }
+    }
+
+    public void printEnquiries(List<Enquiry> enquiries) {
         String separator = "+------------+--------------+------------+----------------------------------+----------------------------------+----------+";
 
         System.out.println("+-------------------------------------------------------------------------------------------------------------------------+");
-        System.out.println("|                                                 Enquiries List                                                          |");
+        System.out.println("|                                                 Enquiry List                                                            |");
         System.out.println(separator);
         System.out.printf("| %-10s | %-12s | %-10s | %-32s | %-32s | %-8s |\n",
                 "Enquiry ID", "Applicant ID", "Project ID", "Enquiry", "Reply", "Status");
@@ -36,8 +100,8 @@ public class EnquiryController {
             String reply = (e.getEnquiryReply() == null || e.getEnquiryReply().isBlank()) ? "N/A" : e.getEnquiryReply();
 
             // Wrap text to fit within 32-character columns
-            List<String> enquiryLines = wrapText(enquiry, 32);
-            List<String> replyLines = wrapText(reply, 32);
+            List<String> enquiryLines = tableUtil.wrapText(enquiry, 32);
+            List<String> replyLines = tableUtil.wrapText(reply, 32);
             int maxLines = Math.max(enquiryLines.size(), replyLines.size());
 
             for (int i = 0; i < maxLines; i++) {
@@ -66,7 +130,7 @@ public class EnquiryController {
 
         // check if enquiry list is empty
         if (enquiries.isEmpty()) {
-            System.out.println("Enquiry empty");
+            System.out.println("Enquiry empty.");
             return;
         }
 
@@ -213,24 +277,6 @@ public class EnquiryController {
             // Handle any potential IOException
             System.out.println("An error occurred while deleting the enquiry: " + e.getMessage());
         }
-    }
-
-    private List<String> wrapText(String text, int maxWidth) {
-        List<String> lines = new ArrayList<>();
-        if (text == null || text.isEmpty()) {
-            lines.add("");
-            return lines;
-        }
-
-        while (text.length() > maxWidth) {
-            int breakIndex = text.lastIndexOf(' ', maxWidth);
-            if (breakIndex == -1) breakIndex = maxWidth;
-            lines.add(text.substring(0, breakIndex));
-            text = text.substring(breakIndex).trim();
-        }
-
-        lines.add(text);
-        return lines;
     }
 }
 

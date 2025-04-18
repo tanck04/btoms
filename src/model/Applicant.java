@@ -17,6 +17,15 @@ public class Applicant extends User {
         super(nric, name, Role.APPLICANT, password, maritalStatus, age);
     }
 
+    // Constructor for creating an Applicant who is also an Officer
+    public Applicant(String nric,
+                     String name,
+                     Role role,
+                     String password,
+                     MaritalStatus maritalStatus,
+                     int age) {
+        super(nric, name, role, password, maritalStatus, age);
+    }
     public Role getRole() {
         return role;
     }

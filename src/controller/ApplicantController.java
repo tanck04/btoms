@@ -98,32 +98,31 @@ public class ApplicantController{
     }
 
     private void printProjectList(List<Project> projects, FlatType flatTypeFilter) {
-        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------+");
-        System.out.println("|                                                             Project List                                                                 |");
-        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------+");
-        System.out.printf("| %-10s | %-20s | %-15s | %-20s | %-22s |\n", "Project ID", "Project Name", "Neighbourhood", "App. Start", "App. End");
-        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------+");
+        System.out.println("+------------+----------------------+----------------+----------------------+------------------------+");
+        System.out.println("|                                            Project List                                            |");
+        System.out.println("+------------+----------------------+----------------+----------------------+------------------------+");
+        System.out.printf("| %-10s | %-20s | %-14s | %-20s | %-22s |\n", "Project ID", "Project Name", "Neighbourhood", "App. Start", "App. End");
+        System.out.println("+------------+----------------------+----------------+----------------------+------------------------+");
 
         for (Project project : projects) {
-            System.out.printf("| %-10s | %-20s | %-15s | %-20s | %-22s |\n",
+            System.out.printf("| %-10s | %-20s | %-14s | %-20s | %-22s |\n",
                     project.getProjectID(),
                     project.getProjectName(),
                     project.getNeighborhood(),
                     project.getApplicationOpeningDate(),
                     project.getApplicationClosingDate()
             );
-
-            System.out.println("| Flat Types:                                                                                                                              |");
-
+            System.out.println("+------------+----------------------+----------------+----------------------+------------------------+");
+            System.out.println("| Flat Types:                                                                                        |");
             if (flatTypeFilter != null) {
                 // Show only filtered flat type
                 Double price = project.getFlatTypePrices().get(flatTypeFilter);
                 int units = project.getUnitsForFlatType(flatTypeFilter);
                 if (price != null) {
-                    System.out.printf("|    - %-10s : $%-10.2f (%-3d units available)                                                                                      |\n",
-                            flatTypeFilter.toString(), price, units);
+                    System.out.printf("|    - %-12s: $%-13.2f (%3d units available)%44s|\n",
+                            flatTypeFilter.toString(), price, units, "");
                 } else {
-                    System.out.println("|    - No data available for selected flat type                                                                                           |");
+                    System.out.printf("|    - No data available for selected flat type%47s|\n", "");
                 }
             } else {
                 // Show all flat types
@@ -131,12 +130,12 @@ public class ApplicantController{
                     FlatType flatType = entry.getKey();
                     Double price = entry.getValue();
                     int units = project.getUnitsForFlatType(flatType);
-                    System.out.printf("|    - %-10s : $%-10.2f (%-3d units available)                                                                                      |\n",
-                            flatType.toString(), price, units);
+                    System.out.printf("|    - %-12s: $%-13.2f (%3d units available)%44s|\n",
+                            flatType.toString(), price, units, "");
                 }
             }
 
-            System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------+");
+            System.out.println("+------------+----------------------+----------------+----------------------+------------------------+");
         }
     }
 

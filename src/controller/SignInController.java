@@ -5,7 +5,6 @@ import model.User;
 import repository.UserLoginRepository;
 import view.MenuInterface;
 
-import java.io.IOException;
 import java.util.Scanner;
 
 public class SignInController {
@@ -15,20 +14,20 @@ public class SignInController {
         String role = userLoginRepository.getUserTypeByNRIC(nric);
 
         if (role == null) {
-            System.out.println("❌ No role found for NRIC: " + nric + ". Returning to main menu.");
+            System.out.println("No role found for NRIC: " + nric + ". Returning to main menu.");
             return false;
         }
 
         RepositoryController repositoryController = new RepositoryController();
         VerificationInterface repository = (VerificationInterface) repositoryController.getRepository(role);
 
-        if (repository == null) {
-            System.out.println("Invalid ID or password. Returning to main menu.");
-            return false;
-        }
+//        if (repository == null) {
+//            System.out.println("Invalid ID or password. Returning to main menu.");
+//            return false;
+//        }
         User user = repository.verifyCredentials(nric, password);
         if(user == null){
-            System.out.println("Invalid ID or password. Returning to main menu.");
+            System.out.println("Wrong password. Returning to main menu.");
             System.out.println();
             return false;
         }
@@ -63,5 +62,13 @@ public class SignInController {
             return true;
         }
 
+    }
+
+    // check if the NRIC format is valid
+    public static boolean isValidNRICFormat(String nric) {
+        if (nric == null) {
+            return false;
+        }
+        return nric.matches("^[ST]\\d{7}[A-Z]$");
     }
 }

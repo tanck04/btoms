@@ -23,5 +23,23 @@ private static final String FILE_PATH = "./src/repository/data/user_login_record
 
         return null; // Not found
     }
+
+    public boolean userExists(String nric) {
+        try (BufferedReader br = new BufferedReader(new FileReader(FILE_PATH))) {
+            String line;
+            br.readLine(); // Skip header
+
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 1 && parts[0].trim().equalsIgnoreCase(nric)) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading CSV: " + e.getMessage());
+        }
+
+        return false;
+    }
 }
 

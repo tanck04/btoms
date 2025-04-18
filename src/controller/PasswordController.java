@@ -1,7 +1,10 @@
 package controller;
 
+import model.User;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Scanner;
 
 import static controller.SignInController.userLoginRepository;
 
@@ -35,5 +38,43 @@ public class PasswordController {
         }
 
         return repository.changePassword(nric, hashedPassword);
+    }
+
+    public void handlePasswordChange(User user){
+        String nric = user.getNRIC();
+        Scanner scanner = new Scanner(System.in);
+
+        String role = userLoginRepository.getUserTypeByNRIC(nric);
+        RepositoryController repositoryController = new RepositoryController();
+        VerificationInterface repository = (VerificationInterface) repositoryController.getRepository(role);
+
+        System.out.print("| Enter your current password: ");
+        String currentPassword = scanner.nextLine();
+
+        User verifiedUser = repository.verifyCredentials(nric, currentPassword);
+
+        if (verifiedUser == null) {
+            System.out.println("Incorrect current password. Password change aborted.");
+            return;
+        }
+
+        System.out.print("| Enter new password: ");
+        String newPassword = scanner.nextLine();
+
+        System.out.print("| Confirm new password: ");
+        String confirmPassword = scanner.nextLine();
+
+        if (!newPassword.equals(confirmPassword)) {
+            System.out.println("New passwords do not match. Password change aborted.");
+            return;
+        }
+
+        boolean success = changePassword(nric, newPassword);
+
+        if (success) {
+            System.out.println("Password changed successfully.");
+        } else {
+            System.out.println("Failed to change password. Please try again.");
+        }
     }
 }
