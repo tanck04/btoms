@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ReceiptController {
-    private Map<String, String> receiptMap = new HashMap<>(); // Key: Application ID, Value: Receipt Content
 
     public boolean generateReceipt(Application application) {
         if (application == null) {
@@ -54,11 +53,6 @@ public class ReceiptController {
             receipt.append("+----------------------------------------------------------------------------------------------------------------------+\n");
 
 
-
-
-            // Store the receipt content
-            receiptMap.put(application.getApplicationID(), receipt.toString());
-
             // Print the receipt
             System.out.println(receipt.toString());
             return true;
@@ -82,28 +76,28 @@ public class ReceiptController {
     }
 
     // View a stored receipt
-    public void viewReceiptByApplicationID(String applicationID) {
-        if (receiptMap.containsKey(applicationID)) {
-            System.out.println(receiptMap.get(applicationID));
-        } else {
-            System.out.println("No receipt found for Application ID: " + applicationID);
+    public void viewReceiptByUser(User user) {
+        // Try to regenerate the receipt if it's not found in memory
+        try {
 
-            // Try to regenerate the receipt if it's not found in memory
-            try {
-                ApplicationRepository applicationRepo = new ApplicationRepository();
-                Application app = applicationRepo.findApplicationById(applicationID);
-
-                if (app != null && app.getApplicationStatus() == ApplicantAppStatus.BOOKED) {
-                    System.out.println("Regenerating receipt for booked application...");
-                    generateReceipt(app);
-                } else if (app == null) {
-                    System.out.println("Application not found in the system.");
-                } else {
-                    System.out.println("Receipt can only be generated for BOOKED applications.");
+            ApplicationRepository applicationRepo = new ApplicationRepository();
+            Application app = null;
+            for (Application application: applicationRepo.loadApplications()){
+                if (application.getUser() != null && application.getUser().getNRIC().equals(user.getNRIC())) {
+                    app = application;
                 }
-            } catch (IOException e) {
-                System.out.println("Error retrieving application: " + e.getMessage());
             }
+
+            if (app != null && app.getApplicationStatus() == ApplicantAppStatus.BOOKED) {
+                System.out.println("Regenerating receipt for booked application...");
+                generateReceipt(app);
+            } else if (app == null) {
+                System.out.println("Application not found in the system.");
+            } else {
+                System.out.println("Receipt can only be generated for BOOKED applications.");
+            }
+        } catch (IOException e) {
+            System.out.println("Error retrieving application: " + e.getMessage());
         }
     }
 }

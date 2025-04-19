@@ -44,7 +44,7 @@ public class ApplicantController{
                         String choice = scanner.nextLine().trim().toUpperCase();
                         if (choice.equals("Y")) {
                             ReceiptController receiptController = new ReceiptController();
-                            receiptController.viewReceiptByApplicationID(application.getApplicationID());
+                            receiptController.viewReceiptByUser(user);
                         }
                     }
                 }
