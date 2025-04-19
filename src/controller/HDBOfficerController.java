@@ -14,16 +14,15 @@ import java.util.stream.Collectors;
 
 public class HDBOfficerController extends ApplicantController {
     private final ProjectRepository projectRepository = new ProjectRepository();
-    private String lastNeighbourhoodFilter = null;
-    private FlatType lastFlatTypeFilter = null;
+    private final ApplicantController applicantController = new ApplicantController();
 
     public void viewProject(User user) {
         Scanner scanner = new Scanner(System.in);
         Officer officer = (Officer) user;
 
         // Step 1: Show all projects
-        lastNeighbourhoodFilter = null;
-        lastFlatTypeFilter = null;
+        String lastNeighbourhoodFilter = null;
+        FlatType lastFlatTypeFilter = null;
         List<Project> allProjects = listProject(officer, lastNeighbourhoodFilter, null);
         System.out.println("All Available Projects:");
         printProjectList(allProjects, null);
@@ -159,162 +158,163 @@ public class HDBOfficerController extends ApplicantController {
     }
 
     public void submitApplication(User user) {
-        FlatType selectedFlatType;
-        Scanner scanner = new Scanner(System.in);
-        try {
-            // First, get the logged in applicant
-            Officer officer = (Officer) user;
-            String nric = officer.getNRIC();
-
-            // check eligibility
-            if (user.getAge()<35 && user.getMaritalStatus() == MaritalStatus.SINGLE) {
-                System.out.println("You are not eligible to apply for a flat.");
-                return;
-            }
-            if (user.getAge()<21 && user.getMaritalStatus() == MaritalStatus.MARRIED) {
-                System.out.println("You are not eligible to apply for a flat. Applicant needs to be at least 21 years old.");
-                return;
-            }
-
-            // Use ApplicationController instead of ApplicantController for this method
-            ApplicationController applicationController = new ApplicationController();
-            ProjectController projectController = new ProjectController();
-
-            // Show currently applied filters
-            System.out.println("\nCurrently applied filters:");
-            System.out.println("Neighbourhood: " + (lastNeighbourhoodFilter == null ? "None" : lastNeighbourhoodFilter));
-            System.out.println("Flat Type: " + (lastFlatTypeFilter == null ? "All" : lastFlatTypeFilter));
-            List<Project> availableProjects = listProject(officer, lastNeighbourhoodFilter, lastFlatTypeFilter);
-            printProjectList(availableProjects, lastFlatTypeFilter);
-
-            System.out.print("Do you want to apply/change the filters? (yes/no): ");
-            String changeFilters = scanner.nextLine().trim().toLowerCase();
-
-            if (changeFilters.equals("yes")) {
-                System.out.print("Enter neighbourhood to filter by (or leave blank): ");
-                String neighbourhood = scanner.nextLine().trim();
-                lastNeighbourhoodFilter = neighbourhood.isEmpty() ? null : neighbourhood;
-                System.out.print("Enter flat type to filter by (e.g., TWO_ROOMS, THREE_ROOMS) or leave blank: ");
-                String flatTypeInput = scanner.nextLine().trim();
-                lastFlatTypeFilter = flatTypeInput.isEmpty() ? null : FlatType.valueOf(flatTypeInput);
-            }
-
-            // Use the filters to get available projects
-            List<Project> filterProjectsAgain = listProject(officer, lastNeighbourhoodFilter, lastFlatTypeFilter);
-
-            if (filterProjectsAgain.isEmpty()) {
-                System.out.println("No projects available with the selected filters.");
-                return;
-            }
-
-            printProjectList(filterProjectsAgain, lastFlatTypeFilter);
-            // Get project selection
-            System.out.print("\nEnter Project ID to apply for: ");
-            String projectID = scanner.nextLine().trim();
-
-            Project selectedProject = projectController.getProjectById(projectID);
-
-            if (selectedProject == null) {
-                System.out.println("Invalid project ID. Please try again.");
-                return;
-            }
-
-            try{
-                if (ifRegisterOfficer(officer, selectedProject)) {
-                    System.out.println("You have already registered to be an officer for this project. Please select another project.");
-                    return;
-                }
-            }catch (Exception e){
-                System.out.println("Error checking registration: " + e.getMessage());
-                return;
-            }
-
-            // Display available flat types for the selected project
-            System.out.println("\n===== Available Flat Types =====");
-            Map<FlatType, Integer> flatTypes = selectedProject.getFlatTypeUnits();
-
-            // Filter and display flat types based on marital status
-            MaritalStatus maritalStatus = user.getMaritalStatus();
-            int age = user.getAge();
-            List<FlatType> availableOptions = new ArrayList<>();
-
-            for (Map.Entry<FlatType, Integer> entry : flatTypes.entrySet()) {
-                FlatType type = entry.getKey();
-                int units = entry.getValue();
-
-                if (units > 0) {
-                    // For SINGLE and of 35 years old and above, only show TWO_ROOMS
-                    if (maritalStatus == MaritalStatus.SINGLE && age > 35 && type == FlatType.TWO_ROOMS) {
-                        System.out.println(type + " - Units available: " + units);
-                        availableOptions.add(type);
-                    }
-
-                    // For MARRIED and of 21 years old and above, show TWO_ROOMS and THREE_ROOMS
-                    if (maritalStatus == MaritalStatus.MARRIED && age > 21 &&
-                            (type == FlatType.TWO_ROOMS || type == FlatType.THREE_ROOMS)) {
-                        System.out.println(type + " - Units available: " + units);
-                        availableOptions.add(type);
-                    }
-                }
-            }
-
-            // Flat type selection
-            if (availableOptions.isEmpty()) {
-                System.out.println("No available flat types for your eligibility.");
-                return;
-            }
-
-            if (maritalStatus == MaritalStatus.MARRIED) {
-                // Let the user choose from available options
-                System.out.println("\nSelect Flat Type:");
-                for (int i = 0; i < availableOptions.size(); i++) {
-                    System.out.printf("%d - %s\n", i + 1, availableOptions.get(i));
-                }
-                System.out.print("Enter your choice (number): ");
-                String input = scanner.nextLine().trim();
-
-                try {
-                    int choice = Integer.parseInt(input);
-                    if (choice < 1 || choice > availableOptions.size()) {
-                        System.out.println("Invalid selection. Please try again.");
-                        return;
-                    }
-                    selectedFlatType = availableOptions.get(choice - 1);
-                } catch (NumberFormatException e) {
-                    System.out.println("Invalid input. Please enter a number.");
-                    return;
-                }
-            } else {
-                // SINGLE: auto-assign TWO_ROOMS if available
-                selectedFlatType = FlatType.TWO_ROOMS;
-                if (!availableOptions.contains(selectedFlatType)) {
-                    System.out.println("TWO_ROOMS is not available at the moment.");
-                    return;
-                }
-                System.out.println("Single applicants can only apply for TWO_ROOMS flat types.");
-            }
-
-
-
-            // Confirm submission
-            System.out.print("\nConfirm application submission? (Y/N): ");
-            String confirm = scanner.nextLine().trim().toUpperCase();
-
-            if (confirm.equals("Y")) {
-                boolean success = applicationController.submitApplication(officer, selectedProject, selectedFlatType);
-
-                if (success) {
-                    System.out.println("Application submitted successfully!");
-                } else {
-                    System.out.println("Failed to submit application. Please try again.");
-                }
-            } else {
-                System.out.println("Application submission cancelled.");
-            }
-
-        } catch (Exception e) {
-            System.out.println("Error submitting application: " + e.getMessage());
-        }
+        applicantController.submitApplication(user);
+//        FlatType selectedFlatType;
+//        Scanner scanner = new Scanner(System.in);
+//        try {
+//            // First, get the logged in applicant
+//            Officer officer = (Officer) user;
+//            String nric = officer.getNRIC();
+//
+//            // check eligibility
+//            if (user.getAge()<35 && user.getMaritalStatus() == MaritalStatus.SINGLE) {
+//                System.out.println("You are not eligible to apply for a flat.");
+//                return;
+//            }
+//            if (user.getAge()<21 && user.getMaritalStatus() == MaritalStatus.MARRIED) {
+//                System.out.println("You are not eligible to apply for a flat. Applicant needs to be at least 21 years old.");
+//                return;
+//            }
+//
+//            // Use ApplicationController instead of ApplicantController for this method
+//            ApplicationController applicationController = new ApplicationController();
+//            ProjectController projectController = new ProjectController();
+//
+//            // Show currently applied filters
+//            System.out.println("\nCurrently applied filters:");
+//            System.out.println("Neighbourhood: " + (lastNeighbourhoodFilter == null ? "None" : lastNeighbourhoodFilter));
+//            System.out.println("Flat Type: " + (lastFlatTypeFilter == null ? "All" : lastFlatTypeFilter));
+//            List<Project> availableProjects = listProject(officer, lastNeighbourhoodFilter, lastFlatTypeFilter);
+//            printProjectList(availableProjects, lastFlatTypeFilter);
+//
+//            System.out.print("Do you want to apply/change the filters? (yes/no): ");
+//            String changeFilters = scanner.nextLine().trim().toLowerCase();
+//
+//            if (changeFilters.equals("yes")) {
+//                System.out.print("Enter neighbourhood to filter by (or leave blank): ");
+//                String neighbourhood = scanner.nextLine().trim();
+//                lastNeighbourhoodFilter = neighbourhood.isEmpty() ? null : neighbourhood;
+//                System.out.print("Enter flat type to filter by (e.g., TWO_ROOMS, THREE_ROOMS) or leave blank: ");
+//                String flatTypeInput = scanner.nextLine().trim();
+//                lastFlatTypeFilter = flatTypeInput.isEmpty() ? null : FlatType.valueOf(flatTypeInput);
+//            }
+//
+//            // Use the filters to get available projects
+//            List<Project> filterProjectsAgain = listProject(officer, lastNeighbourhoodFilter, lastFlatTypeFilter);
+//
+//            if (filterProjectsAgain.isEmpty()) {
+//                System.out.println("No projects available with the selected filters.");
+//                return;
+//            }
+//
+//            printProjectList(filterProjectsAgain, lastFlatTypeFilter);
+//            // Get project selection
+//            System.out.print("\nEnter Project ID to apply for: ");
+//            String projectID = scanner.nextLine().trim();
+//
+//            Project selectedProject = projectController.getProjectById(projectID);
+//
+//            if (selectedProject == null) {
+//                System.out.println("Invalid project ID. Please try again.");
+//                return;
+//            }
+//
+//            try{
+//                if (ifRegisterOfficer(officer, selectedProject)) {
+//                    System.out.println("You have already registered to be an officer for this project. Please select another project.");
+//                    return;
+//                }
+//            }catch (Exception e){
+//                System.out.println("Error checking registration: " + e.getMessage());
+//                return;
+//            }
+//
+//            // Display available flat types for the selected project
+//            System.out.println("\n===== Available Flat Types =====");
+//            Map<FlatType, Integer> flatTypes = selectedProject.getFlatTypeUnits();
+//
+//            // Filter and display flat types based on marital status
+//            MaritalStatus maritalStatus = user.getMaritalStatus();
+//            int age = user.getAge();
+//            List<FlatType> availableOptions = new ArrayList<>();
+//
+//            for (Map.Entry<FlatType, Integer> entry : flatTypes.entrySet()) {
+//                FlatType type = entry.getKey();
+//                int units = entry.getValue();
+//
+//                if (units > 0) {
+//                    // For SINGLE and of 35 years old and above, only show TWO_ROOMS
+//                    if (maritalStatus == MaritalStatus.SINGLE && age > 35 && type == FlatType.TWO_ROOMS) {
+//                        System.out.println(type + " - Units available: " + units);
+//                        availableOptions.add(type);
+//                    }
+//
+//                    // For MARRIED and of 21 years old and above, show TWO_ROOMS and THREE_ROOMS
+//                    if (maritalStatus == MaritalStatus.MARRIED && age > 21 &&
+//                            (type == FlatType.TWO_ROOMS || type == FlatType.THREE_ROOMS)) {
+//                        System.out.println(type + " - Units available: " + units);
+//                        availableOptions.add(type);
+//                    }
+//                }
+//            }
+//
+//            // Flat type selection
+//            if (availableOptions.isEmpty()) {
+//                System.out.println("No available flat types for your eligibility.");
+//                return;
+//            }
+//
+//            if (maritalStatus == MaritalStatus.MARRIED) {
+//                // Let the user choose from available options
+//                System.out.println("\nSelect Flat Type:");
+//                for (int i = 0; i < availableOptions.size(); i++) {
+//                    System.out.printf("%d - %s\n", i + 1, availableOptions.get(i));
+//                }
+//                System.out.print("Enter your choice (number): ");
+//                String input = scanner.nextLine().trim();
+//
+//                try {
+//                    int choice = Integer.parseInt(input);
+//                    if (choice < 1 || choice > availableOptions.size()) {
+//                        System.out.println("Invalid selection. Please try again.");
+//                        return;
+//                    }
+//                    selectedFlatType = availableOptions.get(choice - 1);
+//                } catch (NumberFormatException e) {
+//                    System.out.println("Invalid input. Please enter a number.");
+//                    return;
+//                }
+//            } else {
+//                // SINGLE: auto-assign TWO_ROOMS if available
+//                selectedFlatType = FlatType.TWO_ROOMS;
+//                if (!availableOptions.contains(selectedFlatType)) {
+//                    System.out.println("TWO_ROOMS is not available at the moment.");
+//                    return;
+//                }
+//                System.out.println("Single applicants can only apply for TWO_ROOMS flat types.");
+//            }
+//
+//
+//
+//            // Confirm submission
+//            System.out.print("\nConfirm application submission? (Y/N): ");
+//            String confirm = scanner.nextLine().trim().toUpperCase();
+//
+//            if (confirm.equals("Y")) {
+//                boolean success = applicationController.submitApplication(officer, selectedProject, selectedFlatType);
+//
+//                if (success) {
+//                    System.out.println("Application submitted successfully!");
+//                } else {
+//                    System.out.println("Failed to submit application. Please try again.");
+//                }
+//            } else {
+//                System.out.println("Application submission cancelled.");
+//            }
+//
+//        } catch (Exception e) {
+//            System.out.println("Error submitting application: " + e.getMessage());
+//        }
     }
 
     // Method to check if the officer has registered to become an officer for a project

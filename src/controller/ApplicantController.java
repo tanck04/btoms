@@ -96,6 +96,10 @@ public class ApplicantController{
                             flatTypeFilter == null ||
                                     project.getFlatTypePrices().containsKey(flatTypeFilter)
                     )
+                    .filter(project ->
+                            // Exclude if applicant's NRIC is in officerIDs list
+                            !project.getOfficerIDs().contains(applicant.getNRIC())
+                    )
                     .collect(Collectors.toList());
 
         } catch (Exception e) {
