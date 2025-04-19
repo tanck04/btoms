@@ -62,7 +62,6 @@ public class HDBOfficerController extends ApplicantController {
                                     project.getFlatTypePrices().containsKey(flatTypeFilter)
                     )
                     .collect(Collectors.toList());
-
         } catch (Exception e) {
             System.out.println("Error loading projects: " + e.getMessage());
             return new ArrayList<>();
@@ -167,10 +166,19 @@ public class HDBOfficerController extends ApplicantController {
             Officer officer = (Officer) user;
             String nric = officer.getNRIC();
 
+            // check eligibility
+            if (user.getAge()<35 && user.getMaritalStatus() == MaritalStatus.SINGLE) {
+                System.out.println("You are not eligible to apply for a flat.");
+                return;
+            }
+            if (user.getAge()<21 && user.getMaritalStatus() == MaritalStatus.MARRIED) {
+                System.out.println("You are not eligible to apply for a flat. Applicant needs to be at least 21 years old.");
+                return;
+            }
+
             // Use ApplicationController instead of ApplicantController for this method
             ApplicationController applicationController = new ApplicationController();
             ProjectController projectController = new ProjectController();
-            // Get available projects for the applicant
 
             // Show currently applied filters
             System.out.println("\nCurrently applied filters:");
@@ -179,7 +187,7 @@ public class HDBOfficerController extends ApplicantController {
             List<Project> availableProjects = listProject(officer, lastNeighbourhoodFilter, lastFlatTypeFilter);
             printProjectList(availableProjects, lastFlatTypeFilter);
 
-            System.out.print("Do you want to change the filters? (yes/no): ");
+            System.out.print("Do you want to apply/change the filters? (yes/no): ");
             String changeFilters = scanner.nextLine().trim().toLowerCase();
 
             if (changeFilters.equals("yes")) {
@@ -192,14 +200,14 @@ public class HDBOfficerController extends ApplicantController {
             }
 
             // Use the filters to get available projects
-            List<Project> filerProjectsAgain = listProject(officer, lastNeighbourhoodFilter, lastFlatTypeFilter);
+            List<Project> filterProjectsAgain = listProject(officer, lastNeighbourhoodFilter, lastFlatTypeFilter);
 
-            if (filerProjectsAgain.isEmpty()) {
+            if (filterProjectsAgain.isEmpty()) {
                 System.out.println("No projects available with the selected filters.");
                 return;
             }
 
-            printProjectList(filerProjectsAgain, lastFlatTypeFilter);
+            printProjectList(filterProjectsAgain, lastFlatTypeFilter);
             // Get project selection
             System.out.print("\nEnter Project ID to apply for: ");
             String projectID = scanner.nextLine().trim();
@@ -227,6 +235,7 @@ public class HDBOfficerController extends ApplicantController {
 
             // Filter and display flat types based on marital status
             MaritalStatus maritalStatus = user.getMaritalStatus();
+            int age = user.getAge();
             List<FlatType> availableOptions = new ArrayList<>();
 
             for (Map.Entry<FlatType, Integer> entry : flatTypes.entrySet()) {
@@ -234,14 +243,14 @@ public class HDBOfficerController extends ApplicantController {
                 int units = entry.getValue();
 
                 if (units > 0) {
-                    // For SINGLE, only show TWO_ROOMS
-                    if (maritalStatus == MaritalStatus.SINGLE && type == FlatType.TWO_ROOMS) {
+                    // For SINGLE and of 35 years old and above, only show TWO_ROOMS
+                    if (maritalStatus == MaritalStatus.SINGLE && age > 35 && type == FlatType.TWO_ROOMS) {
                         System.out.println(type + " - Units available: " + units);
                         availableOptions.add(type);
                     }
 
-                    // For MARRIED, show TWO_ROOMS and THREE_ROOMS
-                    if (maritalStatus == MaritalStatus.MARRIED &&
+                    // For MARRIED and of 21 years old and above, show TWO_ROOMS and THREE_ROOMS
+                    if (maritalStatus == MaritalStatus.MARRIED && age > 21 &&
                             (type == FlatType.TWO_ROOMS || type == FlatType.THREE_ROOMS)) {
                         System.out.println(type + " - Units available: " + units);
                         availableOptions.add(type);

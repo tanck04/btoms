@@ -1,1 +1,2 @@
 ApplicationID,ApplicantID,ProjectID,FlatType,ApplicationStatus,WithdrawalStatus
+A0001,S1111111D,P0001,THREE_ROOMS,PENDING,NULL

@@ -172,7 +172,7 @@ public class ApplicantController{
             System.out.println("\nYou are not eligible to view BTO projects. Singles must be at least 35 years old.");
             return;
         }else if (maritalStatus == MaritalStatus.MARRIED && age < 21) {
-            System.out.println("\nYou are not eligible to view BTO projects. Married must be at least 21 years old.");
+            System.out.println("\nYou are not eligible to view BTO projects. Applicant must be at least 21 years old.");
             return;
         }
         lastFlatTypeFilter = (maritalStatus == MaritalStatus.SINGLE) ? FlatType.TWO_ROOMS : null;
@@ -205,6 +205,8 @@ public class ApplicantController{
             // First, get the logged in applicant
             Applicant applicant = (Applicant) user;
             MaritalStatus maritalStatus = applicant.getMaritalStatus();
+
+            // check eligibility
             if (user.getAge()<35 && maritalStatus == MaritalStatus.SINGLE) {
                 System.out.println("You are not eligible to apply for a flat.");
                 return;
@@ -238,14 +240,14 @@ public class ApplicantController{
             }
 
             // Use the filters to get available projects
-            List<Project> filerProjectsAgain = listProject(applicant, lastNeighbourhoodFilter, lastFlatTypeFilter);
+            List<Project> filterProjectsAgain = listProject(applicant, lastNeighbourhoodFilter, lastFlatTypeFilter);
 
-            if (filerProjectsAgain.isEmpty()) {
+            if (filterProjectsAgain.isEmpty()) {
                 System.out.println("No projects available with the selected filters.");
                 return;
             }
 
-            printProjectList(filerProjectsAgain, lastFlatTypeFilter);
+            printProjectList(filterProjectsAgain, lastFlatTypeFilter);
 
             // Get project selection
             System.out.print("\nEnter Project ID to apply for: ");
@@ -263,7 +265,7 @@ public class ApplicantController{
             }
 
             // Display available flat types for the selected project
-            System.out.println("\n===== Available Flat Types =====");
+            System.out.println("\n====== Available Flat Types ======");
             Map<FlatType, Integer> flatTypes = selectedProject.getFlatTypeUnits();
 
             List<FlatType> availableOptions = new ArrayList<>();
