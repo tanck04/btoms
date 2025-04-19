@@ -1,5 +1,6 @@
 package controller;
 
+import enums.ApplicantAppStatus;
 import enums.FlatType;
 import enums.Visibility;
 import model.*;
@@ -22,22 +23,43 @@ public class ApplicantController{
     private FlatType lastFlatTypeFilter = null;
     // Method to check application status
     public void checkApplicationStatus(User user) {
-        // Logic to check application status
         try {
-            for (Application application : applicationRepository.loadApplications()) {
+            List<Application> applications = applicationRepository.loadApplications();
+            boolean found = false;
+
+            for (Application application : applications) {
                 if (application.getUser().getNRIC().equals(user.getNRIC())) {
+                    found = true;
                     System.out.println("Application ID: " + application.getApplicationID());
                     System.out.println("Project ID: " + application.getProject().getProjectID());
                     System.out.println("Flat Type: " + application.getFlatType());
                     System.out.println("Application Status: " + application.getApplicationStatus());
                     System.out.println("Withdrawal Status: " + application.getWithdrawalStatus());
                     System.out.println();
+
+                    // Offer to show receipt if application is BOOKED
+                    if (application.getApplicationStatus() == ApplicantAppStatus.BOOKED) {
+                        Scanner scanner = new Scanner(System.in);
+                        System.out.print("Would you like to view your booking receipt for Application ID "
+                                + application.getApplicationID() + "? (Y/N): ");
+                        String choice = scanner.nextLine().trim().toUpperCase();
+                        if (choice.equals("Y")) {
+                            ReceiptController receiptController = new ReceiptController();
+                            receiptController.viewReceiptByApplicationID(application.getApplicationID());
+                        }
+                    }
                 }
             }
+
+            if (!found) {
+                System.out.println("No applications found for your NRIC.");
+            }
+
         } catch (IOException e) {
             System.out.println("Error loading applications: " + e.getMessage());
         }
     }
+
 
     public Applicant getApplicantById(String applicantID) {
         try {
@@ -310,5 +332,4 @@ public class ApplicantController{
             System.out.println("Error submitting application: " + e.getMessage());
         }
     }
-
 }

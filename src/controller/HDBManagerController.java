@@ -590,11 +590,65 @@ public class HDBManagerController{
             project.setOfficerSlot(project.getOfficerSlot() + 1);
 
             // Save the updated project
-            projectRepository.updateProjectInCSV(project);
+            ProjectRepository.updateProjectInCSV(project);
 
             System.out.println("✅ Officer " + officer.getNRIC() + " added to project " + project.getProjectID());
         } else {
             System.out.println("Officer " + officer.getNRIC() + " is already assigned to this project");
+        }
+    }
+
+    /**
+     * Allows HDB manager to generate and view various reports
+     * @param user The HDB manager generating the report
+     */
+    public void generateReports(User user) {
+        Scanner scanner = new Scanner(System.in);
+        ReportController reportController = new ReportController();
+
+        System.out.println("\n+---------------------------------------------------+");
+        System.out.println("|              HDB REPORT GENERATION                |");
+        System.out.println("+---------------------------------------------------+");
+        System.out.println("| 1. Application Status Report                      |");
+        System.out.println("| 2. Booked Applications Report                     |");
+        System.out.println("| 3. Project Summary Report                         |");
+        System.out.println("| 0. Back to Main Menu                              |");
+        System.out.println("+---------------------------------------------------+");
+        System.out.print("Enter your choice: ");
+
+        try {
+            int choice = Integer.parseInt(scanner.nextLine().trim());
+
+            switch (choice) {
+                case 1:
+                    reportController.generateReport("APPLICATION_STATUS");
+                    break;
+                case 2:
+                    reportController.generateReport("BOOKED_APPLICATIONS");
+                    break;
+                case 3:
+                    reportController.generateReport("PROJECT_SUMMARY");
+                    break;
+                case 0:
+                    System.out.println("Returning to main menu...");
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+                    break;
+            }
+
+            // Prompt to continue or generate another report
+            System.out.print("\nGenerate another report? (Y/N): ");
+            String response = scanner.nextLine().trim().toUpperCase();
+
+            if (response.equals("Y")) {
+                generateReports(user);
+            }
+
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a number.");
+        } catch (Exception e) {
+            System.out.println("Error generating report: " + e.getMessage());
         }
     }
 }

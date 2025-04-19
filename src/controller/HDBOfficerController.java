@@ -364,8 +364,9 @@ public class HDBOfficerController extends ApplicantController {
         return successfulApplications;
     }
 
-    public void BookBTO(User user) {
+    public void bookBTO(User user) {
         ApplicationController applicationController = new ApplicationController();
+        ReceiptController receiptController = new ReceiptController();
         Scanner scanner = new Scanner(System.in);
         List<Application> successfulApplications = getSuccessfulApplicationsForOfficerProject(user);
 
@@ -415,8 +416,8 @@ public class HDBOfficerController extends ApplicantController {
 
             selectedApplication.setApplicationStatus(ApplicantAppStatus.BOOKED);
             ApplicationRepository.updateApplicationInCSV(selectedApplication);
-
             System.out.println("Booking successful! Application status updated to BOOKED.");
+            receiptController.generateBookingReceipt(selectedApplication, user);
         } else {
             System.out.println("No units left to book for " + selectedFlatType);
         }

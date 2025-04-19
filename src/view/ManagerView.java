@@ -35,14 +35,15 @@ public class ManagerView implements MenuInterface {
             System.out.println("| 3. Update Project Details                     |");
             System.out.println("| 4. Delete Project                             |");
             System.out.println("| 5. Review Applications                        |");
-            System.out.println("| 6. Approve or Reject Application              |");
-            System.out.println("| 7. Approve or Reject Withdrawal               |");
-            System.out.println("| 8. Review Officer Registrations               |");
-            System.out.println("| 9. Approve or Reject Officers Registration    |");
-            System.out.println("| 10. View and Reply Enquiries                  |");
-            System.out.println("| 11. Set Security Question for Recovery        |");
-            System.out.println("| 12. Change Password                           |");
-            System.out.println("| 13. Logout                                    |");
+            System.out.println("| 6. View Report                                |");
+            System.out.println("| 7. Approve or Reject Application              |");
+            System.out.println("| 8. Approve or Reject Withdrawal               |");
+            System.out.println("| 9. Review Officer Registrations               |");
+            System.out.println("| 10. Approve or Reject Officers Registration    |");
+            System.out.println("| 11. View and Reply Enquiries                  |");
+            System.out.println("| 12. Set Security Question for Recovery        |");
+            System.out.println("| 13. Change Password                           |");
+            System.out.println("| 14. Logout                                    |");
             System.out.println("+-----------------------------------------------+");
             System.out.print("Enter your choice: ");
 
@@ -73,29 +74,32 @@ public class ManagerView implements MenuInterface {
                     reviewApplications();
                     break;
                 case 6:
-                    approveApplication(user);
+                    hdbManagerController.generateReports(user);
                     break;
                 case 7:
-                    hdbManagerController.approveOrRejectWithdrawal(user);
+                    approveApplication(user);
                     break;
                 case 8:
-                    hdbManagerController.reviewOfficerRegistration(user);
+                    hdbManagerController.approveOrRejectWithdrawal(user);
                     break;
                 case 9:
+                    hdbManagerController.reviewOfficerRegistration(user);
+                    break;
+                case 10:
                     hdbManagerController.approveOrRejectOfficerRegistration(user);
                     //approveOfficerRegistration();
                     break;
-                case 10:
+                case 11:
                     enquiryController.viewEnquiry(user);
                     enquiryController.replyToEnquiry(user);
                     break;
-                case 11:
+                case 12:
                     secQuesController.changeSecurityQuestionAndAnswer(user);
                     break;
-                case 12:
+                case 13:
                     passwordController.handlePasswordChange(user);
                     break;
-                case 13:
+                case 14:
                     System.out.println("Logging out...");
                     running = false;
                     break;

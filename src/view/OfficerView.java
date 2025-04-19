@@ -68,7 +68,7 @@ public class OfficerView implements MenuInterface{
                     enquiryController.replyToEnquiry(user);
                     break;
                 case "9":
-                    officerController.BookBTO(user);
+                    officerController.bookBTO(user);
                     break;
                 case "10":
                     secQuesController.changeSecurityQuestionAndAnswer(user);
