@@ -125,13 +125,14 @@ public class ReportController {
         }
 
         // Print report header
-        System.out.println("\n+-----------------------------------------------------------------------------------------------------------+");
-        System.out.println("|                                     APPLICATION STATUS REPORT                                             |");
-        System.out.println("| Generated on: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "                                                          |");
-        System.out.println("+-----------------------------------------------------------------------------------------------------------+");
+        System.out.println("\n+----------------------------------------------------------------------------------------------------------+");
+        System.out.println("|                                     APPLICATION STATUS REPORT                                            |");
+        System.out.println("+----------------------------------------------------------------------------------------------------------+");
+        System.out.println("| Generated on: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "                                                                        |");
+        System.out.println("+----------------------------------------------------------------------------------------------------------+");
         System.out.printf("| %-15s | %-15s | %-20s | %-15s | %-12s | %-12s |\n",
                 "APP ID", "APPLICANT", "PROJECT", "FLAT TYPE", "APP STATUS", "WITHDRAWAL");
-        System.out.println("+-----------------------------------------------------------------------------------------------------------+");
+        System.out.println("+----------------------------------------------------------------------------------------------------------+");
 
         // Print applications
         for (Application app : filteredApplications) {
@@ -144,9 +145,9 @@ public class ReportController {
                     app.getWithdrawalStatus());
         }
 
-        System.out.println("+-----------------------------------------------------------------------------------------------------------+");
-        System.out.println("| Total Applications: " + filteredApplications.size() + "                                                                      |");
-        System.out.println("+-----------------------------------------------------------------------------------------------------------+");
+        System.out.println("+----------------------------------------------------------------------------------------------------------+");
+        System.out.println("| Total Applications: " + filteredApplications.size() + "                                                                                    |");
+        System.out.println("+----------------------------------------------------------------------------------------------------------+");
     }
 
     private void generateBookedApplicationsReport(Scanner scanner) throws IOException {
@@ -203,33 +204,37 @@ public class ReportController {
         }
 
         // Print report header
-        System.out.println("\n+----------------------------------------------------------------------------------------------------------------------------------+");
-        System.out.println("|                                                BOOKED APPLICATIONS REPORT                                                         |");
-        System.out.println("| Generated on: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "                                                                               |");
-        System.out.println("+----------------------------------------------------------------------------------------------------------------------------------+");
+        System.out.println("\n+-----------------------------------------------------------------------------------------------------------------+");
+        System.out.println("|                                                BOOKED APPLICATIONS REPORT                                       |");
+        System.out.println("+-----------------------------------------------------------------------------------------------------------------+");
+        System.out.printf("| Generated on: %-98s|\n", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+        System.out.println("+-----------------------------------------------------------------------------------------------------------------+");
 
-        // Print detailed information for each booked application
         for (int i = 0; i < filteredBookedApps.size(); i++) {
             Application app = filteredBookedApps.get(i);
-            System.out.printf("| Application #%d: %s\n", (i + 1), app.getApplicationID());
-            System.out.println("+----------------------------------------------------------------------------------------------------------------------------------+");
-            System.out.println("| APPLICANT DETAILS:                                                                                                              |");
-            System.out.printf("| Name: %-30s NRIC: %-15s                                                           |\n",
-                    app.getUser().getName(), app.getUser().getNRIC());
-            System.out.printf("| Age: %-4d   Marital Status: %-12s                                                                      |\n",
-                    app.getUser().getAge(), app.getUser().getMaritalStatus());
-            System.out.println("+----------------------------------------------------------------------------------------------------------------------------------+");
-            System.out.println("| FLAT BOOKING DETAILS:                                                                                                          |");
-            System.out.printf("| Project ID: %-12s Project Name: %-25s Neighborhood: %-15s            |\n",
-                    app.getProject().getProjectID(), app.getProject().getProjectName(), app.getProject().getNeighborhood());
-            System.out.printf("| Flat Type: %-12s Price: $%-12.2f                    |\n",
-                    app.getFlatType(), app.getProject().getFlatTypePrices().get(app.getFlatType()));
-            System.out.println("+----------------------------------------------------------------------------------------------------------------------------------+");
-        }
 
-        System.out.println("\n+----------------------------------------------------------------------------------------------------------------------------------+");
-        System.out.println("| Total Booked Applications: " + filteredBookedApps.size() + "                                                                                    |");
-        System.out.println("+----------------------------------------------------------------------------------------------------------------------------------+");
+            System.out.printf("| Application #%d: %-96s|\n", (i + 1), app.getApplicationID());
+            System.out.println("+-----------------------------------------------------------------------------------------------------------------+");
+
+            System.out.println("| APPLICANT DETAILS:                                                                                              |");
+            System.out.printf("| Name       : %-25s NRIC           : %-56s|\n", app.getUser().getName(), app.getUser().getNRIC());
+            System.out.printf("| Age        : %-25d Marital Status : %-56s|\n", app.getUser().getAge(), app.getUser().getMaritalStatus());
+
+            System.out.println("+-----------------------------------------------------------------------------------------------------------------+");
+            System.out.println("| FLAT BOOKING DETAILS:                                                                                           |");
+            System.out.printf("| Project ID : %-25s Project Name   : %-25s Neighborhood: %-16s|\n",
+                    app.getProject().getProjectID(),
+                    app.getProject().getProjectName(),
+                    app.getProject().getNeighborhood());
+            System.out.printf("| Flat Type  : %-25s Price          : $%-55.2f|\n",
+                    app.getFlatType(),
+                    app.getProject().getFlatTypePrices().get(app.getFlatType()));
+
+            System.out.println("+-----------------------------------------------------------------------------------------------------------------+");
+        }
+        System.out.println("+-----------------------------------------------------------------------------------------------------------------+");
+        System.out.printf("| Total Booked Applications: %-85d|\n", filteredBookedApps.size());
+        System.out.println("+-----------------------------------------------------------------------------------------------------------------+");
     }
 
     private void generateProjectSummaryReport(Scanner scanner) throws IOException {
@@ -270,57 +275,55 @@ public class ReportController {
         }
 
         // Print report header
-        System.out.println("\n+---------------------------------------------------------------------------------------------------------------------------------------+");
-        System.out.println("|                                                     PROJECT SUMMARY REPORT                                                            |");
-        System.out.println("| Generated on: " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "                                                                                   |");
-        System.out.println("+---------------------------------------------------------------------------------------------------------------------------------------+");
+        System.out.println("\n+------------------------------------------------------------------------------------+");
+        System.out.println("|                               PROJECT SUMMARY REPORT                               |");
+        System.out.println("+------------------------------------------------------------------------------------+");
+        System.out.printf("| Generated on: %-69s|\n", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+        System.out.println("+------------------------------------------------------------------------------------+");
 
-        // Process each project
         for (Project project : filteredProjects) {
-            System.out.println("|                                                                                                                                       |");
-            System.out.println("| PROJECT: " + project.getProjectName() + " (ID: " + project.getProjectID() + ")                                                                           |");
-            System.out.println("| Location: " + project.getNeighborhood() + "                                                                                                  |");
-            System.out.println("+---------------------------------------------------------------------------------------------------------------------------------------+");
-            System.out.println("| FLAT INVENTORY:                                                                                                                        |");
-            System.out.printf("| %-10s | %-15s | %-15s | %-15s | %-15s |\n", "TYPE", "TOTAL UNITS", "AVAILABLE", "BOOKED", "PRICE");
-            System.out.println("+---------------------------------------------------------------------------------------------------------------------------------------+");
+            System.out.println("+------------------------------------------------------------------------------------+");
+            System.out.printf("| PROJECT: %-74s|\n", project.getProjectName() + " (ID: " + project.getProjectID() + ")");
+            System.out.printf("| Location: %-73s|\n", project.getNeighborhood());
+            System.out.println("+------------------------------------------------------------------------------------+");
+
+            System.out.println("| FLAT INVENTORY:                                                                    |");
+            System.out.println("| TYPE        | TOTAL UNITS     | AVAILABLE       | BOOKED          | PRICE          |");
+            System.out.println("+------------------------------------------------------------------------------------+");
 
             for (FlatType flatType : FlatType.values()) {
                 int totalUnits = project.getFlatTypeUnits().getOrDefault(flatType, 0);
                 double price = project.getFlatTypePrices().getOrDefault(flatType, 0.0);
 
-                // Count booked units for this flat type
                 long bookedUnits = applications.stream()
-                    .filter(app -> app.getProject().getProjectID().equals(project.getProjectID())
-                            && app.getFlatType() == flatType
-                            && app.getApplicationStatus() == ApplicantAppStatus.BOOKED)
-                    .count();
+                        .filter(app -> app.getProject().getProjectID().equals(project.getProjectID())
+                                && app.getFlatType() == flatType
+                                && app.getApplicationStatus() == ApplicantAppStatus.BOOKED)
+                        .count();
 
-                int availableUnits = Math.max(0, totalUnits - (int)bookedUnits);
+                int availableUnits = Math.max(0, totalUnits - (int) bookedUnits);
 
-                System.out.printf("| %-10s | %-15d | %-15d | %-15d | $%-14.2f |\n",
+                System.out.printf("| %-12s| %-16d| %-16d| %-16d| $%-14.2f|\n",
                         flatType, totalUnits, availableUnits, bookedUnits, price);
             }
 
-            System.out.println("+---------------------------------------------------------------------------------------------------------------------------------------+");
+            System.out.println("+------------------------------------------------------------------------------------+");
 
-            // Application statistics for this project
             long totalApplications = applications.stream()
-                .filter(app -> app.getProject().getProjectID().equals(project.getProjectID()))
-                .count();
+                    .filter(app -> app.getProject().getProjectID().equals(project.getProjectID()))
+                    .count();
 
             Map<ApplicantAppStatus, Long> statusCounts = applications.stream()
-                .filter(app -> app.getProject().getProjectID().equals(project.getProjectID()))
-                .collect(Collectors.groupingBy(Application::getApplicationStatus, Collectors.counting()));
+                    .filter(app -> app.getProject().getProjectID().equals(project.getProjectID()))
+                    .collect(Collectors.groupingBy(Application::getApplicationStatus, Collectors.counting()));
 
-            System.out.println("| APPLICATION STATISTICS:                                                                                                              |");
-            System.out.println("| Total Applications: " + totalApplications);
-            System.out.println("| Pending: " + statusCounts.getOrDefault(ApplicantAppStatus.PENDING, 0L));
-            System.out.println("| Successful: " + statusCounts.getOrDefault(ApplicantAppStatus.SUCCESSFUL, 0L));
-            System.out.println("| Unsuccessful: " + statusCounts.getOrDefault(ApplicantAppStatus.UNSUCCESSFUL, 0L));
-            System.out.println("| Booked: " + statusCounts.getOrDefault(ApplicantAppStatus.BOOKED, 0L));
-            System.out.println("+---------------------------------------------------------------------------------------------------------------------------------------+");
-            System.out.println();
+            System.out.println("| APPLICATION STATISTICS:                                                            |");
+            System.out.printf("| Total Applications : %-62d|\n", totalApplications);
+            System.out.printf("| Pending            : %-62d|\n", statusCounts.getOrDefault(ApplicantAppStatus.PENDING, 0L));
+            System.out.printf("| Successful         : %-62d|\n", statusCounts.getOrDefault(ApplicantAppStatus.SUCCESSFUL, 0L));
+            System.out.printf("| Unsuccessful       : %-62d|\n", statusCounts.getOrDefault(ApplicantAppStatus.UNSUCCESSFUL, 0L));
+            System.out.printf("| Booked             : %-62d|\n", statusCounts.getOrDefault(ApplicantAppStatus.BOOKED, 0L));
+            System.out.println("+------------------------------------------------------------------------------------+");
         }
     }
 }
