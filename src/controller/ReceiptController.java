@@ -28,29 +28,35 @@ public class ReceiptController {
             String currentDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 
             StringBuilder receipt = new StringBuilder();
-            receipt.append("+----------------------------------------------------------------------------------------------------------------------+ \n");
-            receipt.append("|                                           FLAT BOOKING RECEIPT                                                      |\n");
-            receipt.append("+----------------------------------------------------------------------------------------------------------------------+\n");
-            receipt.append(String.format("| Current Date: %-94s |\n", currentDate));
-            receipt.append("|                                                                                                                      |\n");
-            receipt.append("| APPLICANT INFORMATION:                                                                                               |\n");
-            receipt.append(String.format("| Name: %-30s NRIC: %-40s |\n", applicant.getName(), applicant.getNRIC()));
-            receipt.append(String.format("| Age: %-4d Marital Status: %-20s                                                             |\n", applicant.getAge(), applicant.getMaritalStatus()));
-            receipt.append("+----------------------------------------------------------------------------------------------------------------------+\n");
-            receipt.append("| PROPERTY DETAILS:                                                                                                    |\n");
-            receipt.append(String.format("| Project ID: %-12s Project Name: %-30s Neighborhood: %-20s |\n",
-                    project.getProjectID(), project.getProjectName(), project.getNeighborhood()));
-            receipt.append(String.format("| Flat Type: %-97s |\n", flatType.toString()));
-            receipt.append("+----------------------------------------------------------------------------------------------------------------------+\n");
-            receipt.append("| FINANCIAL SUMMARY:                                                                                                   |\n");
-            receipt.append(String.format("| Base Price: %-94s $%-10.2f |\n", "", price));
-            receipt.append("+----------------------------------------------------------------------------------------------------------------------+\n");
-            receipt.append("| IMPORTANT INFORMATION:                                                                                               |\n");
-            receipt.append(String.format("| 1. This receipt confirms your flat booking under Application ID: %-45s |\n", application.getApplicationID()));
-            receipt.append("| 2. Please keep this receipt for your records.                                                                        |\n");
-            receipt.append("| 3. You will be contacted by HDB for the next steps in the purchase process.                                          |\n");
-            receipt.append("| 4. Failure to make payments by due dates may result in cancellation of your booking.                                 |\n");
-            receipt.append("+----------------------------------------------------------------------------------------------------------------------+\n");
+            receipt.append("+----------------------------------------------------------------------------------------+\n");
+            receipt.append("|                                FLAT BOOKING RECEIPT                                    |\n");
+            receipt.append("+----------------------------------------------------------------------------------------+\n");
+
+            receipt.append("| APPLICANT INFORMATION:                                                                 |\n");
+            receipt.append(String.format("| Name          : %-20s NRIC           : %-33s|\n", applicant.getName(), applicant.getNRIC()));
+            receipt.append(String.format("| Age           : %-20d Marital Status : %-33s|\n", applicant.getAge(), applicant.getMaritalStatus()));
+
+            receipt.append("+----------------------------------------------------------------------------------------+\n");
+
+            receipt.append("| PROPERTY DETAILS:                                                                      |\n");
+            receipt.append(String.format("| Project ID    : %-20s Project Name   : %-33s|\n", project.getProjectID(), project.getProjectName()));
+            receipt.append(String.format("| Neighbourhood : %-20s Flat Type      : %-33s|\n", project.getNeighborhood(), flatType.toString()));
+
+            receipt.append("+----------------------------------------------------------------------------------------+\n");
+
+            receipt.append("| FINANCIAL SUMMARY:                                                                     |\n");
+            receipt.append(String.format("| Base Price:%-64s$%-10.2f |\n", "", price));
+
+            receipt.append("+----------------------------------------------------------------------------------------+\n");
+
+            receipt.append("| IMPORTANT INFORMATION:                                                                 |\n");
+            receipt.append(String.format("| 1. This receipt confirms your flat booking under Application ID: %-22s|\n", application.getApplicationID()));
+            receipt.append("| 2. Please keep this receipt for your records.                                          |\n");
+            receipt.append("| 3. You will be contacted by HDB for the next steps in the purchase process.            |\n");
+            receipt.append("| 4. Failure to make payments by due dates may result in cancellation of your booking.   |\n");
+
+            receipt.append("+----------------------------------------------------------------------------------------+\n");
+
 
 
             // Print the receipt
