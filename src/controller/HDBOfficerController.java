@@ -7,12 +7,10 @@ import repository.OfficerRegRepository;
 import repository.ProjectRepository;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class HDBOfficerController extends ApplicantController {
+public class HDBOfficerController extends ApplicantController implements ViewProjectInterface {
     private final ProjectRepository projectRepository = new ProjectRepository();
     private final ApplicantController applicantController = new ApplicantController();
 

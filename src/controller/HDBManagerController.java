@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class HDBManagerController{
+public class HDBManagerController implements ViewProjectInterface {
     private final ApplicantRepository applicantRepository = new ApplicantRepository();
     private final ProjectRepository projectRepository = new ProjectRepository();
     private final ManagerRepository managerRepository = new ManagerRepository();

@@ -15,7 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ApplicantController{
+public class ApplicantController implements ViewProjectInterface{
     private final ApplicantRepository applicantRepository = new ApplicantRepository();
     private final ApplicationRepository applicationRepository = new ApplicationRepository();
     private String lastNeighbourhoodFilter = null;
