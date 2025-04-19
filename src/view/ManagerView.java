@@ -38,7 +38,7 @@ public class ManagerView implements MenuInterface {
             System.out.println("| 7. Approve or Reject Application              |");
             System.out.println("| 8. Approve or Reject Withdrawal               |");
             System.out.println("| 9. Review Officer Registrations               |");
-            System.out.println("| 10. Approve or Reject Officers Registration    |");
+            System.out.println("| 10. Approve or Reject Officers Registration   |");
             System.out.println("| 11. View and Reply Enquiries                  |");
             System.out.println("| 12. Set Security Question for Recovery        |");
             System.out.println("| 13. Change Password                           |");
