@@ -16,7 +16,6 @@ import java.util.*;
 public class ManagerView implements MenuInterface {
     private final ProjectController projectController = new ProjectController();;
     private final Scanner scanner = new Scanner(System.in);
-    private final HDBOfficerRegController officerRegController = new HDBOfficerRegController();
     private final HDBManagerController hdbManagerController = new HDBManagerController();
     private final EnquiryController enquiryController = new EnquiryController();
     private final SecQuesController secQuesController = new SecQuesController();

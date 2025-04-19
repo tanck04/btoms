@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 public class ApplicantController{
     private final ApplicantRepository applicantRepository = new ApplicantRepository();
     private final ApplicationRepository applicationRepository = new ApplicationRepository();
-    private final ProjectRepository projectRepository = new ProjectRepository();
     private String lastNeighbourhoodFilter = null;
     private FlatType lastFlatTypeFilter = null;
     // Method to check application status
@@ -71,6 +70,7 @@ public class ApplicantController{
     }
 
     public List<Project> listProject(Applicant applicant, String neighbourhoodFilter, FlatType flatTypeFilter) {
+        ProjectRepository projectRepository = new ProjectRepository();
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy"); // Adjust the format to your actual date format
             Date now = new Date();
@@ -166,9 +166,13 @@ public class ApplicantController{
         Scanner scanner = new Scanner(System.in);
         Applicant applicant = (Applicant) user;
         MaritalStatus maritalStatus = applicant.getMaritalStatus();
-
+        int age = user.getAge();
         // Reset filters initially
-        lastFlatTypeFilter = maritalStatus == MaritalStatus.SINGLE ? FlatType.TWO_ROOMS : null;
+        if (maritalStatus == MaritalStatus.SINGLE && age < 35) {
+            System.out.println("\nYou are not eligible to view BTO projects. Singles must be at least 35 years old.");
+            return;
+        }
+        lastFlatTypeFilter = (maritalStatus == MaritalStatus.SINGLE) ? FlatType.TWO_ROOMS : null;
         lastNeighbourhoodFilter = null;
 
         // Step 1: Show all projects with initial filters

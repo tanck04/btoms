@@ -19,7 +19,6 @@ public class ProjectController {
 
 
     private final ProjectRepository projectRepository = new ProjectRepository();
-    private final ManagerRepository managerRepository = new ManagerRepository();
     /**
      * Creates a new project with the provided details and saves it to the repository
      * @return the created Project object if successful, null otherwise
@@ -37,7 +36,7 @@ public class ProjectController {
             List<String> officerIDs) {
         // Validate inputs
 
-
+        ManagerRepository managerRepository = new ManagerRepository();
         try {
             // Validate project ID doesn't already exist
             if (projectRepository.findProjectById(projectID) != null) {

@@ -2,17 +2,13 @@ package controller;
 
 import enums.*;
 import model.*;
-import repository.ApplicantRepository;
 import repository.ApplicationRepository;
-import repository.OfficerRegRepository;
 import repository.ProjectRepository;
 
 import java.io.IOException;
 import java.util.*;
 
 public class ApplicationController {
-    private final ApplicantRepository applicantRepo = new ApplicantRepository();
-    private final ProjectRepository projectRepo = new ProjectRepository();
     private final ApplicationRepository applicationRepo = new ApplicationRepository();
 
     public Application getApplicationById(String applicationID) {
@@ -25,6 +21,7 @@ public class ApplicationController {
     }
 
     public boolean submitApplication(User user, Project project, FlatType flatType) {
+        ProjectRepository projectRepo = new ProjectRepository();
         if (user == null || project == null) {
             System.out.println("Invalid input: User or project is null.");
             return false;
@@ -118,7 +115,25 @@ public class ApplicationController {
 
     /// Method to withdraw an application
     public boolean requestWithdrawal(User user) {
+        Application userApplication = null;
         Scanner scanner = new Scanner(System.in);
+        try {
+            for (Application application : applicationRepo.loadApplications()) {
+                if (application.getUser() != null && application.getUser().getNRIC().equals(user.getNRIC())) {
+                    userApplication = application;
+                    System.out.println("Application ID: " + application.getApplicationID());
+                    System.out.println("Project ID: " + application.getProject().getProjectID());
+                    System.out.println("Flat Type: " + application.getFlatType());
+                    System.out.println("Withdrawal Status: " + application.getWithdrawalStatus());
+                }
+            }
+        }catch(IOException e){
+            System.out.println("Error loading applications: " + e.getMessage());
+        }
+        if (userApplication == null) {
+            System.out.println("No applications found for the applicant.");
+            return false;
+        }
         System.out.println("Enter 1 to confirm withdrawal, 0 to cancel:");
         int choice = scanner.nextInt();
         if (choice == 0) {

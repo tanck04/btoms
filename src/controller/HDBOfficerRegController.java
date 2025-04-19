@@ -16,10 +16,9 @@ import java.util.Scanner;
 
 public class HDBOfficerRegController {
     private final OfficerRegRepository officerRegRepository = new OfficerRegRepository();
-    private final ProjectRepository projectRepository = new ProjectRepository();
-    private final ApplicationRepository applicationRepo = new ApplicationRepository();
 
     public Project getInChargeActiveProject(Officer officer) {
+        ProjectRepository projectRepository = new ProjectRepository();
         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
         sdf.setLenient(false);
         Date currentDate = new Date();
@@ -119,6 +118,7 @@ public class HDBOfficerRegController {
     }
 
     private boolean ifAppliedProject(Officer officer, Project project) {
+        ApplicationRepository applicationRepo = new ApplicationRepository();
         List<Application> applications = new ArrayList<>();
         try{
             applications = applicationRepo.loadApplications();
