@@ -10,15 +10,15 @@ import java.io.Serializable;
 public abstract class User implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;  // Optional but recommended for Serializable classes
-    protected String NRIC;
+    protected String nric;
     protected String name;
     protected Role role;
     protected MaritalStatus maritalStatus;
     protected String password;
     protected int age;
 
-    public User(String NRIC, String name, Role role, String password, MaritalStatus maritalStatus, int age) {
-        this.NRIC = NRIC;
+    public User(String nric, String name, Role role, String password, MaritalStatus maritalStatus, int age) {
+        this.nric = nric;
         this.name = name;
         this.role = role;
         this.password = password;
@@ -28,7 +28,7 @@ public abstract class User implements Serializable {
 
     // Getters
     public String getNRIC() {
-        return NRIC;
+        return nric;
     }
 
     public String getName() {
@@ -52,8 +52,8 @@ public abstract class User implements Serializable {
     }
 
     // Setters
-    public void setNRIC(String NRIC) {
-        this.NRIC = NRIC;
+    public void setNRIC(String nric) {
+        this.nric = nric;
     }
 
     public void setName(String name) {

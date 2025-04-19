@@ -171,6 +171,9 @@ public class ApplicantController{
         if (maritalStatus == MaritalStatus.SINGLE && age < 35) {
             System.out.println("\nYou are not eligible to view BTO projects. Singles must be at least 35 years old.");
             return;
+        }else if (maritalStatus == MaritalStatus.MARRIED && age < 21) {
+            System.out.println("\nYou are not eligible to view BTO projects. Married must be at least 21 years old.");
+            return;
         }
         lastFlatTypeFilter = (maritalStatus == MaritalStatus.SINGLE) ? FlatType.TWO_ROOMS : null;
         lastNeighbourhoodFilter = null;
@@ -204,6 +207,10 @@ public class ApplicantController{
             MaritalStatus maritalStatus = applicant.getMaritalStatus();
             if (user.getAge()<35 && maritalStatus == MaritalStatus.SINGLE) {
                 System.out.println("You are not eligible to apply for a flat.");
+                return;
+            }
+            if (user.getAge()<21 && maritalStatus == MaritalStatus.MARRIED) {
+                System.out.println("You are not eligible to apply for a flat. Applicant needs to be at least 21 years old.");
                 return;
             }
             // Use ApplicationController for submission

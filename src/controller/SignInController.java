@@ -47,6 +47,7 @@ public class SignInController {
                 System.out.println("Something went wrong, please contact an administrator");
             }
             System.out.println("Your password has been successfully changed, proceeding to login...");
+            System.out.println("\nWelcome, " + user.getName() + ".");
             ViewController viewController = new ViewController();
             MenuInterface view = (MenuInterface) viewController.getView(role);
             view.displayMenu(user);
@@ -55,6 +56,8 @@ public class SignInController {
 
         }
         else{
+            System.out.println("Login successful.");
+            System.out.println("\nWelcome, " + user.getName() + ".");
             ViewController viewController = new ViewController();
             MenuInterface view = (MenuInterface) viewController.getView(role);
             view.displayMenu(user);

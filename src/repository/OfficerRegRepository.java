@@ -1,7 +1,5 @@
 package repository;
 
-import enums.FlatType;
-import enums.MaritalStatus;
 import enums.OfficerRegStatus;
 import model.*;
 

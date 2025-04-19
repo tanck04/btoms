@@ -1,7 +1,5 @@
 package repository;
 
-import controller.ApplicantController;
-import controller.ProjectController;
 import model.Application;
 import model.Applicant;
 import model.Officer;
@@ -11,7 +9,6 @@ import enums.FlatType;
 import enums.WithdrawalStatus;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
