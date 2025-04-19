@@ -133,8 +133,6 @@ public class ManagerView implements MenuInterface {
             for (Application application : pending_project_list) {
                 System.out.println("Name: " + application.getApplicant().getName());
                 System.out.println("NRIC: " + application.getApplicant().getNRIC());
-                System.out.print("Approve this application? (yes/no): ");
-                String input = scanner.nextLine().trim();
             }
         } catch (Exception e) {
             System.out.println("Error retrieving project: " + e.getMessage());
