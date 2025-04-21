@@ -12,11 +12,30 @@ import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * Repository class for managing Application data persistence.
+ * <p>
+ * This class handles CRUD operations for Application objects, storing and retrieving data
+ * from a CSV file. It provides methods to load applications, find applications by ID,
+ * generate new application IDs, create new applications, and update existing applications.
+ * </p>
+ */
 public class ApplicationRepository{
+    /** The folder where data files are stored */
     private static final String folder = "data";
+
+    /** The filename for application records */
     private static final String fileName = "application_records.csv";
+
+    /** The complete file path to the application records file */
     private static final String filePath = "./src/repository/" + folder + "/" + fileName;
 
+    /**
+     * Creates an Application object from CSV record data.
+     *
+     * @param csv A string representing a CSV record for an application
+     * @return A new Application object or null if creation fails
+     */
     private static Application createApplicationFromCSV(String csv) {
         String[] fields = csv.split(",");
         try {
@@ -41,7 +60,8 @@ public class ApplicationRepository{
             Applicant applicant = null;
             Project project = null;
             Officer officer = null;
-            // Use instance methods\
+
+            // Use instance methods
             try{
                 if (officerRepo.findOfficerById(userNRIC) != null) {
                     officer = officerRepo.findOfficerById(userNRIC);
@@ -78,6 +98,12 @@ public class ApplicationRepository{
         return null;
     }
 
+    /**
+     * Loads all applications from the CSV file.
+     *
+     * @return A list of Application objects
+     * @throws IOException If an error occurs while reading the file
+     */
     public List<Application> loadApplications() throws IOException {
         List<Application> applications = new ArrayList<>();
         File file = new File(filePath);
@@ -98,7 +124,6 @@ public class ApplicationRepository{
                     continue;
                 }
 
-
                 Application application = createApplicationFromCSV(line);
                 if (application != null) {
                     applications.add(application);
@@ -109,19 +134,36 @@ public class ApplicationRepository{
         return applications;
     }
 
+    /**
+     * Finds an application by its ID.
+     *
+     * @param applicationID The application ID to search for
+     * @return The found Application or null if not found
+     * @throws IOException If an error occurs while reading the file
+     */
     public Application findApplicationById(String applicationID) throws IOException {
         List<Application> applications = this.loadApplications();
         return applications.stream()
-                .filter((application) -> application.getApplicationID().equals(applicationID)).findFirst().orElse((Application) null);
+                .filter((application) -> application.getApplicationID().equals(applicationID))
+                .findFirst()
+                .orElse(null);
     }
 
+    /**
+     * Generates the next sequential application ID.
+     * <p>
+     * The format is "A" followed by a four-digit number (e.g., A0001, A0002).
+     * </p>
+     *
+     * @return A new unique application ID
+     */
     public String generateNextApplicationID() {
         int max = 0;
         try {
             // Load all applications directly from CSV
             List<Application> applications = loadApplications();
 
-            // Find the highest project number
+            // Find the highest application number
             for (Application application : applications) {
                 String existingID = application.getApplicationID();
                 if (existingID.matches("A\\d+")) {
@@ -140,6 +182,12 @@ public class ApplicationRepository{
         return String.format("A%04d", nextNumber);  // e.g., A0001, A0002
     }
 
+    /**
+     * Creates a new application record in the CSV file.
+     *
+     * @param application The Application object to be saved
+     * @throws IOException If an error occurs while writing to the file
+     */
     public void createNewApplication(Application application) throws IOException {
         File file = new File(filePath);
         boolean needsNewline = false;
@@ -169,6 +217,14 @@ public class ApplicationRepository{
         }
     }
 
+    /**
+     * Updates an existing application record in the CSV file.
+     * <p>
+     * This method finds and replaces the record with matching application ID.
+     * </p>
+     *
+     * @param updatedApplication The Application object with updated information
+     */
     public static void updateApplicationInCSV(Application updatedApplication) {
         File inputFile = new File(filePath);
         List<String> updatedLines = new ArrayList<>();
@@ -207,6 +263,12 @@ public class ApplicationRepository{
         }
     }
 
+    /**
+     * Converts an Application object to a CSV record string.
+     *
+     * @param application The Application object to convert
+     * @return A string representing the application in CSV format
+     */
     private static String applicationToCSV(Application application) {
         return String.join(",",
                 application.getApplicationID(),
@@ -216,5 +278,4 @@ public class ApplicationRepository{
                 application.getApplicationStatus().toString(),
                 application.getWithdrawalStatus().toString());
     }
-
 }

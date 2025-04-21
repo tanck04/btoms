@@ -5,14 +5,46 @@ import model.*;
 
 import java.util.*;
 
+/**
+ * View class responsible for displaying the manager user interface.
+ * <p>
+ * This class implements the MenuInterface and provides a command-line interface
+ * for manager users. It offers various functionality including creating, viewing,
+ * updating, and deleting projects, reviewing applications, generating reports,
+ * approving or rejecting applications and withdrawals, managing officer registrations,
+ * handling enquiries, and account security management.
+ * </p>
+ */
 public class ManagerView implements MenuInterface {
+    /** Controller for project-related operations */
     private final ProjectController projectController = new ProjectController();;
+
+    /** Scanner for handling user input */
     private final Scanner scanner = new Scanner(System.in);
+
+    /** Controller for HDB manager-specific operations */
     private final HDBManagerController hdbManagerController = new HDBManagerController();
+
+    /** Controller for enquiry management */
     private final EnquiryController enquiryController = new EnquiryController();
+
+    /** Controller for security question operations */
     private final SecQuesController secQuesController = new SecQuesController();
+
+    /** Controller for password management */
     private final PasswordController passwordController = new PasswordController();
 
+    /**
+     * Displays the main menu for manager users and processes their selections.
+     * <p>
+     * This method presents a menu with options for creating, viewing, updating, and deleting projects,
+     * reviewing and approving applications, generating reports, managing officer registrations,
+     * handling enquiries, and managing account security. It continues to display the menu until
+     * the user chooses to logout.
+     * </p>
+     *
+     * @param user The currently authenticated User object
+     */
     @Override
     public void displayMenu(User user) {
         boolean running = true;
@@ -106,6 +138,13 @@ public class ManagerView implements MenuInterface {
         }
     }
 
+    /**
+     * Displays applications for a specific project that are pending review.
+     * <p>
+     * This method prompts the user for a project ID, retrieves the corresponding project,
+     * and displays all pending applications for that project including applicant details.
+     * </p>
+     */
     private void reviewApplications() {
         System.out.println("\n===== Review Applications =====");
 
@@ -131,6 +170,15 @@ public class ManagerView implements MenuInterface {
         }
     }
 
+    /**
+     * Handles the approval or rejection of housing applications.
+     * <p>
+     * This method validates the current manager's credentials and delegates
+     * the approval/rejection process to the HDBManagerController.
+     * </p>
+     *
+     * @param user The manager user who is approving or rejecting the application
+     */
     private void approveApplication(User user) {
         Manager manager = (Manager) user;
         try {

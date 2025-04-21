@@ -10,17 +10,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Utility class for handling CSV file operations, such as removing empty rows.
+ * Utility class for handling CSV file operations in the BTO housing system.
+ * Provides static methods for common file operations such as cleaning and
+ * manipulating CSV files that store application data.
+ * <p>
+ * This class uses standard Java I/O operations to process CSV files.
+ * All methods are static as this is a utility class not meant to be instantiated.
+ * </p>
  */
-
 public class CSVUtil {
     /**
      * Removes empty rows from a CSV file. This method reads all lines from the file,
      * filters out the empty or whitespace-only lines, and rewrites the file with the
      * remaining lines.
+     * <p>
+     * Empty rows can occur during file manipulation operations and may cause issues
+     * when parsing the CSV data for BTO applications and officer records.
+     * </p>
      *
      * @param filePath The path to the CSV file that needs to be cleaned.
-     * @throws IOException If an error occurs while reading from or writing to the file.
+     * @throws IOException If an error occurs while reading from or writing to the file,
+     *                     such as file not found or insufficient permissions.
      */
     public static void removeEmptyRows(String filePath) throws IOException {
         File file = new File(filePath);
@@ -45,5 +55,4 @@ public class CSVUtil {
             }
         }
     }
-
 }

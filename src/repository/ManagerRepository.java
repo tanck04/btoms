@@ -10,11 +10,30 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Repository class for managing Manager data persistence.
+ * <p>
+ * This class handles CRUD operations for Manager objects, storing and retrieving data
+ * from a CSV file. It implements multiple interfaces to support authentication,
+ * password management, and security question functionality for managers.
+ * </p>
+ */
 public class ManagerRepository implements PasswordChangerInterface,VerificationInterface, CheckSecQuesInterface, SecQuesChangerInterface {
+    /** The folder where data files are stored */
     private static final String folder = "data";
+
+    /** The filename for manager records */
     private static final String fileName = "manager_records.csv";
+
+    /** The complete file path to the manager records file */
     private static final String filePath = "./src/repository/" + folder + "/" + fileName;
 
+    /**
+     * Creates a Manager object from CSV record data.
+     *
+     * @param parts Array of strings representing fields from a CSV record
+     * @return A new Manager object or null if creation fails
+     */
     private Manager createManagerFromCSV(String[] parts) {
         try {
             String nric = parts[0];
@@ -30,6 +49,12 @@ public class ManagerRepository implements PasswordChangerInterface,VerificationI
         }
     }
 
+    /**
+     * Loads all managers from the CSV file.
+     *
+     * @return A list of Manager objects
+     * @throws IOException If an error occurs while reading the file
+     */
     public List<Manager> loadApplicants() throws IOException {
         List<Manager> managers = new ArrayList<>();
         File file = new File(filePath);
@@ -61,6 +86,13 @@ public class ManagerRepository implements PasswordChangerInterface,VerificationI
         return managers;
     }
 
+    /**
+     * Finds a manager by their NRIC (National Registration Identity Card) number.
+     *
+     * @param nric The NRIC to search for
+     * @return The found Manager or null if not found
+     * @throws IOException If an error occurs while reading the file
+     */
     public Manager findManagerById(String nric) throws IOException {
         List<Manager> managers = loadApplicants();
         return managers.stream()
@@ -69,6 +101,13 @@ public class ManagerRepository implements PasswordChangerInterface,VerificationI
                 .orElse(null);
     }
 
+    /**
+     * Verifies manager credentials for authentication.
+     *
+     * @param id The NRIC of the manager
+     * @param password The password to verify
+     * @return The authenticated Manager or null if authentication fails
+     */
     public Manager verifyCredentials(String id, String password) {
         PasswordController pc = new PasswordController();
         String hashedInputPassword = pc.hashPassword(password);
@@ -95,6 +134,14 @@ public class ManagerRepository implements PasswordChangerInterface,VerificationI
 
         return null; // Login failed
     }
+
+    /**
+     * Changes a manager's password.
+     *
+     * @param nric The NRIC of the manager
+     * @param newHashedPassword The new hashed password
+     * @return true if password was successfully updated, false otherwise
+     */
     public boolean changePassword(String nric, String newHashedPassword) {
         List<String[]> allRecords = new ArrayList<>();
         boolean passwordUpdated = false;
@@ -129,6 +176,12 @@ public class ManagerRepository implements PasswordChangerInterface,VerificationI
         return passwordUpdated;
     }
 
+    /**
+     * Updates a manager's record with a project assignment.
+     *
+     * @param updatedManager The Manager object with updated information
+     * @param project The Project to assign to the manager
+     */
     public void updateManagerInCSV(Manager updatedManager, Project project) {
         File inputFile = new File(filePath);
         List<String> updatedLines = new ArrayList<>();
@@ -183,6 +236,14 @@ public class ManagerRepository implements PasswordChangerInterface,VerificationI
         }
     }
 
+    /**
+     * Changes a manager's security question and answer.
+     *
+     * @param nric The NRIC of the manager
+     * @param newSecQues The new security question
+     * @param newSecAns The new security answer
+     * @return true if security question/answer was successfully updated, false otherwise
+     */
     @Override
     public boolean changeSecQuesAndAns(String nric, String newSecQues, String newSecAns) {
         List<String[]> records = new ArrayList<>();
@@ -224,6 +285,12 @@ public class ManagerRepository implements PasswordChangerInterface,VerificationI
         return secQuesUpdated;
     }
 
+    /**
+     * Checks if a manager has set up a security question.
+     *
+     * @param nric The NRIC of the manager
+     * @return true if the manager has a security question, false otherwise
+     */
     @Override
     public boolean checkHaveSecQues(String nric) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
@@ -241,6 +308,12 @@ public class ManagerRepository implements PasswordChangerInterface,VerificationI
         return false;
     }
 
+    /**
+     * Retrieves a manager's security question.
+     *
+     * @param nric The NRIC of the manager
+     * @return The security question or an error message if not found
+     */
     @Override
     public String retrieveSecQues(String nric) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
@@ -258,6 +331,13 @@ public class ManagerRepository implements PasswordChangerInterface,VerificationI
         return "Error retrieving security question"; // Default return value
     }
 
+    /**
+     * Verifies if the provided answer matches the manager's security question answer.
+     *
+     * @param nric The NRIC of the manager
+     * @param answer The answer to verify
+     * @return true if the answer is correct, false otherwise
+     */
     @Override
     public boolean verifyAnsToSecQues(String nric, String answer) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {

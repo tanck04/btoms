@@ -5,14 +5,48 @@ import model.*;
 
 import java.util.Scanner;
 
+/**
+ * View class responsible for displaying the officer user interface.
+ * <p>
+ * This class implements the MenuInterface and provides a command-line interface
+ * for officer users. It offers various functionality including viewing projects,
+ * submitting and managing applications, handling enquiries, registering for projects,
+ * booking flats for applicants, and managing account security.
+ * </p>
+ */
 public class OfficerView implements MenuInterface{
+    /** Controller for HDB officer-specific operations */
     private final HDBOfficerController officerController = new HDBOfficerController();
+
+    /** Controller for officer registration operations */
     private final HDBOfficerRegController officerRegController = new HDBOfficerRegController();
+
+    /** Controller for enquiry management */
     private final EnquiryController enquiryController = new EnquiryController();
+
+    /** Controller for application-specific operations */
     private final ApplicationController applicationController = new ApplicationController();
+
+    /** Controller for security question operations */
     private final SecQuesController secQuesController = new SecQuesController();
+
+    /** Controller for password management */
     private final PasswordController passwordController = new PasswordController();
+
+    /** Scanner for handling user input */
     private final Scanner scanner = new Scanner(System.in);
+
+    /**
+     * Displays the main menu for officer users and processes their selections.
+     * <p>
+     * This method presents a menu with options for viewing projects, submitting applications,
+     * checking application status, requesting withdrawals, managing enquiries, registering for
+     * projects, viewing registration status, replying to enquiries, booking flats for applicants,
+     * and managing account security. It continues to display the menu until the user chooses to logout.
+     * </p>
+     *
+     * @param user The currently authenticated User object
+     */
     public void displayMenu(User user) {
         boolean running = true;
         while (running){
@@ -82,5 +116,4 @@ public class OfficerView implements MenuInterface{
             }
         }
     }
-
 }

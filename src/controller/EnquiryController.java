@@ -2,17 +2,28 @@ package controller;
 
 import model.*;
 import repository.EnquiryRepository;
-import repository.ProjectRepository;
 import helper.TableUtil;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Controller class that manages enquiries in the BTO application system.
+ * This class provides functionality for users to view, submit, edit, reply to, and delete enquiries
+ * related to BTO projects.
+ */
 public class EnquiryController {
-    EnquiryRepository enquiryRepository = new EnquiryRepository();
-    TableUtil tableUtil = new TableUtil();
+    private final EnquiryRepository enquiryRepository = new EnquiryRepository();
+    private final TableUtil tableUtil = new TableUtil();
 
+    /**
+     * Displays the enquiry menu and handles user choices for enquiry operations.
+     * Allows users to view, submit, edit, and delete enquiries based on their role.
+     *
+     * @param user The user interacting with the enquiry system
+     * @param viewAsApplicant Flag indicating whether to view enquiries as an applicant (true) or officer (false)
+     */
     public void handleEnquiries(User user, boolean viewAsApplicant) {
         Scanner sc = new Scanner(System.in);
         int choice = -1;
@@ -35,11 +46,11 @@ public class EnquiryController {
 
             switch (choice) {
                 case 1:
-                if (viewAsApplicant) {
-                    viewEnquiry(user, "view as applicant");
-                }else{
-                    viewEnquiry(user);
-                }
+                    if (viewAsApplicant) {
+                        viewEnquiry(user, "view as applicant");
+                    }else{
+                        viewEnquiry(user);
+                    }
                     break;
                 case 2:
                     submitEnquiry(user);
@@ -59,6 +70,13 @@ public class EnquiryController {
         } while (choice != 5);
     }
 
+    /**
+     * Displays all enquiries relevant to the user based on their role.
+     * For officers, shows all enquiries they can respond to.
+     * For applicants, shows all their submitted enquiries.
+     *
+     * @param user The user whose enquiries to display
+     */
     public void viewEnquiry(User user) {
         List<Enquiry> enquiries = enquiryRepository.getEnquiriesByUserType(user);
 
@@ -68,9 +86,15 @@ public class EnquiryController {
             return;
         }
         printEnquiries(enquiries);
-
     }
 
+    /**
+     * Displays enquiries specifically for an applicant.
+     * This overloaded method is used when officers want to view enquiries as if they were a specific applicant.
+     *
+     * @param user The user whose enquiries to view
+     * @param viewAsApplicant A string flag indicating to view enquiries as an applicant
+     */
     public void viewEnquiry(User user, String viewAsApplicant) {
         if (viewAsApplicant.equalsIgnoreCase("view as applicant")) {
             List<Enquiry> enquiries = enquiryRepository.getEnquiriesByApplicantId(user.getNRIC());
@@ -84,6 +108,12 @@ public class EnquiryController {
         }
     }
 
+    /**
+     * Displays a formatted table of enquiries with wrapped text for better readability.
+     * Shows enquiry ID, applicant ID, project ID, enquiry text, reply text, and status.
+     *
+     * @param enquiries The list of enquiries to display
+     */
     public void printEnquiries(List<Enquiry> enquiries) {
         String separator = "+------------+--------------+------------+----------------------------------+----------------------------------+----------+";
 
@@ -124,7 +154,14 @@ public class EnquiryController {
             System.out.println(separator);
         }
     }
-    public void replyToEnquiry(User user){
+
+    /**
+     * Allows officers to reply to pending enquiries.
+     * Checks if the enquiry exists and hasn't been replied to before allowing a reply.
+     *
+     * @param user The officer user who is replying to the enquiry
+     */
+    public void replyToEnquiry(User user) {
         List<Enquiry> enquiries = enquiryRepository.getEnquiriesByUserType(user);
 
         // check if enquiry list is empty
@@ -169,9 +206,14 @@ public class EnquiryController {
                 System.out.println("An error occurred while replying to the enquiry: " + e.getMessage());
             }
         }
-
     }
 
+    /**
+     * Allows a user to submit a new enquiry about a specific project.
+     * Validates input to ensure the enquiry text is not empty.
+     *
+     * @param user The user submitting the enquiry
+     */
     public void submitEnquiry(User user) {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter Project ID: ");
@@ -200,6 +242,12 @@ public class EnquiryController {
         }
     }
 
+    /**
+     * Allows a user to edit their own pending enquiries.
+     * Validates that the enquiry belongs to the user and is still in PENDING status.
+     *
+     * @param user The user editing the enquiry
+     */
     public void editEnquiry(User user) {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter Enquiry ID to edit: ");
@@ -249,6 +297,12 @@ public class EnquiryController {
         }
     }
 
+    /**
+     * Allows a user to delete their own enquiries.
+     * Verifies that the enquiry belongs to the user before deletion.
+     *
+     * @param user The user deleting the enquiry
+     */
     public void deleteEnquiry(User user) {
         try {
             Scanner scanner = new Scanner(System.in);
@@ -278,4 +332,3 @@ public class EnquiryController {
         }
     }
 }
-

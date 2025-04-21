@@ -6,12 +6,29 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-//methods:
+/**
+ * Repository class for managing Enquiry data persistence.
+ * <p>
+ * This class handles CRUD operations for Enquiry objects, storing and retrieving data
+ * from a CSV file. It provides methods for creating new enquiries, loading existing enquiries,
+ * searching by various criteria, and managing enquiry responses from officers.
+ * </p>
+ */
 public class EnquiryRepository {
+    /** The complete file path to the enquiry records file */
     private static final String FILE_PATH_ENQUIRY = "./src/repository/data/enquiry_records.csv";
+
+    /** Repository instance for accessing project data */
     private static final ProjectRepository projectRepository = new ProjectRepository();
 
-
+    /**
+     * Generates the next sequential enquiry ID.
+     * <p>
+     * The format is "E" followed by a four-digit number (e.g., E0001, E0002).
+     * </p>
+     *
+     * @return A new unique enquiry ID
+     */
     public String generateNextEnquiryID() {
         int max = 0;
         // Load all enquiries directly from CSV
@@ -19,14 +36,14 @@ public class EnquiryRepository {
 
         // Find the highest project number
         for (Enquiry enquiry : enquiries) {
-        String existingID = enquiry.getEnquiryID();
-        if (existingID.matches("E\\d+")) {
-            int number = Integer.parseInt(existingID.substring(1));
-            if (number > max) {
-                max = number;
+            String existingID = enquiry.getEnquiryID();
+            if (existingID.matches("E\\d+")) {
+                int number = Integer.parseInt(existingID.substring(1));
+                if (number > max) {
+                    max = number;
+                }
             }
         }
-    }
 
         int nextNumber = max + 1;
         return String.format("E%04d", nextNumber);  // e.g., E0001, E0002
@@ -35,8 +52,9 @@ public class EnquiryRepository {
     /**
      * Creates a new enquiry and appends it to the CSV file.
      *
-     * @param enquiry The Enquiry object to be added.
-     * @throws IOException if an error occurs while writing to the file.
+     * @param enquiry The Enquiry object to be added
+     * @return true if the enquiry was successfully created, false otherwise
+     * @throws IOException if an error occurs while writing to the file
      */
     public boolean createNewEnquiry(Enquiry enquiry) throws IOException {
         File file = new File(FILE_PATH_ENQUIRY);
@@ -65,6 +83,12 @@ public class EnquiryRepository {
         return true;
     }
 
+    /**
+     * Converts an Enquiry object to a CSV record string.
+     *
+     * @param enquiry The Enquiry object to convert
+     * @return A string representing the enquiry in CSV format
+     */
     private static String enquiryToCSV(Enquiry enquiry) {
         return String.join(",",
                 enquiry.getEnquiryID(),
@@ -79,7 +103,7 @@ public class EnquiryRepository {
     /**
      * Loads all enquiries from the CSV file.
      *
-     * @return A list of Enquiry objects.
+     * @return A list of Enquiry objects
      */
     public List<Enquiry> loadAllEnquiries() {
         List<Enquiry> enquiries = new ArrayList<>();
@@ -100,14 +124,13 @@ public class EnquiryRepository {
                             parts[3].trim(),
                             parts[4].trim(),
                             parts[5].trim(),
-                            parts[6].trim() // Assuming this is the replying officer ID
+                            parts[6].trim() // Replying officer ID
                     );
                     enquiries.add(enquiry);
                 }
             }
-        }catch (IOException e) {
+        } catch (IOException e) {
             System.out.println("Failed to read enquiries: " + e.getMessage());
-            // Optional: e.printStackTrace();
         }
         return enquiries;
     }
@@ -115,9 +138,9 @@ public class EnquiryRepository {
     /**
      * Finds an enquiry by its ID.
      *
-     * @param enquiryID The ID to look for.
-     * @return Enquiry if found, else null.
-     * @throws IOException if reading fails.
+     * @param enquiryID The ID to look for
+     * @return Enquiry if found, else null
+     * @throws IOException if reading fails
      */
     public Enquiry getEnquiryById(String enquiryID) throws IOException {
         for (Enquiry e : loadAllEnquiries()) {
@@ -129,8 +152,8 @@ public class EnquiryRepository {
     /**
      * Gets the most recent enquiry ID.
      *
-     * @return The last enquiry ID (or "E0000" if none).
-     * @throws IOException if reading fails.
+     * @return The last enquiry ID (or "E0000" if none)
+     * @throws IOException if reading fails
      */
     public String getLastEnquiryId() throws IOException {
         List<Enquiry> all = loadAllEnquiries();
@@ -141,10 +164,11 @@ public class EnquiryRepository {
     /**
      * Updates the reply and status of an enquiry.
      *
-     * @param enquiryID Enquiry to update.
-     * @param replyText Text to reply with.
-     * @return true if successful.
-     * @throws IOException if writing fails.
+     * @param enquiryID The ID of the enquiry to update
+     * @param replyText The text to reply with
+     * @param officerId The ID of the officer making the reply
+     * @return true if update was successful
+     * @throws IOException if writing fails
      */
     public boolean replyToEnquiry(String enquiryID, String replyText, String officerId) throws IOException {
         List<Enquiry> enquiries = loadAllEnquiries();
@@ -169,9 +193,9 @@ public class EnquiryRepository {
     /**
      * Deletes an enquiry by its ID.
      *
-     * @param enquiryID The ID to remove.
-     * @return true if deleted.
-     * @throws IOException if writing fails.
+     * @param enquiryID The ID of the enquiry to remove
+     * @return true if deleted successfully
+     * @throws IOException if writing fails
      */
     public boolean removeEnquiryById(String enquiryID) throws IOException {
         List<Enquiry> enquiries = loadAllEnquiries();
@@ -195,8 +219,8 @@ public class EnquiryRepository {
     /**
      * Gets all enquiries made by a specific applicant.
      *
-     * @param applicantID The applicant ID.
-     * @return List of Enquiries.
+     * @param applicantID The ID of the applicant
+     * @return List of enquiries made by the applicant
      */
     public List<Enquiry> getEnquiriesByApplicantId(String applicantID) {
         List<Enquiry> result = new ArrayList<>();
@@ -211,9 +235,9 @@ public class EnquiryRepository {
     /**
      * Gets all enquiries made for a specific project.
      *
-     * @param projectID The project ID.
-     * @return List of Enquiries.
-     * @throws IOException if reading fails.
+     * @param projectID The ID of the project
+     * @return List of enquiries for the project
+     * @throws IOException if reading fails
      */
     public List<Enquiry> getEnquiriesByProject(String projectID) throws IOException {
         List<Enquiry> result = new ArrayList<>();
@@ -225,6 +249,13 @@ public class EnquiryRepository {
         return result;
     }
 
+    /**
+     * Gets all enquiries that have been replied to by a specific officer.
+     *
+     * @param officerID The ID of the officer
+     * @return List of enquiries replied to by the officer
+     * @throws IOException if reading fails
+     */
     public List<Enquiry> getEnquiriesRepliedByOfficer(String officerID) throws IOException {
         List<Enquiry> filteredEnquiries = new ArrayList<>();
         List<Enquiry> allEnquiries = loadAllEnquiries();
@@ -240,6 +271,13 @@ public class EnquiryRepository {
         return filteredEnquiries;
     }
 
+    /**
+     * Gets all enquiries that are either pending or have been replied to by a specific officer.
+     *
+     * @param officerID The ID of the officer
+     * @return List of pending or replied enquiries for the officer
+     * @throws IOException if reading fails
+     */
     public List<Enquiry> getPendingOrRepliedEnquiriesForOfficer(String officerID) throws IOException {
         List<Enquiry> filteredEnquiries = new ArrayList<>();
         List<Enquiry> allEnquiries = loadAllEnquiries();
@@ -256,9 +294,11 @@ public class EnquiryRepository {
         return filteredEnquiries;
     }
 
-
     /**
-     * Helper to overwrite CSV file with given list of enquiries.
+     * Helper method to overwrite CSV file with a given list of enquiries.
+     *
+     * @param enquiries The list of enquiries to write to the file
+     * @throws IOException if writing fails
      */
     private void overwriteCSV(List<Enquiry> enquiries) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH_ENQUIRY))) {
@@ -278,6 +318,15 @@ public class EnquiryRepository {
             }
         }
     }
+
+    /**
+     * Updates an enquiry with a reply text and sets its status to replied.
+     *
+     * @param enquiryID The ID of the enquiry to update
+     * @param replyText The text of the reply
+     * @param officerId The ID of the officer making the reply
+     * @throws IOException if writing fails
+     */
     public void insertInquiryTextByEnquiryId(String enquiryID, String replyText, String officerId) throws IOException {
         List<Enquiry> enquiries = loadAllEnquiries();
         boolean updated = false;
@@ -296,7 +345,19 @@ public class EnquiryRepository {
             overwriteCSV(enquiries);
         }
     }
-    public List<Enquiry> getEnquiriesByUserType(User user){
+
+    /**
+     * Gets enquiries based on user type.
+     * <p>
+     * - Managers see all enquiries.
+     * - Officers see enquiries for projects they are assigned to.
+     * - Applicants see only their own enquiries.
+     * </p>
+     *
+     * @param user The user requesting the enquiries
+     * @return List of enquiries relevant to the user type
+     */
+    public List<Enquiry> getEnquiriesByUserType(User user) {
         List<Enquiry> enquiriesByUserType = new ArrayList<>();
         if (user instanceof Manager) {
             enquiriesByUserType = loadAllEnquiries();
@@ -316,6 +377,16 @@ public class EnquiryRepository {
         return enquiriesByUserType;
     }
 
+    /**
+     * Updates an existing enquiry in the CSV file.
+     * <p>
+     * This method finds and replaces the record with matching enquiry ID.
+     * </p>
+     *
+     * @param updatedEnquiry The Enquiry object with updated information
+     * @return true if update was successful, false otherwise
+     * @throws IOException if reading or writing fails
+     */
     public boolean updateEnquiry(Enquiry updatedEnquiry) throws IOException {
         File inputFile = new File(FILE_PATH_ENQUIRY);
         List<String> updatedLines = new ArrayList<>();

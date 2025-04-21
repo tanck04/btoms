@@ -15,13 +15,30 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+/**
+ * Controller class for managing BTO projects.
+ * Provides functionality for creating, retrieving, updating, and deleting projects,
+ * as well as managing project details like flat types, prices, and application dates.
+ */
 public class ProjectController {
 
-
     private final ProjectRepository projectRepository = new ProjectRepository();
+
     /**
-     * Creates a new project with the provided details and saves it to the repository
-     * @return the created Project object if successful, null otherwise
+     * Creates a new project with the provided details and saves it to the repository.
+     * Validates project ID uniqueness, manager availability, and other business rules.
+     *
+     * @param projectID The unique identifier for the project
+     * @param projectName The name of the project
+     * @param neighborhood The neighborhood where the project is located
+     * @param flatTypeUnits Map of flat types and their available units
+     * @param flatTypePrices Map of flat types and their prices
+     * @param openingDate The application opening date (MM/dd/yyyy format)
+     * @param closingDate The application closing date (MM/dd/yyyy format)
+     * @param managerID The NRIC of the manager in charge of this project
+     * @param officerSlot The number of officer slots for the project
+     * @param officerIDs List of officer NRICs assigned to the project
+     * @return The created Project object if successful, null otherwise
      */
     private Project createProject(
             String projectID,
@@ -87,7 +104,7 @@ public class ProjectController {
                 System.out.println("You are already managing a project with an open application period.");
                 return null;
             }
-            
+
 
             // Create project object
             Project newProject = new Project(
@@ -115,6 +132,12 @@ public class ProjectController {
         }
     }
 
+    /**
+     * Handles the user interface for creating a new project.
+     * Collects project details from user input and calls the private createProject method.
+     *
+     * @param user The manager creating the project
+     */
     public void createProject(User user) {
         Scanner scanner = new Scanner(System.in);
         try {
@@ -213,6 +236,12 @@ public class ProjectController {
         }
     }
 
+    /**
+     * Updates the details of an existing project.
+     * Allows modification of project name, unit counts, prices, dates, and visibility.
+     *
+     * @param user The manager updating the project
+     */
     public void updateProjectDetails(User user) {
         Manager manager = (Manager) user;
         Scanner scanner = new Scanner(System.in);
@@ -296,7 +325,7 @@ public class ProjectController {
                             // Confirm what the user entered
                             System.out.println("Parsed Opening Date: " + sdf.format(newOpeningDate));
                         } catch (ParseException e) {
-                            System.out.println("❌ Invalid date format. Please follow MM/dd/yyyy.");
+                            System.out.println("Invalid date format. Please follow MM/dd/yyyy.");
                         }
                     }
                     project.setApplicationOpeningDate(sdf.format(newOpeningDate));
@@ -338,6 +367,12 @@ public class ProjectController {
         }
     }
 
+    /**
+     * Deletes a project from the system.
+     * Checks if there are any applications associated with the project before deletion.
+     *
+     * @param user The manager deleting the project
+     */
     public void deleteProject(User user) {
         Scanner scanner = new Scanner(System.in);
         HDBManagerController hdbManagerController = new HDBManagerController();
@@ -391,11 +426,11 @@ public class ProjectController {
         }
     }
 
-
     /**
-     * Retrieves a project by its ID
-     * @param projectID the ID of the project to retrieve
-     * @return the Project object if found, null otherwise
+     * Retrieves a project by its ID from the repository.
+     *
+     * @param projectID The ID of the project to retrieve
+     * @return The Project object if found, null otherwise
      */
     public Project getProjectById(String projectID) {
         try {

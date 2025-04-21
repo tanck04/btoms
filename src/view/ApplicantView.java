@@ -5,14 +5,45 @@ import model.User;
 
 import java.util.Scanner;
 
+/**
+ * View class responsible for displaying the applicant user interface.
+ * <p>
+ * This class implements the MenuInterface and provides a command-line interface
+ * for applicant users. It offers various functionality including viewing projects,
+ * submitting applications, checking application status, managing enquiries,
+ * and handling account security.
+ * </p>
+ */
 public class ApplicantView implements MenuInterface {
+    /** Controller for applicant-specific operations */
     private final ApplicantController applicantController = new ApplicantController();
+
+    /** Controller for application-specific operations */
     private final ApplicationController applicationController = new ApplicationController();
+
+    /** Controller for enquiry management */
     private final EnquiryController enquiryController = new EnquiryController();
+
+    /** Controller for security question operations */
     private final SecQuesController secQuesController = new SecQuesController();
+
+    /** Controller for password management */
     private final PasswordController passwordController = new PasswordController();
+
+    /** Scanner for handling user input */
     private final Scanner scanner = new Scanner(System.in);
 
+    /**
+     * Displays the main menu for applicant users and processes their selections.
+     * <p>
+     * This method presents a menu with options for viewing projects, submitting applications,
+     * checking application status, requesting withdrawals, managing enquiries, setting security
+     * questions, and changing passwords. It continues to display the menu until the user
+     * chooses to logout.
+     * </p>
+     *
+     * @param user The currently authenticated User object
+     */
     @Override
     public void displayMenu(User user) {
         boolean running = true;
@@ -74,7 +105,4 @@ public class ApplicantView implements MenuInterface {
             }
         }
     }
-
-
-
 }

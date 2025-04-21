@@ -1,6 +1,5 @@
 package controller;
 
-
 import enums.*;
 import model.*;
 import repository.*;
@@ -14,12 +13,23 @@ import java.util.stream.Collectors;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * Controller class for HDB Manager operations in the BTO system.
+ * Handles project management, application approval/rejection, officer registrations,
+ * and report generation for HDB managers.
+ * Implements the ViewProjectInterface to provide project viewing capabilities.
+ */
 public class HDBManagerController implements ViewProjectInterface {
     private final ProjectRepository projectRepository = new ProjectRepository();
     private final ManagerRepository managerRepository = new ManagerRepository();
     private final ApplicationRepository applicationRepository = new ApplicationRepository();
 
-
+    /**
+     * Retrieves a Manager by their ID from the repository.
+     *
+     * @param managerID The ID of the manager to retrieve
+     * @return The Manager object if found, null otherwise
+     */
     public Manager getManagerById(String managerID) {
         try {
             return managerRepository.findManagerById(managerID);
@@ -29,11 +39,12 @@ public class HDBManagerController implements ViewProjectInterface {
         }
     }
 
-
     /**
-     * Gets the active project managed by the specified manager
+     * Gets the active project managed by the specified manager.
+     * A project is considered active if its closing date is after the current date.
+     *
      * @param manager The manager whose project we're looking for
-     * @return The managed project if found and still active (closing date after current date), null otherwise
+     * @return The managed project if found and still active, null otherwise
      */
     public Project getManagedActiveProject(Manager manager) {
         SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
@@ -66,12 +77,12 @@ public class HDBManagerController implements ViewProjectInterface {
     }
 
     /**
-     * Allows HDB manager to approve an applicant's application
+     * Allows HDB manager to approve or reject an applicant's application.
+     * Displays pending applications for the manager's project and processes the approval or rejection.
      *
      * @param manager The HDB manager making the approval
      * @return true if approval was successful, false otherwise
      */
-
     public boolean approveOrRejectApplication(Manager manager) {
         Scanner scanner = new Scanner(System.in);
 
@@ -155,13 +166,12 @@ public class HDBManagerController implements ViewProjectInterface {
         return true;
     }
 
-        // Rest of the method remains the same...
-
     /**
-    * Gets all applications with PENDING status for a specific project
-    * @param project The project to filter applications for
-    * @return List of applications with pending status for the specified project
-    */
+     * Gets all applications with PENDING status for a specific project.
+     *
+     * @param project The project to filter applications for
+     * @return List of applications with pending status for the specified project
+     */
     public List<Application> getPendingApplicationsByProject(Project project) {
         List<Application> pendingApplications = new ArrayList<>();
 
@@ -187,27 +197,30 @@ public class HDBManagerController implements ViewProjectInterface {
         } catch (IOException e) {
             System.out.println("Error loading applications: " + e.getMessage());
             System.out.println("Returning empty list of pending applications");
-            // Log could be added here if needed
-            // The method will return the empty pendingApplications list created earlier
         }
 
         return pendingApplications;
     }
+
     /**
-     * Allows HDB manager to view all projects
+     * Lists projects based on filter criteria.
+     * Projects can be filtered by neighborhood and whether they are managed by the current manager.
+     *
      * @param manager The HDB manager viewing the projects
-     * @return List of projects that the manager can view
+     * @param neighbourhoodFilter The neighborhood to filter by (can be null for no filter)
+     * @param filterproject Flag to view projects managed by the manager ("Y") or all projects
+     * @return List of projects matching the filter criteria
      */
     public List<Project> listProject(Manager manager, String neighbourhoodFilter, String filterproject) {
         try {
             return projectRepository.loadProjects().stream()
                     .filter(project ->
-                            neighbourhoodFilter == null || neighbourhoodFilter.isEmpty() ||
-                                    project.getNeighborhood().equalsIgnoreCase(neighbourhoodFilter)
+                            // Filter implementation
+                            neighbourhoodFilter == null || neighbourhoodFilter.isEmpty() || project.getNeighborhood().equalsIgnoreCase(neighbourhoodFilter)
                     )
                     .filter(project ->
-                            filterproject == null || filterproject.equalsIgnoreCase("N") ||
-                                    project.getManagerID().equals(manager.getNRIC())
+                            // Additional filter implementation
+                            filterproject == null || filterproject.equalsIgnoreCase("N") || project.getManagerID().equals(manager.getNRIC())
                     )
                     .collect(Collectors.toList());
 
@@ -218,7 +231,10 @@ public class HDBManagerController implements ViewProjectInterface {
     }
 
     /**
-     * Prints the list of projects in a formatted table
+     * Prints the list of projects in a formatted table.
+     * Displays project details including ID, name, neighborhood, application dates,
+     * visibility status, officer slots, manager ID, and flat type information.
+     *
      * @param projects The list of projects to print
      */
     public void printProjectList(List<Project> projects) {
@@ -269,6 +285,12 @@ public class HDBManagerController implements ViewProjectInterface {
         }
     }
 
+    /**
+     * Implements the ViewProjectInterface method to display projects.
+     * Allows the manager to view all projects and filter them by neighborhood or by projects they manage.
+     *
+     * @param user The user (HDB manager) viewing the projects
+     */
     public void viewProject(User user) {
         Scanner scanner = new Scanner(System.in);
         Manager manager = (Manager) user;
@@ -295,10 +317,11 @@ public class HDBManagerController implements ViewProjectInterface {
         }
     }
 
-
     /**
-     * Allows HDB manager to approve or reject withdrawal applications
-     * @param user The HDB manager approving/rejecting the application
+     * Allows HDB manager to approve or reject withdrawal applications.
+     * Displays withdrawal requests for the manager's project and processes the approval or rejection.
+     *
+     * @param user The HDB manager approving/rejecting the withdrawal
      */
     public void approveOrRejectWithdrawal(User user) {
         Manager manager = (Manager) user;
@@ -309,7 +332,6 @@ public class HDBManagerController implements ViewProjectInterface {
 
         managedProject = getManagedActiveProject(manager);
 
-        // Rest of the method remains unchanged
         if (managedProject == null) {
             System.out.println("Error: No project found for manager " + manager.getNRIC());
             return;
@@ -393,7 +415,12 @@ public class HDBManagerController implements ViewProjectInterface {
         }
     }
 
-
+    /**
+     * Allows HDB manager to review officer registration requests.
+     * Displays registrations and allows filtering by project.
+     *
+     * @param user The HDB manager reviewing the registrations
+     */
     public void reviewOfficerRegistration(User user) {
         Scanner scanner = new Scanner(System.in);
         Manager manager = (Manager) user;
@@ -416,19 +443,25 @@ public class HDBManagerController implements ViewProjectInterface {
             String filterProject = scanner.nextLine().trim();
 
             List<OfficerRegistration> filteredRegistrations = registrations.stream()
-                        .filter(registration -> {
-                            if (filterProject.equalsIgnoreCase("Y")) {
-                                return registration.getProject().getManagerID().equals(manager.getNRIC());
-                            } else {
-                                return true; // Show all if not filtering by managed projects
-                            }
-                        })
-                        .collect(Collectors.toList());
+                    .filter(registration -> {
+                        // Filter implementation
+                        if (filterProject.equalsIgnoreCase("Y")) {
+                            return registration.getProject().getManagerID().equals(manager.getNRIC());
+                        } else {
+                            return true; // Show all if not filtering by managed projects
+                        }
+                    })
+                    .collect(Collectors.toList());
 
             showRegistrations(filteredRegistrations);
         }
     }
 
+    /**
+     * Displays a formatted table of officer registrations.
+     *
+     * @param registrations The list of officer registrations to display
+     */
     private void showRegistrations(List<OfficerRegistration> registrations) {
         System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
         System.out.println("|                                                                                 Officer Registrations                                                                                 |");
@@ -448,7 +481,9 @@ public class HDBManagerController implements ViewProjectInterface {
     }
 
     /**
-     * Allows HDB manager to approve or reject officer registration
+     * Allows HDB manager to approve or reject officer registration requests.
+     * Verifies officer slots are available before approval and updates the project with new officers.
+     *
      * @param user The HDB manager approving/rejecting the registration
      */
     public void approveOrRejectOfficerRegistration(User user) {
@@ -458,7 +493,6 @@ public class HDBManagerController implements ViewProjectInterface {
 
         managedProject = getManagedActiveProject(manager);
 
-        // Rest of the method remains unchanged
         if (managedProject == null) {
             System.out.println("Error: No project found for manager " + manager.getNRIC());
             return;
@@ -543,6 +577,13 @@ public class HDBManagerController implements ViewProjectInterface {
         }
     }
 
+    /**
+     * Adds an officer to a project by updating the officer IDs list and officer slot count.
+     * Updates the project in the repository after modification.
+     *
+     * @param project The project to add the officer to
+     * @param officer The officer to add to the project
+     */
     public void addOfficerToProject(Project project, Officer officer) {
         if (!project.getOfficerIDs().contains(officer.getNRIC())) {
             List<String> newOfficerIDs = new ArrayList<>(project.getOfficerIDs());
@@ -561,7 +602,9 @@ public class HDBManagerController implements ViewProjectInterface {
     }
 
     /**
-     * Allows HDB manager to generate and view various reports
+     * Allows HDB manager to generate and view various reports about applications and projects.
+     * Provides options for application status reports, booked applications reports, and project summary reports.
+     *
      * @param user The HDB manager generating the report
      */
     public void generateReports(User user) {

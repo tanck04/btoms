@@ -12,8 +12,21 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Controller class for handling receipt generation operations.
+ * Provides functionality for creating, viewing, and managing booking receipts
+ * for BTO flat applications.
+ */
 public class ReceiptController {
 
+    /**
+     * Generates a receipt for a flat booking application.
+     * Creates a formatted receipt with applicant information, property details,
+     * financial summary, and important notes for the applicant.
+     *
+     * @param application The application for which to generate the receipt
+     * @return true if the receipt was generated successfully, false otherwise
+     */
     public boolean generateReceipt(Application application) {
         if (application == null) {
             System.out.println("Error: No application provided to generate receipt.");
@@ -57,8 +70,6 @@ public class ReceiptController {
 
             receipt.append("+----------------------------------------------------------------------------------------+\n");
 
-
-
             // Print the receipt
             System.out.println(receipt.toString());
             return true;
@@ -68,6 +79,13 @@ public class ReceiptController {
         }
     }
 
+    /**
+     * Generates a booking receipt for an application processed by an officer.
+     * Creates a receipt with officer information and application details.
+     *
+     * @param application The application for which to generate the booking receipt
+     * @param user The officer user who processed the booking
+     */
     public void generateBookingReceipt(Application application, User user) {
         System.out.println("\n+----------------------------------------------------------------------------------------------------------------------------------+");
         System.out.println("|                                           GENERATING FLAT BOOKING RECEIPT                                                          |");
@@ -81,11 +99,15 @@ public class ReceiptController {
         }
     }
 
-    // View a stored receipt
+    /**
+     * Retrieves and displays a receipt for a user's booked application.
+     * Checks if the user has a BOOKED application and regenerates the receipt if found.
+     *
+     * @param user The user whose receipt to view
+     */
     public void viewReceiptByUser(User user) {
         // Try to regenerate the receipt if it's not found in memory
         try {
-
             ApplicationRepository applicationRepo = new ApplicationRepository();
             Application app = null;
             for (Application application: applicationRepo.loadApplications()){
@@ -107,4 +129,3 @@ public class ReceiptController {
         }
     }
 }
-

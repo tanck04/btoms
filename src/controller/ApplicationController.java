@@ -8,18 +8,40 @@ import repository.ProjectRepository;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Controller class responsible for managing BTO applications.
+ * This class handles the creation, retrieval, and updates of applications,
+ * including validation of application requirements and withdrawal requests.
+ */
 public class ApplicationController {
     private final ApplicationRepository applicationRepo = new ApplicationRepository();
 
+    /**
+     * Retrieves an application by its unique ID.
+     *
+     * @param applicationID The unique identifier of the application to retrieve
+     * @return The Application object if found, null otherwise
+     */
     public Application getApplicationById(String applicationID) {
         try {
-            applicationRepo.findApplicationById(applicationID);
+            return applicationRepo.findApplicationById(applicationID);
         } catch (IOException e) {
             System.out.println("Error loading applications: " + e.getMessage());
         }
         return null;
     }
 
+    /**
+     * Submits a new application for a user to a specific project and flat type.
+     * Validates eligibility based on user type (Applicant or Officer) and marital status.
+     * Ensures users cannot have multiple active applications.
+     * Singles can only apply for TWO_ROOMS flat types.
+     *
+     * @param user The user submitting the application
+     * @param project The project being applied for
+     * @param flatType The flat type being applied for
+     * @return true if application submission was successful, false otherwise
+     */
     public boolean submitApplication(User user, Project project, FlatType flatType) {
         ProjectRepository projectRepo = new ProjectRepository();
         if (user == null || project == null) {
@@ -111,9 +133,14 @@ public class ApplicationController {
         }
     }
 
-
-
-    /// Method to withdraw an application
+    /**
+     * Processes a withdrawal request for an application.
+     * Displays the user's current application and prompts for confirmation.
+     * Updates the application status to PENDING withdrawal if confirmed.
+     *
+     * @param user The user requesting withdrawal of their application
+     * @return true if withdrawal request was successfully submitted, false otherwise
+     */
     public boolean requestWithdrawal(User user) {
         Application userApplication = null;
         Scanner scanner = new Scanner(System.in);
@@ -127,13 +154,15 @@ public class ApplicationController {
                     System.out.println("Withdrawal Status: " + application.getWithdrawalStatus());
                 }
             }
-        }catch(IOException e){
+        } catch (IOException e) {
             System.out.println("Error loading applications: " + e.getMessage());
         }
+
         if (userApplication == null) {
             System.out.println("No applications found for the applicant.");
             return false;
         }
+
         System.out.println("Enter 1 to confirm withdrawal, 0 to cancel:");
         int choice = scanner.nextInt();
         if (choice == 0) {
@@ -143,10 +172,12 @@ public class ApplicationController {
             System.out.println("Invalid choice. Please enter 1 to confirm or 0 to cancel.");
             return false;
         }
+
         if (user == null) {
             System.out.println("Invalid input: Applicant is null.");
             return false;
         }
+
         System.out.println("Processing withdrawal for applicant: " + user.getNRIC());
         try {
             ApplicationRepository applicationRepo = new ApplicationRepository();

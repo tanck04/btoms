@@ -7,11 +7,30 @@ import model.Applicant;
 import java.io.*;
 import java.util.*;
 
+/**
+ * Repository class for managing Applicant data persistence.
+ * <p>
+ * This class handles CRUD operations for Applicant objects, storing and retrieving data
+ * from a CSV file. It implements verification interfaces to support authentication,
+ * password management, and security question functionality for applicants.
+ * </p>
+ */
 public class ApplicantRepository implements VerificationInterface, PasswordChangerInterface, CheckSecQuesInterface, SecQuesChangerInterface {
+    /** The folder where data files are stored */
     private static final String folder = "data";
+
+    /** The filename for applicant records */
     private static final String fileName = "applicant_records.csv";
+
+    /** The complete file path to the applicant records file */
     private static final String filePath = "./src/repository/" + folder + "/" + fileName;
 
+    /**
+     * Creates an Applicant object from CSV record data.
+     *
+     * @param parts Array of strings representing fields from a CSV record
+     * @return A new Applicant object or null if creation fails
+     */
     private Applicant createApplicantFromCSV(String[] parts) {
         try {
             String nric = parts[0];
@@ -27,6 +46,12 @@ public class ApplicantRepository implements VerificationInterface, PasswordChang
         }
     }
 
+    /**
+     * Loads all applicants from the CSV file.
+     *
+     * @return A list of Applicant objects
+     * @throws IOException If an error occurs while reading the file
+     */
     public List<Applicant> loadApplicants() throws IOException {
         List<Applicant> applicants = new ArrayList<>();
         File file = new File(filePath);
@@ -58,6 +83,13 @@ public class ApplicantRepository implements VerificationInterface, PasswordChang
         return applicants;
     }
 
+    /**
+     * Finds an applicant by their NRIC (National Registration Identity Card) number.
+     *
+     * @param nric The NRIC to search for
+     * @return The found Applicant or null if not found
+     * @throws IOException If an error occurs while reading the file
+     */
     public Applicant findApplicantById(String nric) throws IOException {
         List<Applicant> applicants = loadApplicants();
         return applicants.stream()
@@ -66,6 +98,13 @@ public class ApplicantRepository implements VerificationInterface, PasswordChang
                 .orElse(null);
     }
 
+    /**
+     * Verifies applicant credentials for authentication.
+     *
+     * @param id The NRIC of the applicant
+     * @param password The password to verify
+     * @return The authenticated Applicant or null if authentication fails
+     */
     public Applicant verifyCredentials(String id, String password) {
         PasswordController pc = new PasswordController();
         String hashedInputPassword = pc.hashPassword(password);
@@ -92,6 +131,14 @@ public class ApplicantRepository implements VerificationInterface, PasswordChang
 
         return null; // Login failed
     }
+
+    /**
+     * Changes an applicant's password.
+     *
+     * @param nric The NRIC of the applicant
+     * @param newHashedPassword The new hashed password
+     * @return true if password was successfully updated, false otherwise
+     */
     public boolean changePassword(String nric, String newHashedPassword) {
         List<String[]> records = new ArrayList<>();
         boolean passwordUpdated = false;
@@ -126,7 +173,14 @@ public class ApplicantRepository implements VerificationInterface, PasswordChang
         return passwordUpdated;
     }
 
-
+    /**
+     * Changes an applicant's security question and answer.
+     *
+     * @param nric The NRIC of the applicant
+     * @param newSecQues The new security question
+     * @param newSecAns The new security answer
+     * @return true if security question/answer was successfully updated, false otherwise
+     */
     @Override
     public boolean changeSecQuesAndAns(String nric, String newSecQues, String newSecAns) {
         List<String[]> records = new ArrayList<>();
@@ -168,6 +222,12 @@ public class ApplicantRepository implements VerificationInterface, PasswordChang
         return secQuesUpdated; // Return true if the question was updated
     }
 
+    /**
+     * Checks if an applicant has set up a security question.
+     *
+     * @param nric The NRIC of the applicant
+     * @return true if the applicant has a security question, false otherwise
+     */
     @Override
     public boolean checkHaveSecQues(String nric) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
@@ -185,6 +245,12 @@ public class ApplicantRepository implements VerificationInterface, PasswordChang
         return false;
     }
 
+    /**
+     * Retrieves an applicant's security question.
+     *
+     * @param nric The NRIC of the applicant
+     * @return The security question or an error message if not found
+     */
     @Override
     public String retrieveSecQues(String nric) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
@@ -202,6 +268,13 @@ public class ApplicantRepository implements VerificationInterface, PasswordChang
         return "Error retrieving security question"; // Default return value
     }
 
+    /**
+     * Verifies if the provided answer matches the applicant's security question answer.
+     *
+     * @param nric The NRIC of the applicant
+     * @param answer The answer to verify
+     * @return true if the answer is correct, false otherwise
+     */
     @Override
     public boolean verifyAnsToSecQues(String nric, String answer) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {

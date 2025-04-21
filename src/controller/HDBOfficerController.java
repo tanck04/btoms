@@ -10,10 +10,24 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Controller class for HDB Officer operations in the BTO application system.
+ * Extends ApplicantController to inherit applicant functionality while implementing
+ * ViewProjectInterface for project viewing capabilities. This class provides
+ * officer-specific functionality such as project management, application bookings,
+ * and handling successful applications.
+ */
 public class HDBOfficerController extends ApplicantController implements ViewProjectInterface {
     private final ProjectRepository projectRepository = new ProjectRepository();
     private final ApplicantController applicantController = new ApplicantController();
 
+    /**
+     * Displays available projects and provides filtering options.
+     * Implements the ViewProjectInterface method to allow officers to view and filter
+     * BTO projects based on neighborhood and flat type criteria.
+     *
+     * @param user The officer user viewing the projects
+     */
     public void viewProject(User user) {
         Scanner scanner = new Scanner(System.in);
         Officer officer = (Officer) user;
@@ -44,6 +58,15 @@ public class HDBOfficerController extends ApplicantController implements ViewPro
         }
     }
 
+    /**
+     * Retrieves a filtered list of projects based on specified criteria.
+     * Filters projects by officer access, neighborhood, and flat type.
+     *
+     * @param officer The officer user for whom to list projects
+     * @param neighbourhoodFilter The neighborhood to filter by (null for no filter)
+     * @param flatTypeFilter The flat type to filter by (null for no filter)
+     * @return A filtered list of Project objects matching the criteria
+     */
     public List<Project> listProject(Officer officer, String neighbourhoodFilter, FlatType flatTypeFilter) {
         try {
             return projectRepository.loadProjects().stream()
@@ -65,6 +88,14 @@ public class HDBOfficerController extends ApplicantController implements ViewPro
         }
     }
 
+    /**
+     * Displays a formatted table of projects with their details.
+     * Shows project ID, name, neighborhood, application dates, visibility,
+     * officer slots, manager ID, officers assigned, and flat type information.
+     *
+     * @param projects The list of projects to display
+     * @param flatTypeFilter Optional filter to display only specific flat types (null for all)
+     */
     public void printProjectList(List<Project> projects, FlatType flatTypeFilter){
         // Assuming user is an instance of Officer
         // print centered title
@@ -112,11 +143,24 @@ public class HDBOfficerController extends ApplicantController implements ViewPro
         }
     }
 
+    /**
+     * Delegates to the applicant controller to submit an application.
+     * Allows officers to submit applications using the inherited functionality.
+     *
+     * @param user The user (officer) submitting the application
+     */
     public void submitApplication(User user) {
         applicantController.submitApplication(user);
     }
 
-    // Method to check if the officer has registered to become an officer for a project
+    /**
+     * Checks if an officer has registered to become an officer for a specific project.
+     * Verifies the registration status by checking the officer registration repository.
+     *
+     * @param officer The officer to check
+     * @param project The project to check against
+     * @return true if the officer is registered for the project, false otherwise
+     */
     private boolean ifRegisterOfficer(Officer officer, Project project){
         OfficerRegRepository officerRegRepository = new OfficerRegRepository();
         List <OfficerRegistration> officerRegistrations = new ArrayList<>();
@@ -136,9 +180,11 @@ public class HDBOfficerController extends ApplicantController implements ViewPro
     }
 
     /**
-     * Find successful applications for the project the officer is in charge of
+     * Finds successful applications for the project the officer is in charge of.
+     * Retrieves applications that are marked as SUCCESSFUL and not pending withdrawal.
+     *
      * @param user The officer user
-     * @return List of successful applications
+     * @return List of successful applications for the officer's assigned project
      */
     public List<Application> getSuccessfulApplicationsForOfficerProject(User user) {
         List<Application> successfulApplications = new ArrayList<>();
@@ -172,6 +218,13 @@ public class HDBOfficerController extends ApplicantController implements ViewPro
         return successfulApplications;
     }
 
+    /**
+     * Allows an officer to book a BTO flat for successful applicants.
+     * Displays successful applications, allows selection, verifies unit availability,
+     * updates application status to BOOKED, and generates a receipt.
+     *
+     * @param user The officer user performing the booking
+     */
     public void bookBTO(User user) {
         ApplicationController applicationController = new ApplicationController();
         ReceiptController receiptController = new ReceiptController();
@@ -230,5 +283,4 @@ public class HDBOfficerController extends ApplicantController implements ViewPro
             System.out.println("No units left to book for " + selectedFlatType);
         }
     }
-
 }

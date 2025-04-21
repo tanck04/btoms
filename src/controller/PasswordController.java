@@ -8,7 +8,21 @@ import java.util.Scanner;
 
 import static controller.SignInController.userLoginRepository;
 
+/**
+ * Controller class responsible for password management operations.
+ * Handles password hashing, changing, and verification processes across all user types
+ * in the BTO application system.
+ */
 public class PasswordController {
+
+    /**
+     * Hashes a plain-text password using SHA-256 algorithm.
+     * Converts the resulting byte array to a hexadecimal string representation.
+     *
+     * @param password The plain-text password to be hashed
+     * @return The hexadecimal string representation of the hashed password
+     * @throws RuntimeException If the SHA-256 algorithm is not available
+     */
     public String hashPassword(String password) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -25,6 +39,14 @@ public class PasswordController {
         }
     }
 
+    /**
+     * Changes a user's password by hashing the new password and delegating to the
+     * appropriate repository based on the user's role.
+     *
+     * @param nric The National Registration Identity Card (NRIC) of the user
+     * @param newPassword The new plain-text password to be set
+     * @return true if the password was successfully changed, false otherwise
+     */
     public boolean changePassword(String nric, String newPassword) {
         String hashedPassword = hashPassword(newPassword);
         String role = userLoginRepository.getUserTypeByNRIC(nric);
@@ -40,6 +62,13 @@ public class PasswordController {
         return repository.changePassword(nric, hashedPassword);
     }
 
+    /**
+     * Handles the complete password change workflow for a user.
+     * Verifies the current password, collects and confirms the new password,
+     * and processes the change if all validations pass.
+     *
+     * @param user The user object whose password is being changed
+     */
     public void handlePasswordChange(User user){
         String nric = user.getNRIC();
         Scanner scanner = new Scanner(System.in);

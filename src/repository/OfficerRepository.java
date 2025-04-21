@@ -9,11 +9,30 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Repository class for managing Officer data persistence.
+ * <p>
+ * This class handles CRUD operations for Officer objects, storing and retrieving data
+ * from a CSV file. It implements multiple interfaces to support authentication,
+ * password management, and security question functionality for officers.
+ * </p>
+ */
 public class OfficerRepository implements PasswordChangerInterface, VerificationInterface, CheckSecQuesInterface, SecQuesChangerInterface {
+    /** The folder where data files are stored */
     private static final String folder = "data";
+
+    /** The filename for officer records */
     private static final String fileName = "officer_records.csv";
+
+    /** The complete file path to the officer records file */
     private static final String filePath = "src/repository/" + folder + "/" + fileName;
 
+    /**
+     * Creates an Officer object from CSV record data.
+     *
+     * @param parts Array of strings representing fields from a CSV record
+     * @return A new Officer object or null if creation fails
+     */
     private Officer createOfficerFromCSV(String[] parts) {
         try {
             String nric = parts[0];
@@ -29,6 +48,12 @@ public class OfficerRepository implements PasswordChangerInterface, Verification
         }
     }
 
+    /**
+     * Loads all officers from the CSV file.
+     *
+     * @return A list of Officer objects
+     * @throws IOException If an error occurs while reading the file
+     */
     public List<Officer> loadOfficers() throws IOException {
         List<Officer> officers = new ArrayList<>();
         File file = new File(filePath);
@@ -60,6 +85,13 @@ public class OfficerRepository implements PasswordChangerInterface, Verification
         return officers;
     }
 
+    /**
+     * Finds an officer by their NRIC (National Registration Identity Card) number.
+     *
+     * @param nric The NRIC to search for
+     * @return The found Officer or null if not found
+     * @throws IOException If an error occurs while reading the file
+     */
     public Officer findOfficerById(String nric) throws IOException {
         List<Officer> officers = loadOfficers();
         return officers.stream()
@@ -68,6 +100,13 @@ public class OfficerRepository implements PasswordChangerInterface, Verification
                 .orElse(null);
     }
 
+    /**
+     * Verifies officer credentials for authentication.
+     *
+     * @param id The NRIC of the officer
+     * @param password The password to verify
+     * @return The authenticated Officer or null if authentication fails
+     */
     public Officer verifyCredentials(String id, String password) {
         PasswordController pc = new PasswordController();
         String hashedInputPassword = pc.hashPassword(password);
@@ -94,6 +133,14 @@ public class OfficerRepository implements PasswordChangerInterface, Verification
 
         return null; // Login failed
     }
+
+    /**
+     * Changes an officer's password.
+     *
+     * @param nric The NRIC of the officer
+     * @param newHashedPassword The new hashed password
+     * @return true if password was successfully updated, false otherwise
+     */
     public boolean changePassword(String nric, String newHashedPassword) {
         List<String[]> allRecords = new ArrayList<>();
         boolean passwordUpdated = false;
@@ -128,6 +175,14 @@ public class OfficerRepository implements PasswordChangerInterface, Verification
         return passwordUpdated;
     }
 
+    /**
+     * Changes an officer's security question and answer.
+     *
+     * @param nric The NRIC of the officer
+     * @param newSecQues The new security question
+     * @param newSecAns The new security answer
+     * @return true if security question/answer was successfully updated, false otherwise
+     */
     @Override
     public boolean changeSecQuesAndAns(String nric, String newSecQues, String newSecAns) {
         List<String[]> records = new ArrayList<>();
@@ -141,7 +196,7 @@ public class OfficerRepository implements PasswordChangerInterface, Verification
                 if (parts[0].equals(nric)) {
                     // Ensure the CSV has enough columns for Question and Answer
                     if (parts.length < 7) {
-                        parts = Arrays.copyOf(parts, 7); // Extend to at least 8 elements
+                        parts = Arrays.copyOf(parts, 7); // Extend to at least 7 elements
                     }
                     // Update security question and answer
                     parts[5] = newSecQues;
@@ -169,6 +224,12 @@ public class OfficerRepository implements PasswordChangerInterface, Verification
         return secQuesUpdated;
     }
 
+    /**
+     * Checks if an officer has set up a security question.
+     *
+     * @param nric The NRIC of the officer
+     * @return true if the officer has a security question, false otherwise
+     */
     @Override
     public boolean checkHaveSecQues(String nric) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
@@ -186,6 +247,12 @@ public class OfficerRepository implements PasswordChangerInterface, Verification
         return false;
     }
 
+    /**
+     * Retrieves an officer's security question.
+     *
+     * @param nric The NRIC of the officer
+     * @return The security question or an error message if not found
+     */
     @Override
     public String retrieveSecQues(String nric) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
@@ -203,6 +270,13 @@ public class OfficerRepository implements PasswordChangerInterface, Verification
         return "Error retrieving security question"; // Default return value
     }
 
+    /**
+     * Verifies if the provided answer matches the officer's security question answer.
+     *
+     * @param nric The NRIC of the officer
+     * @param answer The answer to verify
+     * @return true if the answer is correct, false otherwise
+     */
     @Override
     public boolean verifyAnsToSecQues(String nric, String answer) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {

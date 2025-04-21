@@ -17,15 +17,30 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+/**
+ * Controller class responsible for generating various types of reports.
+ * Provides functionality for creating application status reports, booked applications reports,
+ * and project summary reports with various filtering options.
+ */
 public class ReportController {
     private final ApplicationRepository applicationRepository;
     private final ProjectRepository projectRepository;
 
+    /**
+     * Constructs a ReportController with initialized repositories.
+     * Initializes application and project repositories for data access.
+     */
     public ReportController() {
         this.applicationRepository = new ApplicationRepository();
         this.projectRepository = new ProjectRepository();
     }
 
+    /**
+     * Generates a report based on the specified report type.
+     * Available report types include APPLICATION_STATUS, BOOKED_APPLICATIONS, and PROJECT_SUMMARY.
+     *
+     * @param reportType The type of report to generate (case-insensitive)
+     */
     public void generateReport(String reportType) {
         Scanner scanner = new Scanner(System.in);
 
@@ -48,6 +63,13 @@ public class ReportController {
         }
     }
 
+    /**
+     * Generates a report showing application statuses with various filtering options.
+     * Allows filtering by project, application status, or withdrawal status.
+     *
+     * @param scanner A Scanner object for user input
+     * @throws IOException If there's an error loading applications from the repository
+     */
     private void generateApplicationStatusReport(Scanner scanner) throws IOException {
         // Get all applications
         List<Application> applications = applicationRepository.loadApplications();
@@ -68,8 +90,8 @@ public class ReportController {
                 System.out.print("Enter Project ID: ");
                 String projectId = scanner.nextLine();
                 filteredApplications = applications.stream()
-                    .filter(app -> app.getProject().getProjectID().equals(projectId))
-                    .collect(Collectors.toList());
+                        .filter(app -> app.getProject().getProjectID().equals(projectId))
+                        .collect(Collectors.toList());
                 break;
             case 2:
                 System.out.println("Select Application Status:");
@@ -90,8 +112,8 @@ public class ReportController {
                 if (selectedStatus != null) {
                     ApplicantAppStatus finalSelectedStatus = selectedStatus;
                     filteredApplications = applications.stream()
-                        .filter(app -> app.getApplicationStatus() == finalSelectedStatus)
-                        .collect(Collectors.toList());
+                            .filter(app -> app.getApplicationStatus() == finalSelectedStatus)
+                            .collect(Collectors.toList());
                 }
                 break;
             case 3:
@@ -113,8 +135,8 @@ public class ReportController {
                 if (selectedWithdrawalStatus != null) {
                     WithdrawalStatus finalSelectedWithdrawalStatus = selectedWithdrawalStatus;
                     filteredApplications = applications.stream()
-                        .filter(app -> app.getWithdrawalStatus() == finalSelectedWithdrawalStatus)
-                        .collect(Collectors.toList());
+                            .filter(app -> app.getWithdrawalStatus() == finalSelectedWithdrawalStatus)
+                            .collect(Collectors.toList());
                 }
                 break;
             case 4:
@@ -150,14 +172,21 @@ public class ReportController {
         System.out.println("+----------------------------------------------------------------------------------------------------------+");
     }
 
+    /**
+     * Generates a report of booked applications with filtering options.
+     * Allows filtering by project or flat type.
+     *
+     * @param scanner A Scanner object for user input
+     * @throws IOException If there's an error loading applications from the repository
+     */
     private void generateBookedApplicationsReport(Scanner scanner) throws IOException {
         // Get all applications
         List<Application> applications = applicationRepository.loadApplications();
 
         // Get only booked applications
         List<Application> bookedApplications = applications.stream()
-            .filter(app -> app.getApplicationStatus() == ApplicantAppStatus.BOOKED)
-            .collect(Collectors.toList());
+                .filter(app -> app.getApplicationStatus() == ApplicantAppStatus.BOOKED)
+                .collect(Collectors.toList());
 
         // Filter options
         System.out.println("\n=== BOOKED APPLICATIONS REPORT FILTER OPTIONS ===");
@@ -174,8 +203,8 @@ public class ReportController {
                 System.out.print("Enter Project ID: ");
                 String projectId = scanner.nextLine();
                 filteredBookedApps = bookedApplications.stream()
-                    .filter(app -> app.getProject().getProjectID().equals(projectId))
-                    .collect(Collectors.toList());
+                        .filter(app -> app.getProject().getProjectID().equals(projectId))
+                        .collect(Collectors.toList());
                 break;
             case 2:
                 System.out.println("Select Flat Type:");
@@ -192,8 +221,8 @@ public class ReportController {
                 if (selectedFlatType != null) {
                     FlatType finalSelectedFlatType = selectedFlatType;
                     filteredBookedApps = bookedApplications.stream()
-                        .filter(app -> app.getFlatType() == finalSelectedFlatType)
-                        .collect(Collectors.toList());
+                            .filter(app -> app.getFlatType() == finalSelectedFlatType)
+                            .collect(Collectors.toList());
                 }
                 break;
             case 3:
@@ -237,6 +266,14 @@ public class ReportController {
         System.out.println("+-----------------------------------------------------------------------------------------------------------------+");
     }
 
+    /**
+     * Generates a summary report for projects with filtering options.
+     * Allows filtering by project ID or neighborhood.
+     * Shows flat inventory and application statistics for each project.
+     *
+     * @param scanner A Scanner object for user input
+     * @throws IOException If there's an error loading projects or applications from repositories
+     */
     private void generateProjectSummaryReport(Scanner scanner) throws IOException {
         // Get all projects
         List<Project> projects = projectRepository.loadProjects();
@@ -257,15 +294,15 @@ public class ReportController {
                 System.out.print("Enter Project ID: ");
                 String projectId = scanner.nextLine();
                 filteredProjects = projects.stream()
-                    .filter(project -> project.getProjectID().equals(projectId))
-                    .collect(Collectors.toList());
+                        .filter(project -> project.getProjectID().equals(projectId))
+                        .collect(Collectors.toList());
                 break;
             case 2:
                 System.out.print("Enter Neighborhood: ");
                 String neighborhood = scanner.nextLine();
                 filteredProjects = projects.stream()
-                    .filter(project -> project.getNeighborhood().equalsIgnoreCase(neighborhood))
-                    .collect(Collectors.toList());
+                        .filter(project -> project.getNeighborhood().equalsIgnoreCase(neighborhood))
+                        .collect(Collectors.toList());
                 break;
             case 3:
                 // No filter, use all projects

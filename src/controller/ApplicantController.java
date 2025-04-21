@@ -15,12 +15,23 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ApplicantController implements ViewProjectInterface{
+/**
+ * Controller class for managing applicant operations in the BTO application system.
+ * This class handles viewing projects, checking application status, and submitting applications.
+ * It implements the ViewProjectInterface to provide standard project viewing capabilities.
+ */
+public class ApplicantController implements ViewProjectInterface {
     private final ApplicantRepository applicantRepository = new ApplicantRepository();
     private final ApplicationRepository applicationRepository = new ApplicationRepository();
     private String lastNeighbourhoodFilter = null;
     private FlatType lastFlatTypeFilter = null;
-    // Method to check application status
+
+    /**
+     * Displays the status of all applications submitted by the user.
+     * If an application has BOOKED status, offers the user an option to view the booking receipt.
+     *
+     * @param user The user whose application status to check
+     */
     public void checkApplicationStatus(User user) {
         try {
             List<Application> applications = applicationRepository.loadApplications();
@@ -59,7 +70,12 @@ public class ApplicantController implements ViewProjectInterface{
         }
     }
 
-
+    /**
+     * Retrieves an applicant by their ID from the repository.
+     *
+     * @param applicantID The ID of the applicant to retrieve
+     * @return The found Applicant object or null if not found
+     */
     public Applicant getApplicantById(String applicantID) {
         try {
             return applicantRepository.findApplicantById(applicantID);
@@ -69,6 +85,20 @@ public class ApplicantController implements ViewProjectInterface{
         }
     }
 
+    /**
+     * Lists all available projects based on filtering criteria.
+     * Projects are filtered by:
+     * - Future closing dates
+     * - Project visibility
+     * - Specified neighborhood (if provided)
+     * - Specified flat type (if provided)
+     * - Projects not handled by the applicant (if they are also an officer)
+     *
+     * @param applicant The applicant for whom to list projects
+     * @param neighbourhoodFilter The neighborhood to filter by (null for no filter)
+     * @param flatTypeFilter The flat type to filter by (null for no filter)
+     * @return List of projects matching the filtering criteria
+     */
     public List<Project> listProject(Applicant applicant, String neighbourhoodFilter, FlatType flatTypeFilter) {
         ProjectRepository projectRepository = new ProjectRepository();
         try {
@@ -108,12 +138,18 @@ public class ApplicantController implements ViewProjectInterface{
         }
     }
 
-
+    /**
+     * Checks if a user has already applied for a specific project.
+     *
+     * @param project The project to check
+     * @param user The user to check applications for
+     * @return true if the user has applied for the project, false otherwise
+     */
     public boolean isApplyProject(Project project, User user) {
         try {
             for (Application application : applicationRepository.loadApplications()) {
                 if (application.getProject().getProjectID().equals(project.getProjectID()) &&
-                    application.getUser().getNRIC().equals(user.getNRIC())) {
+                        application.getUser().getNRIC().equals(user.getNRIC())) {
                     return true;
                 }
             }
@@ -123,6 +159,13 @@ public class ApplicantController implements ViewProjectInterface{
         return false;
     }
 
+    /**
+     * Prints a formatted table of projects with their details.
+     * Displays project basic information and flat types available based on filter.
+     *
+     * @param projects The list of projects to display
+     * @param flatTypeFilter Optional filter to show only specific flat types
+     */
     private void printProjectList(List<Project> projects, FlatType flatTypeFilter) {
         System.out.println("+------------+----------------------+----------------+----------------------+------------------------+");
         System.out.println("|                                            Project List                                            |");
@@ -165,7 +208,15 @@ public class ApplicantController implements ViewProjectInterface{
         }
     }
 
-
+    /**
+     * Allows an applicant to view available projects with filtering options.
+     * Implements eligibility checks based on marital status and age.
+     * Single applicants must be at least 35 years old.
+     * Married applicants must be at least 21 years old.
+     * Single applicants can only view 2-room flats.
+     *
+     * @param user The user viewing projects
+     */
     public void viewProject(User user) {
         Scanner scanner = new Scanner(System.in);
         Applicant applicant = (Applicant) user;
@@ -202,6 +253,15 @@ public class ApplicantController implements ViewProjectInterface{
         }
     }
 
+    /**
+     * Handles the submission of BTO applications.
+     * Enforces eligibility rules:
+     * - Single applicants must be at least 35 years old and can only apply for 2-room flats.
+     * - Married applicants must be at least 21 years old and can apply for 2-room or 3-room flats.
+     * Allows filtering and selecting of projects before submission.
+     *
+     * @param user The user submitting the application
+     */
     public void submitApplication(User user) {
         FlatType selectedFlatType;
         Scanner scanner = new Scanner(System.in);

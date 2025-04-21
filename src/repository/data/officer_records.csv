@@ -1,7 +1,7 @@
 NRIC,Name,Age,MaritalStatus,Password,SecurityQuestion,SecurityAnswer
-S0000001O,Christopher Moore,20,SINGLE,password,NULL,NULL
+S0000001O,Christopher Moore,20,SINGLE,password
 S0000002O,Hannah Thompson,20,MARRIED,password
-S0000003O,Daniel White,21,SINGLE,password,NULL,NULL
+S0000003O,Daniel White,21,SINGLE,password
 S0000004O,Lauren Harris,21,MARRIED,password
 S0000005O,Matthew Lewis,25,SINGLE,password
 S0000006O,Natalie Walker,25,MARRIED,password
