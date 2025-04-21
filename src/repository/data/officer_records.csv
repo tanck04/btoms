@@ -1,4 +1,11 @@
 NRIC,Name,Age,MaritalStatus,Password,SecurityQuestion,SecurityAnswer
-T2109876H,Daniel,36,Single,9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
-S6543210I,Emily,28,Single,9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08,NULL,NULL
-T1234567J,David,29,Married,9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+S0000001O,Christopher Moore,20,SINGLE,password,NULL,NULL
+S0000002O,Hannah Thompson,20,MARRIED,password
+S0000003O,Daniel White,21,SINGLE,password,NULL,NULL
+S0000004O,Lauren Harris,21,MARRIED,password
+S0000005O,Matthew Lewis,25,SINGLE,password
+S0000006O,Natalie Walker,25,MARRIED,password
+S0000007O,Samuel Brooks,35,SINGLE,password
+S0000008O,Madison Parker,35,MARRIED,password
+S0000009O,Liam Peterson,40,SINGLE,password
+S0000010O,Sophie Richardson,40,MARRIED,password

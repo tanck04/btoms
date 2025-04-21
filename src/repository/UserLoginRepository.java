@@ -3,11 +3,11 @@ package repository;
 import java.io.*;
 
 public class UserLoginRepository {
-private static final String FILE_PATH = "./src/repository/data/user_login_records.csv";
+private static final String FILE_PATH_USER_LOGIN = "./src/repository/data/user_login_records.csv";
 
 
     public String getUserTypeByNRIC(String nric) {
-        try (BufferedReader br = new BufferedReader(new FileReader(FILE_PATH))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(FILE_PATH_USER_LOGIN))) {
             String line;
             br.readLine(); // Skip header
 
@@ -25,7 +25,7 @@ private static final String FILE_PATH = "./src/repository/data/user_login_record
     }
 
     public boolean userExists(String nric) {
-        try (BufferedReader br = new BufferedReader(new FileReader(FILE_PATH))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(FILE_PATH_USER_LOGIN))) {
             String line;
             br.readLine(); // Skip header
 

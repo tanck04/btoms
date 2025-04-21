@@ -158,9 +158,9 @@ public class ProjectController {
                     openingDate = sdf.parse(input);  // Parse as strict format
                     formattedOpeningDate = sdf.format(openingDate);
                     // Confirm what the user entered
-                    System.out.println("✅ Parsed Opening Date: " + sdf.format(openingDate));
+                    System.out.println("Parsed Opening Date: " + sdf.format(openingDate));
                 } catch (ParseException e) {
-                    System.out.println("❌ Invalid date format. Please follow MM/dd/yyyy.");
+                    System.out.println("Invalid date format. Please follow MM/dd/yyyy.");
                 }
             }
 
@@ -175,9 +175,9 @@ public class ProjectController {
                     closingDate = sdf.parse(input);  // Parse as strict format
                     formattedClosingDate = sdf.format(closingDate);
                     // Confirm what the user entered
-                    System.out.println("✅ Parsed Closing Date: " + sdf.format(closingDate));
+                    System.out.println("Parsed Closing Date: " + sdf.format(closingDate));
                 } catch (ParseException e) {
-                    System.out.println("❌ Invalid date format. Please follow MM/dd/yyyy.");
+                    System.out.println("Invalid date format. Please follow MM/dd/yyyy.");
                 }
             }
 
@@ -294,7 +294,7 @@ public class ProjectController {
                             newOpeningDate = sdf.parse(input);  // Parse as strict format
 
                             // Confirm what the user entered
-                            System.out.println("✅ Parsed Opening Date: " + sdf.format(newOpeningDate));
+                            System.out.println("Parsed Opening Date: " + sdf.format(newOpeningDate));
                         } catch (ParseException e) {
                             System.out.println("❌ Invalid date format. Please follow MM/dd/yyyy.");
                         }
@@ -308,9 +308,9 @@ public class ProjectController {
                             String input = scanner.nextLine().trim();
                             newClosingDate = sdf.parse(input);  // Parse as strict format
                             // Confirm what the user entered
-                            System.out.println("✅ Parsed Closing Date: " + sdf.format(newClosingDate));
+                            System.out.println("Parsed Closing Date: " + sdf.format(newClosingDate));
                         } catch (ParseException e) {
-                            System.out.println("❌ Invalid date format. Please follow MM/dd/yyyy.");
+                            System.out.println("Invalid date format. Please follow MM/dd/yyyy.");
                         }
                     }
                     project.setApplicationClosingDate(sdf.format(newClosingDate));

@@ -1,16 +1,9 @@
 package view;
 
 import controller.*;
-import enums.MaritalStatus;
-import enums.Role;
-import enums.FlatType;
-import model.Applicant;
-import model.Project;
 import model.User;
 
-import java.util.List;
 import java.util.Scanner;
-import java.util.Map;
 
 public class ApplicantView implements MenuInterface {
     private final ApplicantController applicantController = new ApplicantController();

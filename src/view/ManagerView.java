@@ -1,16 +1,8 @@
 package view;
 
 import controller.*;
-import enums.FlatType;
-import enums.Role;
 import model.*;
-import repository.OfficerRegRepository;
-import repository.ManagerRepository;
-import repository.ProjectRepository;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class ManagerView implements MenuInterface {

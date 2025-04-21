@@ -1,4 +1,7 @@
 NRIC,Name,Age,MaritalStatus,Password,ProjectID,SecurityQuestion,SecurityAnswer
-T8765432F,Michael,36,SINGLE,9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08,P0001
-S5678901G,Jessica,26,MARRIED,password,P0002
-T9876543F,Daniel,25,MARRIED,9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08,P0003
+S0000001M,Andrew Hall,30,SINGLE,password,P0005
+S0000002M,James Anderson,30,SINGLE,password,P0002
+S0000003M,Ashley Martin,30,SINGLE,password,P0003
+S0000004M,Chloe Young,30,MARRIED,password,P0004
+S0000005M,Benjamin Scott,30,MARRIED,password,null,favorite dog,shiba inu
+S0000006M,Grace Adams,30,MARRIED,password,null,favorite dog,shiba inu

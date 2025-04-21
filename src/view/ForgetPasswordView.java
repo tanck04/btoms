@@ -13,6 +13,4 @@ public class ForgetPasswordView {
         answer = scanner.nextLine();
         return repository.verifyAnsToSecQues(nric,answer);
     }
-
-
 }

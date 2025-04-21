@@ -13,15 +13,6 @@ public class Application {
     private WithdrawalStatus withdrawalStatus;
     private ApplicantAppStatus applicationStatus;
 
-    // Constructor for creating a new Application
-//    public Application(Applicant applicant, Project project, FlatType flatType) {
-//        this.applicant = applicant;
-//        this.project = project;
-//        this.flatType = flatType;
-//        this.withdrawalStatus = WithdrawalStatus.NULL;
-//        this.applicationStatus = ApplicantAppStatus.PENDING;
-//    }
-
     // Constructor for creating an Application from CSV data
     public Application(String applicationID, Applicant applicant, Project project, FlatType flatType,
                        ApplicantAppStatus applicationStatus, WithdrawalStatus withdrawalStatus) {

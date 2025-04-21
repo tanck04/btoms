@@ -64,7 +64,7 @@ public class ApplicantController implements ViewProjectInterface{
         try {
             return applicantRepository.findApplicantById(applicantID);
         } catch (IOException e) {
-            System.out.println("Error retrieving project: " + e.getMessage());
+            System.out.println("Error retrieving applicant: " + e.getMessage());
             return null;
         }
     }

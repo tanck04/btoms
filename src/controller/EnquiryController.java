@@ -11,7 +11,6 @@ import java.util.Scanner;
 
 public class EnquiryController {
     EnquiryRepository enquiryRepository = new EnquiryRepository();
-    ProjectRepository projectRepository = new ProjectRepository();
     TableUtil tableUtil = new TableUtil();
 
     public void handleEnquiries(User user, boolean viewAsApplicant) {

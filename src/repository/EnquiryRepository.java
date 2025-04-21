@@ -40,22 +40,40 @@ public class EnquiryRepository {
      */
     public boolean createNewEnquiry(Enquiry enquiry) throws IOException {
         File file = new File(FILE_PATH_ENQUIRY);
+        boolean needsNewline = false;
+
+        // Check if file exists and doesn't end with newline
+        if (file.exists() && file.length() > 0) {
+            try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+                if (raf.length() > 0) {
+                    raf.seek(raf.length() - 1);
+                    byte lastByte = raf.readByte();
+                    needsNewline = lastByte != '\n';
+                }
+            }
+        }
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
             // Write a newline if file has content
-            if (file.length() > 0) writer.newLine();
+            if (needsNewline) {
+                writer.newLine();
+            }
 
-            String record = String.join(",",
-                    enquiry.getEnquiryID(),
-                    enquiry.getApplicantID(),
-                    enquiry.getProjectID(),
-                    enquiry.getEnquiryText(),
-                    enquiry.getEnquiryReply(),
-                    enquiry.getEnquiryStatus(),
-                    enquiry.getReplyingOfficerID());
-            writer.write(record);
-            writer.flush();
-            return true;
+            String enquiryData = enquiryToCSV(enquiry);
+
+            writer.write(enquiryData);
         }
+        return true;
+    }
+
+    private static String enquiryToCSV(Enquiry enquiry) {
+        return String.join(",",
+                enquiry.getEnquiryID(),
+                enquiry.getApplicantID(),
+                enquiry.getProjectID(),
+                enquiry.getEnquiryText(),
+                enquiry.getEnquiryReply(),
+                enquiry.getEnquiryStatus(),
+                enquiry.getReplyingOfficerID());
     }
 
     /**
@@ -160,9 +178,18 @@ public class EnquiryRepository {
         boolean removed = enquiries.removeIf(e -> e.getEnquiryID().equals(enquiryID));
 
         if (removed) {
-            overwriteCSV(enquiries);
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH_ENQUIRY))) {
+                // Write header
+                writer.write("EnquiryID,ApplicantNRIC,ProjectID,EnquiryText,EnquiryResponse,EnquiryStatus,ResponderNRIC");
+                writer.newLine();
+
+                for (Enquiry e : enquiries) {
+                    writer.write(enquiryToCSV(e));
+                    writer.newLine();
+                }
+            }
         }
-        return removed;
+        return true;
     }
 
     /**
@@ -235,7 +262,7 @@ public class EnquiryRepository {
      */
     private void overwriteCSV(List<Enquiry> enquiries) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH_ENQUIRY))) {
-            writer.write("Enquiry ID,Applicant ID,Project ID,Enquiry Text,Enquiry Reply,Enquiry Status");
+            writer.write("EnquiryID,ApplicantNRIC,ProjectID,EnquiryText,EnquiryResponse,EnquiryStatus,ResponderNRIC");
             writer.newLine();
             for (Enquiry e : enquiries) {
                 String record = String.join(",",
@@ -290,42 +317,41 @@ public class EnquiryRepository {
     }
 
     public boolean updateEnquiry(Enquiry updatedEnquiry) throws IOException {
-        // Load all enquiries from the file
-        List<Enquiry> existingEnquiries = loadAllEnquiries();
+        File inputFile = new File(FILE_PATH_ENQUIRY);
+        List<String> updatedLines = new ArrayList<>();
 
-        boolean found = false;
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile))) {
+            String line;
+            boolean isFirstLine = true;
 
-        // Iterate over the existing enquiries to find the one with the matching EnquiryID
-        for (int i = 0; i < existingEnquiries.size(); i++) {
-            Enquiry enquiry = existingEnquiries.get(i);
+            while ((line = reader.readLine()) != null) {
+                if (isFirstLine) {
+                    updatedLines.add(line); // Header
+                    isFirstLine = false;
+                    continue;
+                }
 
-            if (enquiry.getEnquiryID().equals(updatedEnquiry.getEnquiryID())) {
-                // Update the enquiry
-                existingEnquiries.set(i, updatedEnquiry);
-                found = true;
-                break;
-            }
-        }
-
-        // If the enquiry was found, write the updated list back to the file
-        if (found) {
-            // Write all enquiries back to the file
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH_ENQUIRY))) {
-                for (Enquiry enquiry : existingEnquiries) {
-                    String record = String.join(",",
-                            enquiry.getEnquiryID(),
-                            enquiry.getApplicantID(),
-                            enquiry.getProjectID(),
-                            enquiry.getEnquiryText(),
-                            enquiry.getEnquiryReply(),
-                            enquiry.getEnquiryStatus(),
-                            enquiry.getReplyingOfficerID());
-                    writer.write(record);
-                    writer.newLine();
+                if (line.startsWith(updatedEnquiry.getEnquiryID() + ",")) {
+                    updatedLines.add(enquiryToCSV(updatedEnquiry)); // Use helper method
+                } else {
+                    updatedLines.add(line); // Keep as is
                 }
             }
+        } catch (IOException e) {
+            System.out.println("Error reading CSV for update: " + e.getMessage());
+            return false;
         }
 
-        return found;
+        // Write updated content back to file
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH_ENQUIRY, false))) {
+            for (String updatedLine : updatedLines) {
+                writer.write(updatedLine);
+                writer.newLine();
+            }
+            System.out.println("Updated enquiry saved successfully.");
+        } catch (IOException e) {
+            System.out.println("Error writing updated CSV: " + e.getMessage());
+        }
+        return true;
     }
 }

@@ -15,7 +15,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class HDBManagerController implements ViewProjectInterface {
-    private final ApplicantRepository applicantRepository = new ApplicantRepository();
     private final ProjectRepository projectRepository = new ProjectRepository();
     private final ManagerRepository managerRepository = new ManagerRepository();
     private final ApplicationRepository applicationRepository = new ApplicationRepository();
@@ -224,43 +223,6 @@ public class HDBManagerController implements ViewProjectInterface {
      */
     public void printProjectList(List<Project> projects) {
         // Assuming user is an instance of Manager
-
-        // Header
-//        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
-//        System.out.println("|                                                                                 Project List                                                                                 |");
-//        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
-//        System.out.printf("| %-10s | %-20s | %-15s | %-12s | %-12s | %-10s | %-12s | %-15s |\n",
-//                "Project ID", "Project Name", "Neighbourhood", "App. Start", "App. End", "Visibility", "OfficerSlot", "Manager ID");
-//        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
-//
-//        // Project rows
-//        for (Project project : projects) {
-//            System.out.printf("| %-10s | %-20s | %-15s | %-12s | %-12s | %-10s | %-12d | %-15s |\n",
-//                    project.getProjectID(),
-//                    project.getProjectName(),
-//                    project.getNeighborhood(),
-//                    project.getApplicationOpeningDate(),
-//                    project.getApplicationClosingDate(),
-//                    project.getVisibility(),
-//                    project.getOfficerSlot(),
-//                    project.getManagerID()
-//            );
-//
-//            // Officer IDs
-//            System.out.println("| Officer IDs: " + String.join(", ", project.getOfficerIDs()));
-//            // Flat types
-//            System.out.println("| Flat Types:");
-//            for (Map.Entry<FlatType, Double> entry : project.getFlatTypePrices().entrySet()) {
-//                FlatType flatType = entry.getKey();
-//                Double price = entry.getValue();
-//                int units = project.getUnitsForFlatType(flatType);
-//                System.out.printf("|    - %-10s : $%-10.2f (%-3d units available)\n",
-//                        flatType.toString(), price, units);
-//            }
-//
-//            // Separator after each project
-//            System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
-//        }
         // print centered title
         System.out.println("+------------+----------------------+-----------------+--------------+--------------+------------+--------------+----------------+");
         System.out.println("|                                                          Project List                                                          |");
