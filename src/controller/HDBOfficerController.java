@@ -236,10 +236,10 @@ public class HDBOfficerController extends ApplicantController implements ViewPro
             return;
         }
 
-        System.out.println("\n======================= Successful Applications =======================");
-        System.out.printf("%-15s %-20s %-10s %-20s %-12s %-15s\n",
+        System.out.println("\n=================================== Successful Applications =======================================");
+        System.out.printf("%-15s %-20s %-16s %-20s %-12s %-15s\n",
                 "Application ID", "Applicant Name", "Project ID", "Project Name", "Flat Type", "Status");
-        System.out.println("----------------------------------------------------------------------");
+        System.out.println("---------------------------------------------------------------------------------------------------");
 
         for (Application application : successfulApplications) {
             String applicationID = application.getApplicationID();
@@ -249,10 +249,10 @@ public class HDBOfficerController extends ApplicantController implements ViewPro
             String flatType = application.getFlatType().toString();
             String applicationStatus = application.getApplicationStatus().toString();
 
-            System.out.printf("%-15s %-20s %-10s %-20s %-12s %-15s\n",
+            System.out.printf("%-15s %-20s %-16s %-20s %-12s %-15s\n",
                     applicationID, applicantName, projectID, projectName, flatType, applicationStatus);
         }
-
+        System.out.println("===================================================================================================");
         System.out.print("Enter the Application ID to book: ");
         String applicationID = scanner.nextLine().trim();
 

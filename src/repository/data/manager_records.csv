@@ -1,7 +1,7 @@
 NRIC,Name,Age,MaritalStatus,Password,ProjectID,SecurityQuestion,SecurityAnswer
-S0000001M,Andrew Hall,30,SINGLE,password,P0005,,,
-S0000002M,James Anderson,30,SINGLE,password,P0002,,,
-S0000003M,Ashley Martin,30,SINGLE,password,P0003,,,
-S0000004M,Chloe Young,30,MARRIED,password,P0004,,,
-S0000005M,Benjamin Scott,30,MARRIED,password,null,,
-S0000006M,Grace Adams,30,MARRIED,password,null,,
+S0000001M,Andrew Hall,30,SINGLE,password,P0005
+S0000002M,James Anderson,30,SINGLE,password,P0002
+S0000003M,Ashley Martin,30,SINGLE,password,P0003
+S0000004M,Chloe Young,30,MARRIED,password,P0004
+S0000005M,Benjamin Scott,30,MARRIED,password,null
+S0000006M,Grace Adams,30,MARRIED,password,null

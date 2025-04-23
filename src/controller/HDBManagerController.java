@@ -109,11 +109,10 @@ public class HDBManagerController implements ViewProjectInterface {
 
         // Display pending applications
         System.out.println("\n======== PENDING APPLICATIONS ========");
-        System.out.println("+-----------------------------------------------+");
+        System.out.println("+----------------------------------------------------------------------+");
         System.out.printf("| %-15s | %-12s | %-20s | %-12s |\n",
                 "APPLICATION ID", "NRIC", "NAME", "FLAT TYPE");
-        System.out.println("+-----------------------------------------------+");
-
+        System.out.println("+----------------------------------------------------------------------+");
         for (Application application : pendingApplications) {
             User user = application.getUser();
             System.out.printf("| %-15s | %-12s | %-20s | %-12s |\n",
@@ -122,8 +121,7 @@ public class HDBManagerController implements ViewProjectInterface {
                     user.getName(),
                     application.getFlatType());
         }
-        System.out.println("+-----------------------------------------------+");
-
+        System.out.println("+----------------------------------------------------------------------+");
         // Get user choice
         System.out.print("\nEnter the ID of the application to approve or reject (or 0 to cancel): ");
         String choice = scanner.nextLine().trim();
@@ -463,12 +461,13 @@ public class HDBManagerController implements ViewProjectInterface {
      * @param registrations The list of officer registrations to display
      */
     private void showRegistrations(List<OfficerRegistration> registrations) {
-        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
-        System.out.println("|                                                                                 Officer Registrations                                                                                 |");
-        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
+        System.out.println("+----------------------------------------------------------------------+");
+        System.out.println("|                       Officer Registrations                          |");
+        System.out.println("+----------------------------------------------------------------------+");
+        System.out.println("+----------------------------------------------------------------------+");
         System.out.printf("| %-15s | %-12s | %-20s | %-12s |\n",
                 "REGISTRATION ID", "OFFICER NRIC", "OFFICER NAME", "STATUS");
-        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
+        System.out.println("+----------------------------------------------------------------------+");
 
         for (OfficerRegistration registration : registrations) {
             System.out.printf("| %-15s | %-12s | %-20s | %-12s |\n",
@@ -477,7 +476,7 @@ public class HDBManagerController implements ViewProjectInterface {
                     registration.getOfficer().getName(),
                     registration.getStatus());
         }
-        System.out.println("+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+");
+        System.out.println("+----------------------------------------------------------------------+");
     }
 
     /**
