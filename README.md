@@ -26,12 +26,14 @@ The BTO Management System streamlines the digital simulation of BTO applications
   - View and withdraw submitted applications
   - Track application and registration status
 - **Officer Functions:**
-  - Create registrations for BTO projects
+  - Submit application as an applicant
+  - Register to handle BTO projects
   - Book flats for successful applicants
+  - View and reply to applicants' enquiries
 - **Manager Functions:**
   - Filter housing projects by neighbourhood and flat type
   - Review officer registration and application status
-  - Display role-based menus
+  - View and reply to applicants' enquiries
 
 ## Installation
 
